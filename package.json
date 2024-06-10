@@ -1,0 +1,51 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "concurrently \"vite\" \"php artisan reverb:start\"",
+        "build": "tsc && vite build"
+    },
+    "devDependencies": {
+        "@headlessui/react": "^1.4.2",
+        "@inertiajs/react": "^1.0.0",
+        "@tailwindcss/forms": "^0.5.3",
+        "@types/node": "^18.13.0",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.0.10",
+        "@vitejs/plugin-react": "^4.2.0",
+        "autoprefixer": "^10.4.12",
+        "axios": "^1.6.4",
+        "concurrently": "^8.2.2",
+        "laravel-echo": "^1.16.1",
+        "laravel-vite-plugin": "^1.0",
+        "postcss": "^8.4.31",
+        "pusher-js": "^8.4.0-rc2",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss": "^3.2.1",
+        "typescript": "^5.4.5",
+        "vite": "^5.0"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.11.4",
+        "@emotion/styled": "^11.11.5",
+        "@inertiajs/inertia": "^0.11.1",
+        "@inertiajs/inertia-react": "^0.8.1",
+        "@mui/icons-material": "^5.15.19",
+        "@mui/material": "^5.15.19",
+        "@radix-ui/react-checkbox": "^1.0.4",
+        "@radix-ui/react-popover": "^1.0.7",
+        "@radix-ui/react-slot": "^1.0.2",
+        "@sweetalert2/theme-dark": "^5.0.16",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.1",
+        "date-fns": "^3.6.0",
+        "lucide-react": "^0.383.0",
+        "react-day-picker": "^8.10.1",
+        "react-slick": "^0.30.2",
+        "slick-carousel": "^1.8.1",
+        "sweetalert2": "^11.11.1",
+        "tailwind-merge": "^2.3.0",
+        "tailwindcss-animate": "^1.0.7"
+    }
+}

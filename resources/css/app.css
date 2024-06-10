@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    box-sizing: border-box;
+    background-image: url("../assets/images/header.png");
+    line-height: 1.5;
+    letter-spacing: 0em;
+    --tw-text-opacity: 1;     color: rgb(129 140 248 / var(--tw-text-opacity)) ;
+    background-size: cover;
+    background-attachment: fixed;
+}
