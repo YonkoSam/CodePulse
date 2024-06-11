@@ -6,6 +6,7 @@ use App\Http\Controllers\EducationController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\FriendRequestController;
+use App\Http\Controllers\isTypingController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
     Route::get('/my-messages/{receiverId}', [ChatController::class, 'index'])->name('chatWithId.index');
     Route::get('/my-messages', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/is-typing', isTypingController::class)->name('is-typing');
 
 });
 

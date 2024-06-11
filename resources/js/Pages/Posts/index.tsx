@@ -16,8 +16,6 @@ const Index = ({posts}: any) => {
                              header={
                                  <h2 className="font-semibold text-xl text-white leading-tight">Posts</h2>}>
             <Head title="Posts"/>
-
-
             <Stack justifyContent='start' gap={3} padding={3}>
                 <Link href={route('posts.create')} className='flex justify-end'><PrimaryButton> Add New
                     Post</PrimaryButton></Link>
@@ -30,7 +28,7 @@ const Index = ({posts}: any) => {
                 </div>
                 <Stack justifyContent='center' alignItems='center'>
                     <Box maxWidth={'fit-content'}>
-                        <Pagination links={posts.links}/>
+                        <Pagination links={posts.links} currentPage={posts.current_page} lastPage={posts.last_page}/>
                     </Box>
                 </Stack>
 

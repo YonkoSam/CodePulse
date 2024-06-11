@@ -179,14 +179,14 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
                                         <div className='w-full flex flex-col mb-3'>
                                             <label className="font-semibold text-white py-2">Profile Image</label>
                                             <div className="flex items-center">
-                                                <div className="w-32 h-32 mr-4 flex-none rounded-xl  overflow-hidden">
+                                                <div
+                                                    className="w-32 h-32 mr-4 flex-none rounded-xl object-cover overflow-hidden">
                                                     {auth.user.profile_image && !selectedFile ? (
-                                                            <img src={auth.user.profile_image} alt='preview'/>) :
+                                                            <img src={auth.user.profile_image}
+                                                                 alt='preview'/>) :
                                                         selectedFile ? (<img src={preview} alt='preview'/>) :
                                                             <img src={Avatar} alt='Avatar'/>}
 
-                                                    <img className="w-12 h-12 object-cover"
-                                                         alt="Avatar Upload"/>
                                                 </div>
                                                 {progress && (
                                                     <progress value={progress.percentage} max="100">

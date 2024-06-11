@@ -100,7 +100,9 @@ export default function Authenticated({user, header, children}: PropsWithChildre
                                     <ResponsiveNavLink
                                         method="post"
                                         href={route('home')}
-                                        active={route().current('home')}
+                                        as="button"
+                                        active={route().current('home')
+                                        }
                                     >
                                         Dashboard
                                     </ResponsiveNavLink>

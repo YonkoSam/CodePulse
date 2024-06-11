@@ -9,7 +9,6 @@ import {Button, Stack} from "@mui/material";
 import {EditIcon,} from "lucide-react";
 import InputError from "@/Components/InputError";
 import Swal from "sweetalert2";
-import {buttonStyle} from "@/utils";
 import AddIcon from "@mui/icons-material/Add";
 
 interface ProfileCardProps {
@@ -74,7 +73,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({type, object, callback}) => {
 
     return (
         <form onSubmit={onSubmit}>
-            <Card className="w-[400px] bg-black/60 text-white rounded-lg">
+            <Card className="w-[400px] bg-gray-600 text-white rounded-lg">
                 <CardHeader>
                     <CardTitle>Add {type.title}</CardTitle>
                     <CardDescription>*= required field</CardDescription>
@@ -111,7 +110,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({type, object, callback}) => {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                     <Button onClick={callback} variant="contained" className="!bg-gray-500" color="info">Close</Button>
-                    <Button type="submit" variant="contained" className={buttonStyle}
+                    <Button type="submit" variant={"outlined"} className='!text-white !border-white'
                             endIcon={object ? <EditIcon/> : <AddIcon/>}>
                         {object ? "Update" : "Add"}
                     </Button>

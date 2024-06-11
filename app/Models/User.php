@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Redis;
 
 class User extends Authenticatable
 {
@@ -36,6 +37,12 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function isOnline(): bool|int|\Redis
+    {
+
+        return Redis::exists('user-online-'.$this->id);
+    }
 
     public function friends(): BelongsToMany
     {

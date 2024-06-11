@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Echo from 'laravel-echo';
 import {router, usePage} from "@inertiajs/react";
 import {PageProps} from "@/types";
@@ -17,11 +17,26 @@ const Chat = ({open, messages, receiverId}) => {
 
     const [openChat, setOpenChat] = useState(false);
     const [minimized, setMinimized] = useState(false);
-
+    const chatBoxRef = useRef(null);
+    const observer = useRef(null);
 
     const fetchMessages = () => {
         router.reload({only: ['messages']})
     };
+
+
+    useEffect(() => {
+        if (chatBoxRef.current) {
+            chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight - chatBoxRef.current.clientHeight;
+
+            if (!observer.current) {
+                observer.current = new MutationObserver(() => {
+                    chatBoxRef.current.scrollBy(0, 10); // Refine scroll on mutation
+                });
+                observer.current.observe(chatBoxRef.current, {childList: true});
+            }
+        }
+    }, [openChat, open, minimized, messages]);
 
     useEffect(() => {
         window.Pusher = Pusher;
@@ -45,7 +60,8 @@ const Chat = ({open, messages, receiverId}) => {
         return () => {
             window.Echo.leaveChannel(`my-messages-${auth.user.id}`);
         };
-    }, [import.meta.env.VITE_PUSHER_APP_KEY, import.meta.env.VITE_PUSHER_APP_CLUSTER]);
+    }, []);
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -59,8 +75,8 @@ const Chat = ({open, messages, receiverId}) => {
     };
     return (
         <Slide direction="up" in={open || openChat} mountOnEnter unmountOnExit>
-            <div
-                className='rounded absolute bottom-0 bg-white max-w-2xl text-xs text-gray-800 min-w-52 py-2 px-3 right-[15%] overflow-y-auto max-h-[50%]'>
+            <div id="chat-box" ref={chatBoxRef}
+                 className='rounded absolute bottom-0 bg-white max-w-2xl text-xs text-gray-800 min-w-52 py-2 px-3 right-[15%] overflow-y-auto max-h-[50%]'>
                 <Stack direction='row' alignItems='center'>
                     <div className='!text-gray-800 !h-fit'>
                         <IconButton onClick={handleToggleMinimize}>
@@ -103,7 +119,7 @@ const Chat = ({open, messages, receiverId}) => {
                             placeholder="Type a message..."
                             size='small'
                         />
-                        <IconButton type="submit">
+                        <IconButton type="submit" disabled={message.length <= 0}>
                             <SendIcon/>
                         </IconButton>
                     </form>

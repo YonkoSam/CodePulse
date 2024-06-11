@@ -26,7 +26,8 @@ const PostCard = ({post}: PageProps<{ post: Post }>) => {
             <CardContent className='!flex !flex-col !justify-between !min-h-60 !max-h-60'>
 
                 <Link href={route('posts.show', post.id)} style={{textDecoration: 'none'}}>
-                    <Typography variant="h5" style={{color: '#fff', fontWeight: 'bold'}}>{post.title}</Typography>
+                    <Typography variant="h5" style={{color: '#fff', fontWeight: 'bold'}}
+                                className='line-clamp-1'>{post.title}</Typography>
                     <Typography variant="body1" style={{color: '#fff'}}
                                 className='line-clamp-5'>{post.text}</Typography>
                 </Link>

@@ -18,23 +18,31 @@ class ChatController extends Controller
         $user = Auth::user();
 
         if ($receiverId == -1) {
-
-            $messages = Message::where('receiver_id', $user->id)
+            $latestMessage = Message::where('receiver_id', $user->id)
                 ->latest()->first();
 
-            $receiverId = $messages?->sender_id;
+            $receiverId = $latestMessage ? $latestMessage->sender_id : Auth::user()->friends()->first()->id;
         }
 
-        $messages = Message::where('receiver_id', $receiverId)
-            ->where('sender_id', $user->id)
-            ->orWhere('sender_id', $receiverId)
-            ->where('receiver_id', $user->id)
+        $messages = Message::where(function ($query) use ($user, $receiverId) {
+            $query->where('sender_id', $user->id)
+                ->where('receiver_id', $receiverId);
+        })
+            ->orWhere(function ($query) use ($user, $receiverId) {
+                $query->where('sender_id', $receiverId)
+                    ->where('receiver_id', $user->id);
+            })
             ->with(['sender', 'receiver'])
             ->get();
 
+        // Fetch friends with profile
         $friends = $user->friends()->with(['profile' => function ($query) {
             $query->select('user_id', 'profiles.id');
-        }])->get();
+        }])
+            ->get()
+            ->each(function ($friend) {
+                $friend->online = $friend->isOnline();
+            });
 
         return Inertia::render('Messages', [
             'messages' => $messages,

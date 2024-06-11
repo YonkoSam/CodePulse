@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "concurrently \"vite\" \"php artisan reverb:start\"",
+        "dev": "concurrently \"vite\" \"php artisan reverb:start\" \".\\redis-server\"",
         "build": "tsc && vite build"
     },
     "devDependencies": {

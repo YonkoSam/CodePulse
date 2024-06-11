@@ -23,11 +23,14 @@ class ProfilesController extends Controller
             ->with(['sender', 'receiver'])
             ->get();
         $isFriend = $profile->isFriend($authUser);
+        $isOnline = $profile->user->isOnline();
 
         return Inertia::render('Home', [
             'profile' => $profile,
             'isFriend' => $isFriend,
+            'isOnline' => $isOnline,
             'messages' => $messages,
+
         ]);
     }
 

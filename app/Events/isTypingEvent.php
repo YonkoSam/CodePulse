@@ -8,22 +8,26 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageSent implements ShouldBroadcast
+class isTypingEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $id;
-
     /**
      * Create a new event instance.
-     *
-     * @return void
      */
-    public function __construct($id)
+    public int $id;
+
+    public bool $isTyping;
+
+    public function __construct($id, $isTyping)
     {
         $this->id = $id;
+        $this->isTyping = $isTyping;
     }
 
+    /**
+     * Get the channels the event should broadcast on.
+     */
     public function broadcastOn(): string
     {
         return new Channel('my-messages-'.$this->id);
@@ -32,12 +36,14 @@ class MessageSent implements ShouldBroadcast
 
     public function broadcastAs(): string
     {
-        return 'message-sent';
+        return 'is-typing';
     }
 
     public function broadcastWith(): array
     {
 
-        return [];
+        return [
+            'isTyping' => $this->isTyping,
+        ];
     }
 }

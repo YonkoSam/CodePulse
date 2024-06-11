@@ -5,17 +5,17 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import ProfileCard from "@/Components/ProfileCard";
 import {Container, IconButton, Modal, Stack} from "@mui/material";
 import {formatDate} from "date-fns";
-import {ReactNode, useCallback, useMemo, useState} from "react";
+import React, {ReactNode, useCallback, useMemo, useState} from "react";
 import AddIcon from '@mui/icons-material/Add';
-import {Delete, Edit, PersonAdd} from "@mui/icons-material";
+import {Circle, Delete, Edit, PersonAdd} from "@mui/icons-material";
 import Swal from "sweetalert2";
 import {EditIcon, MessageCircleIcon} from "lucide-react";
 import Avatar from "../../assets/images/default-avatar.svg"
 import FriendsMenu from "@/Components/FriendsMenu";
 import Chat from "@/Components/Chat";
 
-export default function Home({profile, auth, isFriend, messages}: PageProps<{ profile: Profile }> & {
-    isFriend: boolean
+export default function Home({profile, auth, isFriend, isOnline, messages}: PageProps<{ profile: Profile }> & {
+    isFriend: boolean, isOnline: boolean
 }) {
 
     const experience = {
@@ -138,7 +138,13 @@ export default function Home({profile, auth, isFriend, messages}: PageProps<{ pr
                                      alt="Profile"
                                      className="w-64 h-64 rounded-full mr-4 object-cover object-top"/>
                                 <div>
-                                    <h1 className="text-2xl font-bold">{profile.company}</h1>
+                                    <Stack direction='row' alignItems='center' gap={2}>
+                                        <h1 className="text-2xl font-bold">{profile.company}</h1>
+                                        {
+                                            isFriend ? isOnline ? <Circle className='text-green-600 !w-5 s!h-5'/> :
+                                                <Circle className='text-red-600 !w-5 !h-5'/> : <></>
+                                        }
+                                    </Stack>
                                     <p>Website: <a href={profile.website || '#'} target='_blank'
                                                    className="text-blue-500">{profile.website}</a>
                                     </p>
@@ -163,7 +169,11 @@ export default function Home({profile, auth, isFriend, messages}: PageProps<{ pr
                                     ))}
                                 </div>
                             </div>
+
+
                             {
+
+
                                 isAuthUser ? <Link href={route('profiles.edit')}><EditIcon/></Link> :
                                     !isFriend && auth.hasProfile ?
                                         <IconButton className='!text-white !h-fit'
@@ -172,6 +182,7 @@ export default function Home({profile, auth, isFriend, messages}: PageProps<{ pr
                                             <FriendsMenu callback={handleFriendRemove}/>
                                             <MessageCircleIcon onClick={() => setChatToggle(!chatToggle)}/>
                                         </Stack> : <> </>
+
                             }
 
 

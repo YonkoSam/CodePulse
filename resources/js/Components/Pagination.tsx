@@ -1,30 +1,27 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {router} from "@inertiajs/react";
-import {Pagination as PaginationMui} from "@mui/material";
+import {Pagination as PaginationMui, PaginationItem} from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-function Pagination({links}: any) {
+function Pagination({links, currentPage, lastPage}: any) {
 
-    const [currentPage, setCurrentPage] = useState(findActivePage());
-
-    function findActivePage() {
-        for (let i = 0; i < links.length; i++) {
-            if (links[i].active) {
-                return i;
-            }
-        }
-        return 1;
-    }
 
     const handlePageChange = (event: any, page: any) => {
+
         router.visit(`?page=${page}`);
-        setCurrentPage(page);
     };
 
     return (
         <PaginationMui
             className=' p-2 rounded !mb-4 '
-            count={links.length - 2}
+            count={lastPage}
             page={currentPage}
+            renderItem={(item) =>
+                <PaginationItem
+                    slots={{previous: ArrowBackIcon, next: ArrowForwardIcon}}
+                    {...item}
+                />}
             onChange={handlePageChange}
             shape="rounded"
             style={{padding: 10}}
