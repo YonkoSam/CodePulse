@@ -9,9 +9,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with(['profile' => function ($query) {
-            $query->select('user_id', 'status','profiles.id');
-        }])->get();
+        $users = User::has('profile')
+            ->with(['profile' => function ($query) {
+                $query->select('user_id', 'status', 'profiles.id');
+            }])->paginate(10);
 
         return Inertia::render('Profiles/index', [
             'users' => $users,

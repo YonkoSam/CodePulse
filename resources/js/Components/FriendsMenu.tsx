@@ -1,9 +1,9 @@
 import React from 'react';
 import {Button, Menu, MenuItem} from "@mui/material";
-import {People, PersonRemove} from "@mui/icons-material";
+import {Block, People, PersonRemove} from "@mui/icons-material";
 
 
-const FriendsMenu = ({callback}: any) => {
+const FriendsMenu = ({handleRemove, handleBlock}: any) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handleClick = (event: any) => {
@@ -34,11 +34,17 @@ const FriendsMenu = ({callback}: any) => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
             >
-                <MenuItem className='!text-xs !px-1'
-                          onClick={callback}>
+                <MenuItem className='!text-xs !px-1 !flex gap-2'
+                          onClick={handleRemove}>
                     <PersonRemove/>
                     Remove Friend
                 </MenuItem>
+                <MenuItem className='!text-xs !px-1 !flex gap-2 '
+                          onClick={handleBlock}>
+                    <Block/>
+                    Block Friend
+                </MenuItem>
+
             </Menu>
         </div>
     );

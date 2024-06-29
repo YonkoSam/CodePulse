@@ -10,19 +10,21 @@ import TextInput from "@/Components/TextInput";
 import InputLabel from "@/Components/InputLabel";
 import Swal from 'sweetalert2';
 import {MenuItem, Select} from "@mui/material";
+import SkillInput from "@/Components/SkillInput";
 
 
-export default function create({profile}: PageProps<{ profile: Profile }>) {
+export default function createAndUpdate({profile}: PageProps<{ profile: Profile }>) {
 
     const {auth} = usePage<PageProps>().props;
     const {url} = usePage();
+    const [skill, setSkill] = useState(profile ? profile.skills.split(',') : []);
 
     const [characterCount, setCharacterCount] = useState(0)
     const [selectedFile, setSelectedFile] = useState<File>()
     const [preview, setPreview] = useState<string>(auth.user.profile_image)
     const [displaySocialInputs, toggleSocialInputs] = useState(false)
 
-    if (auth.hasProfile && url === '/create-profile') {
+    if (auth.hasProfile && url === '/createAndUpdate-profile') {
         router.visit(route('profiles.edit'));
     }
 
@@ -74,8 +76,8 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
         location: string;
         country: string;
         status: string;
-        skills: string;
         bio: string;
+        skills: string;
         twitter: string;
         facebook: string;
         linkedin: string;
@@ -83,6 +85,7 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
         instagram: string;
         github: string;
     }
+
 
     const getInitialValues = (auth: any): InitialValues => {
         return profile
@@ -93,8 +96,8 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
                 location: profile.location || "",
                 country: profile.country || "",
                 status: profile.status || "",
-                skills: profile.skills || "",
                 bio: profile.bio || "",
+                skills: profile.skills || "",
                 twitter: profile.socials.twitter || "",
                 facebook: profile.socials.facebook || "",
                 linkedin: profile.socials.linkedin || "",
@@ -132,9 +135,9 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
         location,
         country,
         status,
-        skills,
         bio,
         twitter,
+        skills,
         facebook,
         linkedin,
         youtube,
@@ -171,7 +174,6 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
                         <div className="flex flex-col">
                             <div className="flex flex-col sm:flex-row items-center">
                                 <h2 className="font-semibold text-lg mr-auto">Profile Info</h2>
-                                <div className="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0"></div>
                             </div>
                             <div className="mt-5">
                                 <form onSubmit={onSubmit}>
@@ -188,12 +190,6 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
                                                             <img src={Avatar} alt='Avatar'/>}
 
                                                 </div>
-                                                {progress && (
-                                                    <progress value={progress.percentage} max="100">
-                                                        {progress.percentage}%
-                                                    </progress>
-                                                )
-                                                }
                                                 <label className="cursor-pointer">
                                             <span
                                                 className={buttonStyle}>Browse</span>
@@ -211,12 +207,10 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
                                         <div className="w-full flex flex-col mb-3 ">
                                             <div className="mb-3 space-y-2 w-full text-xs">
                                                 <InputLabel>Skills</InputLabel>
-                                                <TextInput placeholder="Skills"
-                                                           className={inputStyle}
-                                                           type="text"
-                                                           value={skills}
-                                                           onChange={onChange}
-                                                           name="skills"/>
+                                                <SkillInput setSkills={setSkill} skills={skill}
+                                                            onSkillsChange={(skills) => setData('skills', skills)}/>
+                                                <InputError message={errors.skills} className="mt-2"/>
+
                                             </div>
                                             <InputLabel>Status<abbr
                                                 title="required">*</abbr></InputLabel>
@@ -390,9 +384,6 @@ export default function create({profile}: PageProps<{ profile: Profile }>) {
                                     </div>
 
 
-                                    <p className="text-xs text-red-500 text-right my-3">Required fields are marked with
-                                        an
-                                        asterisk <abbr title="Required field">*</abbr></p>
                                     <div className="flex justify-end gap-4">
                                         <PrimaryButton><Link href='/'> Cancel</Link></PrimaryButton>
                                         <PrimaryButton type='submit'>Save</PrimaryButton>

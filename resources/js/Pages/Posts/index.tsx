@@ -4,8 +4,8 @@ import PostCard from "@/Components/PostCard";
 import {Head, Link, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import {Box, Stack} from "@mui/material";
-import Pagination from "@/Components/Pagination";
 import PrimaryButton from "@/Components/PrimaryButton";
+import Pagination from "@/Components/Pagination";
 
 const Index = ({posts}: any) => {
 
@@ -19,7 +19,7 @@ const Index = ({posts}: any) => {
             <Stack justifyContent='start' gap={3} padding={3}>
                 <Link href={route('posts.create')} className='flex justify-end'><PrimaryButton> Add New
                     Post</PrimaryButton></Link>
-                <div className='grid grid-cols-3  gap-4'>
+                <div className='grid grid-cols-1  gap-4 sm:grid-cols-3'>
                     {posts.data.map((post: Post) => (
                         <div key={post.id}>
                             <PostCard post={post} auth={auth}/>

@@ -8,14 +8,13 @@ class CreateProfilesTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up(): void
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('cover')->nullable();
             $table->string('company')->nullable();
             $table->string('website')->nullable();
             $table->string('country')->nullable();
@@ -29,8 +28,6 @@ class CreateProfilesTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down(): void
     {

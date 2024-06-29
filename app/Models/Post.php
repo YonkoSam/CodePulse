@@ -18,6 +18,22 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function scopeVisibleToUser($query, $userId)
+    {
+        return $query->whereNotIn('user_id', function ($query) use ($userId) {
+            $query->select('friend_id')
+                ->from('friendships')
+                ->where('user_id', $userId)
+                ->where('blocked', true)
+                ->union(function ($query) use ($userId) {
+                    $query->select('user_id')
+                        ->from('friendships')
+                        ->where('friend_id', $userId)
+                        ->where('blocked', true);
+                });
+        });
+    }
+
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);

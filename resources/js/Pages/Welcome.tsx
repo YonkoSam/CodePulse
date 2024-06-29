@@ -40,8 +40,8 @@ export default function Welcome() {
                                         </h3>
                                     </div>
                                     <div className="flex items-center justify-center pt-4 space-x-2">
-                                        <PrimaryButton><Link href={route('login')}>Login</Link></PrimaryButton>
-                                        <PrimaryButton><Link href={route('register')}>Sign up</Link></PrimaryButton>
+                                        <Link href={route('login')}> <PrimaryButton>Login</PrimaryButton></Link>
+                                        <Link href={route('register')}><PrimaryButton>Sign up</PrimaryButton></Link>
                                     </div>
                                 </>
                             ) : (
@@ -55,7 +55,7 @@ export default function Welcome() {
                                         </h3>
                                     </div>
                                     <div className="flex items-center justify-center pt-4 space-x-2">
-                                        <PrimaryButton><Link href={route('home')}>Go to home</Link></PrimaryButton>
+                                        <Link href={route('home')}> <PrimaryButton>Go to home</PrimaryButton></Link>
                                     </div>
                                 </>
                             )}

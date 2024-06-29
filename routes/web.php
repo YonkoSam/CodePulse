@@ -8,9 +8,12 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\FriendRequestController;
 use App\Http\Controllers\isTypingController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilesController;
+use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\UploadProfileCoverController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,10 +29,11 @@ Route::middleware('auth')->group(function () {
         ->middleware(['auth', 'verified'])->name('profiles.show');
     Route::get('/home/', [ProfilesController::class, 'me'])
         ->middleware(['auth', 'verified'])->name('home');
-    Route::get('/create-profile', [ProfilesController::class, 'create'])->name('profiles-create');
+    Route::get('/create-profile', [ProfilesController::class, 'create'])->name('profiles.create');
     Route::get('/update-profile', [ProfilesController::class, 'edit'])->name('profiles.edit');
     Route::get('/profiles', [UserController::class, 'index'])->name('profiles.index');
     Route::post('/profiles', [ProfilesController::class, 'store'])->name('profiles.store');
+    Route::post('/profiles/cover', UploadProfileCoverController::class)->name('cover.upload');
     Route::post('/profiles/experience', [ExperienceController::class, 'store'])->name('experience.store');
     Route::post('/profiles/education', [EducationController::class, 'store'])->name('education.store');
     Route::patch('/profiles/experience/{experience}', [ExperienceController::class, 'update'])->name('experience.update');
@@ -39,13 +43,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     //Posts
     Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
     Route::post('/posts/create', [PostController::class, 'store'])->name('posts.store');
-    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show')->middleware('can:view,post');
     Route::post('/posts', [LikeController::class, 'store'])->name('like.store');
     Route::post('/posts/comment', [CommentController::class, 'store'])->name('comment.store');
+    Route::post('/posts/comment/reply', ReplyController::class)->name('reply');
     Route::delete('/posts/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy');
 
     //Friends
@@ -56,14 +62,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read', [FriendRequestController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::post('/notifications/delete', [FriendRequestController::class, 'deleteNotification'])->name('notifications.delete');
     Route::delete('/friend/delete/{friend}', [FriendController::class, 'destroy'])->name('friend.delete');
+    Route::delete('/friend/block/{friend}', [FriendController::class, 'block'])->name('friend.block');
+    Route::patch('/friend/unblock/{friend}', [FriendController::class, 'unblock'])->name('friend.unblock');
 
     //Chat
-
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
     Route::get('/my-messages/{receiverId}', [ChatController::class, 'index'])->name('chatWithId.index');
     Route::get('/my-messages', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/is-typing', isTypingController::class)->name('is-typing');
+    Route::get('/my-chat/{receiverId}', [ChatController::class, 'show'])->name('chat.show');
 
+    //Notification
+    Route::get('/my-notifications', NotificationController::class)->name('my-notifications');
 });
 
 require __DIR__.'/auth.php';

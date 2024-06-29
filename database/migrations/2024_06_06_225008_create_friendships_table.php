@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('friendships', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('friend_id')->constrained('users')->onDelete('cascade');
+            $table->boolean('blocked')->default(false);
+            $table->foreignId('blocked_initiator')->constrained('users')->onDelete('cascade');
             $table->timestamps();
             $table->unique(['user_id', 'friend_id']);
             $table->unique(['friend_id', 'user_id']);

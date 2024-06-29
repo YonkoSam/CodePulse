@@ -71,21 +71,25 @@ export interface Like {
 
 export interface Comment {
     // columns
+    comment_id: number | null;
     id: number
     text: string
     user_id: number
     post_id: number
+    replies: []
     created_at: string | null
     updated_at: string | null
     // relations
     user: User
     post: Post
+    comment: Comment
 }
 
 export interface Profile {
     // columns
     id: number
     user_id: number
+    cover: string | null
     company: string | null
     website: string | null
     country: string | null

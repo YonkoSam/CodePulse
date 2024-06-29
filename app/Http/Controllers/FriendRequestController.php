@@ -45,18 +45,16 @@ class FriendRequestController extends Controller
 
         if ($friendRequest) {
             Friendship::create(['user_id' => $friendRequest->sender_id, 'friend_id' => $friendRequest->receiver_id]);
-            Friendship::create(['user_id' => $friendRequest->receiver_id, 'friend_id' => $friendRequest->sender_id]);
             $sender = $friendRequest->sender;
             $receiver = $friendRequest->receiver;
             $friendRequest->delete();
-
             $sender->notify(new FriendRequestStatus($receiver->name, 'accepted'));
             event(new NotificationSent($sender->id));
 
-            return back()->with(['message' => 'Friend request accepted!']);
+            return back();
         }
 
-        return back()->with(['message' => 'Friend request was not found!']);
+        return back()->withErrors(['message' => 'Friend request was not found!']);
     }
 
     public function rejectRequest(Request $request)

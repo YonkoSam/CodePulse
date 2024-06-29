@@ -17,7 +17,8 @@
             "ziggy-js": [
                 "./vendor/tightenco/ziggy"
             ]
-        }
+        },
+        "noImplicitAny": false
     },
     "include": [
         "resources/js/**/*.ts",

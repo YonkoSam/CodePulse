@@ -14,6 +14,7 @@ class Profile extends Model
 
     protected $fillable = [
         'user_id',
+        'cover',
         'company',
         'website',
         'country',
@@ -28,6 +29,21 @@ class Profile extends Model
 
         return $this->user->friends()->where('friend_id', $user->id)->exists() ||
             $this->user->friendOf()->where('user_id', $user->id)->exists();
+    }
+
+    public function isBlocked(User $user): bool
+    {
+        $friendship = Friendship::where('user_id', $this->user->id)
+            ->where('friend_id', $user->id)
+            ->orWhere('user_id', $user->id)
+            ->where('friend_id', $this->user->id)
+            ->first();
+
+        if ($friendship) {
+            return $friendship->blocked;
+        }
+
+        return false;
     }
 
     public function user(): BelongsTo

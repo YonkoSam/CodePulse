@@ -1,55 +1,73 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {Head, Link, router} from '@inertiajs/react';
-import {PageProps, Profile} from '@/types';
+import {Head, Link, router, useForm} from '@inertiajs/react';
+import {PageProps, Post, Profile, User} from '@/types';
 import PrimaryButton from "@/Components/PrimaryButton";
 import ProfileCard from "@/Components/ProfileCard";
-import {Container, IconButton, Modal, Stack} from "@mui/material";
-import {formatDate} from "date-fns";
-import React, {ReactNode, useCallback, useMemo, useState} from "react";
+import {Avatar, Box, Button, Chip, Container, Divider, IconButton, List, ListItem, Modal, Stack} from "@mui/material";
+import {format} from "date-fns";
+import React, {ReactNode, useCallback, useEffect, useState} from "react";
 import AddIcon from '@mui/icons-material/Add';
-import {Circle, Delete, Edit, PersonAdd} from "@mui/icons-material";
+import {Circle, Delete, Edit, LocationCity, LocationOn, PersonAdd} from "@mui/icons-material";
 import Swal from "sweetalert2";
-import {EditIcon, MessageCircleIcon} from "lucide-react";
-import Avatar from "../../assets/images/default-avatar.svg"
+import _ from "lodash";
+import {CodeIcon, EditIcon, Link2Icon, MessageCircleIcon} from "lucide-react";
 import FriendsMenu from "@/Components/FriendsMenu";
-import Chat from "@/Components/Chat";
+import PostCard from "@/Components/PostCard";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import CreateProfilePrompt from "@/Components/CreateProfilePrompt";
+import {buttonStyle, Toast} from "@/utils";
 
-export default function Home({profile, auth, isFriend, isOnline, messages}: PageProps<{ profile: Profile }> & {
-    isFriend: boolean, isOnline: boolean
+export default function Home({profile, auth, friends, posts, isFriend, isBlocked, isOnline}: PageProps<{
+    profile: Profile,
+    friends: [User],
+    posts: [Post]
+}> & {
+    isFriend: boolean, isBlocked: boolean, isOnline: boolean
 }) {
-
     const experience = {
         title: "Experience",
         firstField: "job_title",
         secondField: "company",
         thirdField: "location",
-    }
+    };
+
     const education = {
         title: "Education",
         firstField: "school",
         secondField: "degree",
         thirdField: "fieldofstudy",
-    }
-
+    };
 
     const [open, setOpen] = useState(false);
     const [card, setCard] = useState<ReactNode>();
-
-
-    const [chatToggle, setChatToggle] = useState(false);
-
+    const [chatToggle, setChatToggle] = useState(null);
     const isAuthUser = profile?.user_id === auth.user.id;
-    const Toast = useMemo(() => Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-        }
-    }), []);
+    const [selectedFile, setSelectedFile] = useState<File>()
+    const [preview, setPreview] = useState<string>(profile?.cover)
+
+    const postSettings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 5000,
+
+    };
+    const settings = {
+        dots: true,
+        infinite: true,
+        arrows: false,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+
+    };
+
+
     const handleDelete = (id: number, type: string) => {
         Swal.fire({
             title: "Are you sure?",
@@ -72,10 +90,10 @@ export default function Home({profile, auth, isFriend, isOnline, messages}: Page
                     onError: (errors: any) => {
                         console.error(errors);
                     },
-                })
+                });
             }
-        })
-    }
+        });
+    };
     const openExperience = useCallback((object: object | null) => {
         setOpen(true);
         setCard(<ProfileCard type={experience} callback={handleClose} object={object}/>);
@@ -103,8 +121,26 @@ export default function Home({profile, auth, isFriend, isOnline, messages}: Page
                 });
             }
         });
-    }
+    };
 
+
+    const handleFriendBlock = () => {
+        router.delete(route('friend.block', {'friend': profile.user_id}), {
+            onSuccess: () => {
+                Toast.fire({
+                    icon: "success",
+                    title: "Friend was blocked Successfully"
+                });
+                router.visit(route('friends.index'));
+            },
+            onError: (errors) => {
+                Toast.fire({
+                    icon: "error",
+                    title: `${errors.message}`
+                });
+            }
+        });
+    };
     const handleFriendRequest = () => {
         router.post(route('friend.request.send'), {'sender_id': auth.user.id, 'receiver_id': profile.user_id}, {
             onSuccess: () => {
@@ -120,198 +156,342 @@ export default function Home({profile, auth, isFriend, isOnline, messages}: Page
                 });
             }
         });
+    };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        post(route('cover.upload'), {
+            onSuccess: () => {
+                setSelectedFile(undefined);
+            },
+            onError: (errors) => {
+                Toast.fire({
+                    icon: "error",
+                    title: `${errors.cover}`
+                });
+            }
+        });
+
+    };
+    useEffect((): void => {
+        if (!selectedFile) {
+            setPreview('')
+            return
+        }
+        const objectUrl = URL.createObjectURL(selectedFile)
+        setPreview(objectUrl);
+    }, [selectedFile])
+
+    const {data, setData, errors, post, progress} = useForm({cover: null});
+    const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files && files.length === 1) {
+            const fileType = files[0].type;
+            if (!fileType.startsWith('image/')) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Selected file was not an image!",
+                });
+                setSelectedFile(undefined)
+                return
+            } else {
+                setSelectedFile(files[0])
+                setData('cover', files[0]);
+            }
+
+        }
 
     }
+    if (isBlocked) {
+        return <div className='h-screen bg-black text-center font-bold text-white p-56'>
+            <Head title="403"/>
+            <h1 className='text-4xl'>403 Access Denied</h1>
+            <p className='m-2'>Sorry, you do not have permission to view this profile.</p>
+            <Link href={route('home')}><Button variant={"contained"} color='error'>return back</Button></Link>
+
+        </div>;
+    }
     return (
-        <AuthenticatedLayout user={auth.user}
-                             header={<h2 className="font-semibold text-xl text-white leading-tight">Your Profile</h2>}>
-            <Head title="Home"/>
-            <Container>
-                {profile ? (<>
-                    <Stack direction='column' gap={8} alignItems='center'>
+        <AuthenticatedLayout user={auth.user} callback={chatToggle}
+                             header={<h2 className="font-semibold text-xl text-white leading-tight">Profile</h2>}>
+            <Head title="Profile"/>
+            {auth.hasProfile ? <></> : <CreateProfilePrompt/>}
 
-                        <div
-                            className=" p-8 rounded text-white bg-black/30 min-w-full  shadow-lg flex flex-col sm:flex-row ">
+            <Container maxWidth='xl'>
+                <Stack>
+                    {profile ? (
+                        <>
+                            <div className='relative !max-h-96 mb-10 rounded-xl'>
+                                <div className='relative '>
+                                    <img className='object-cover object-top h-72 w-full bg-white/50'
+                                         src={preview ? preview : profile.cover ? '/' + profile.cover : '/covers/default.avif'}
+                                         alt="cover"/>
+                                    <form onSubmit={handleSubmit}>
+                                        <div className="cursor-pointer absolute top-0  right-0 m-5">
 
-                            <div className="flex items-center mb-6 w-2/3">
-                                <img src={profile.user.profile_image ? '/' + profile.user.profile_image : Avatar}
-                                     alt="Profile"
-                                     className="w-64 h-64 rounded-full mr-4 object-cover object-top"/>
-                                <div>
-                                    <Stack direction='row' alignItems='center' gap={2}>
-                                        <h1 className="text-2xl font-bold">{profile.company}</h1>
-                                        {
-                                            isFriend ? isOnline ? <Circle className='text-green-600 !w-5 s!h-5'/> :
-                                                <Circle className='text-red-600 !w-5 !h-5'/> : <></>
-                                        }
-                                    </Stack>
-                                    <p>Website: <a href={profile.website || '#'} target='_blank'
-                                                   className="text-blue-500">{profile.website}</a>
-                                    </p>
-                                    <p>Country: {profile.country}</p>
-                                    <p>Location: {profile.location}</p>
-                                    <p>Status: {profile.status}</p>
-                                </div>
-                            </div>
-                            <div className='p-3 w-1/3'>
-                                <h2 className="text-xl font-bold mb-2">Skills</h2>
-                                <p>{profile.skills}</p>
-                                <h2 className="text-xl font-bold mt-4 mb-2">Bio</h2>
-                                <p>{profile.bio}</p>
+                                            {
+                                                isAuthUser ? (
+                                                    selectedFile ? <Stack direction='row' gap={2}>
+                                                            <PrimaryButton type='submit'>Save</PrimaryButton>
+                                                            <PrimaryButton onClick={() => {
+                                                                setPreview('');
+                                                                setSelectedFile(undefined);
+                                                            }}>Cancel</PrimaryButton>
 
-                                <h2 className="text-xl font-bold mb-2">Socials</h2>
-                                <div className="flex items-center justify-start mb-6 gap-2">
+                                                        </Stack> :
+                                                        <label>
+                                            <span
+                                                className={`${buttonStyle} cursor-pointer`}>Upload Cover</span>
+                                                            <input type="file"
+                                                                   accept='image/*'
+                                                                   onChange={onSelectFile}
+                                                                   className="hidden"/>
+                                                        </label>) : (<></>)
 
-                                    {Object.entries(profile.socials).filter(([key, value]) => value !== '' && value !== null).map(([key, value]) => (
-                                        <div key={key}>
-                                            <a href={value} target='_blank'> <i className={`fab fa-${key} fa-2x`}/></a>
+                                            }
                                         </div>
-                                    ))}
+
+                                    </form>
+
+                                </div>
+                                <div className='absolute bottom-10 w-full'>
+                                    <div className='p-4'>
+                                        <Avatar
+                                            className='!w-36 !h-36 !border-4 !border-white !object-cover !object-top'
+                                            src={`/${profile.user.profile_image}`}/>
+                                    </div>
+                                </div>
+                                <div
+                                    className='bg-black/30 w-full  flex flex-col md:flex-row md:justify-between justify-center  rounded-xl p-4'>
+                                    <div className='ml-40 text-white '>
+                                        <Stack direction='row' alignItems='center' gap={1}>
+                                            <h1 className='text-2xl lg:text-4xl font-bold'>{_.startCase(_.toLower(profile.user.name))}</h1>
+                                            {isFriend && (
+                                                <Circle
+                                                    className={`text-${isOnline ? 'green' : 'red'}-600 !w-5 !h-5 ${isOnline ? 'animate-pulse' : ''}`}/>
+                                            )}
+                                        </Stack>
+                                        <Stack direction='row' alignItems='center' gap={1}>
+                                            <p className='text-sm lg:text-lg p-2'>{profile.status}</p>
+                                            {isAuthUser && (
+                                                <Link href={route('profiles.edit')}
+                                                      className='hover:scale-105'><EditIcon/></Link>
+                                            )}
+                                        </Stack>
+                                    </div>
+                                    {
+                                        auth.hasProfile ? <div className='flex gap-2 items-center ml-auto'>
+                                            {!isFriend && !isAuthUser ? (
+                                                <IconButton className='!text-white !h-fit hover:scale-105'
+                                                            onClick={handleFriendRequest}>
+                                                    <PersonAdd/>
+                                                </IconButton>
+                                            ) : (
+                                                !isAuthUser && (
+                                                    <Stack direction='row' gap={2} alignItems='center'
+                                                           marginLeft='auto'>
+                                                        <FriendsMenu handleRemove={handleFriendRemove}
+                                                                     handleBlock={handleFriendBlock}/>
+                                                        <IconButton size='small'
+                                                                    onClick={() => setChatToggle(chatToggle === profile.user_id ? null : profile.user_id)}>
+                                                            <MessageCircleIcon color='white'
+                                                                               height='fit-content'
+                                                                               className='hover:scale-105'/></IconButton>
+                                                    </Stack>
+                                                )
+                                            )}
+                                        </div> : <></>
+                                    }
+
                                 </div>
                             </div>
 
+                            <div className='flex flex-col justify-between gap-6 lg:flex-row mt-6'>
+                                <div className='w-full lg:w-1/4'>
+                                    <Slider {...settings}>
+                                        <List className='bg-black/30 rounded-xl text-white !min-h-96'>
+                                            <h1 className='text-xl p-4 font-bold'>About</h1>
+                                            <ListItem className='flex gap-2'>
+                                                <p>{profile.bio}</p>
+                                            </ListItem>
+                                            <ListItem className='flex gap-2'>
+                                                <Link2Icon/>
+                                                <p>{profile.website}</p>
+                                            </ListItem>
+                                            <ListItem className='flex gap-2'>
+                                                <LocationOn/>
+                                                <p>{profile.country}</p>
+                                            </ListItem>
+                                            <ListItem className='flex gap-2'>
+                                                <LocationCity/>
+                                                <p>{profile.location}</p>
+                                            </ListItem>
+                                            <ListItem
+                                                className='flex flex-wrap gap-2'>
+                                                <CodeIcon/>
+                                                {profile.skills.split(',').map((skill, i) => (
+                                                    <Chip key={i}
+                                                          className='!text-white font-bold hover:scale-105 transition-all duration-300 ease-in-out'
+                                                          label={skill}/>
+                                                ))}
+                                            </ListItem>
+                                            <ListItem className='flex flex-wrap gap-2'>
+                                                {Object.entries(profile.socials).filter(([key, value]) => value).map(([key, value]) => (
+                                                    <div key={key}>
+                                                        <a href={value} target='_blank' rel='noopener noreferrer'>
+                                                            <i className={`fab fa-${key} fa-2x hover:scale-105 transition-all duration-300`}/>
+                                                        </a>
+                                                    </div>
+                                                ))}
+                                            </ListItem>
+                                        </List>
+                                        <Box className='bg-black/30 rounded-xl text-white !min-h-96'>
+                                            <Stack direction='row' alignItems='center' justifyContent='space-between'
+                                                   gap={1}>
+                                                <h1 className='text-xl p-4 font-bold'>Education</h1>
+                                                {isAuthUser && (
+                                                    <IconButton onClick={() => openEducation(null)} size="large"
+                                                                className='!text-white !min-h-fit'>
+                                                        <AddIcon/>
+                                                    </IconButton>
+                                                )}
+                                            </Stack>
+                                            {profile.educations.map(el => (
+                                                <div key={el.id}>
+                                                    <p className='p-4 text-xl'>Studied <span
+                                                        className='font-bold'>{el.fieldofstudy} </span> at {el.school}
+                                                    </p>
+                                                    <p className='px-4 text-sm'>From {format(new Date(el.from), 'PPP')} {el.to ? 'to ' + format(new Date(el.to), 'PPP') : 'to now'}</p>
+                                                    {isAuthUser && (
+                                                        <Stack direction='row' justifyContent='end'>
+                                                            <IconButton onClick={() => handleDelete(el.id, 'education')}
+                                                                        size="medium"
+                                                                        className='!text-white hover:scale-105'>
+                                                                <Delete/>
+                                                            </IconButton>
+                                                            <IconButton onClick={() => openEducation(el)} size="medium"
+                                                                        className='!text-white hover:scale-105'>
+                                                                <Edit/>
+                                                            </IconButton>
+                                                        </Stack>
+                                                    )}
+                                                    <Divider className='!m-3 !bg-white'/>
 
-                            {
+                                                </div>
+                                            ))}
+                                        </Box>
+                                        <Box className='bg-black/30 rounded-xl text-white !min-h-96'>
+                                            <Stack direction='row' alignItems='center' justifyContent='space-between'
+                                                   gap={1}>
+                                                <h1 className='text-xl p-4 font-bold'>Experience</h1>
+                                                {isAuthUser && (
+                                                    <IconButton onClick={() => openExperience(null)} size="large"
+                                                                className='!text-white !min-h-fit hover:scale-105'>
+                                                        <AddIcon/>
+                                                    </IconButton>
+                                                )}
+                                            </Stack>
+                                            {profile.experiences.map(el => (
+                                                <div key={el.id}>
+                                                    <p className='p-4 text-xl'>
+                                                        Worked as <span
+                                                        className='font-bold'>{el.job_title}</span> at <span
+                                                        className='font-bold'> {el.company} </span> in {el.location}
+                                                    </p>
+                                                    <p className='px-4 text-sm'>From {format(new Date(el.from), 'PPP')} {el.to ? 'to ' + format(new Date(el.to), 'PPP') : 'to now'}</p>
+                                                    {isAuthUser && (
+                                                        <Stack direction='row' justifyContent='end'>
+                                                            <IconButton
+                                                                onClick={() => handleDelete(el.id, 'experience')}
+                                                                size="medium" className='!text-white hover:scale-105'>
+                                                                <Delete/>
+                                                            </IconButton>
+                                                            <IconButton onClick={() => openExperience(el)} size="medium"
+                                                                        className='!text-white hover:scale-105'>
+                                                                <Edit/>
+                                                            </IconButton>
+                                                        </Stack>
+                                                    )}
+                                                    <Divider className='!m-3 !bg-white'/>
 
+                                                </div>
+                                            ))}
+                                        </Box>
+                                    </Slider>
+                                </div>
 
-                                isAuthUser ? <Link href={route('profiles.edit')}><EditIcon/></Link> :
-                                    !isFriend && auth.hasProfile ?
-                                        <IconButton className='!text-white !h-fit'
-                                                    onClick={handleFriendRequest}><PersonAdd/></IconButton> :
-                                        isFriend ? <Stack direction='row' gap={2}>
-                                            <FriendsMenu callback={handleFriendRemove}/>
-                                            <MessageCircleIcon onClick={() => setChatToggle(!chatToggle)}/>
-                                        </Stack> : <> </>
-
-                            }
-
-
-                        </div>
-
-
-                        <div
-                            className="bg-black/30  p-8 rounded text-white shadow-lg max-w-full w-full grid grid-cols-2 gap-8">
-
-                            <Stack maxWidth='full' gap={2}>
-                                <Stack direction='row' alignItems='center' justifyContent='space-between'>
-                                    <h2 className="text-xl font-bold mt-4 mb-2">Education</h2>
-
+                                <div className='max-w-screen-md mx-2'>
+                                    <h1 className='text-xl p-4 font-bold text-white'>Posts</h1>
+                                    <Divider className='!mb-2 !bg-white'/>
                                     {
-                                        isAuthUser ? <IconButton onClick={() => openEducation(null)} size="large"
-                                                                 className='!text-white !min-h-fit'>
-                                            <AddIcon/></IconButton> : <></>
+                                        posts.length > 0 ?
+                                            <Slider {...postSettings}>
+                                                {posts.map((post: Post) => (
+                                                    <div className='mb-4' key={post.id}>
+                                                        <PostCard post={post} auth={auth}/>
+                                                    </div>
+                                                ))}
+                                            </Slider>
+                                            :
+                                            <div
+                                                className="bg-black/30  shadow-lg rounded-xl px-8 pt-6 pb-8 my-4 min-w-[600px]">
+                                                <div className="mb-4">
+                                                    <h3 className="block text-white py-2 font-bold mb-2 text-center">
+                                                        user has no posts yet !
+                                                    </h3>
+                                                </div>
+                                            </div>
                                     }
-
-
-                                </Stack>
-                                {profile.educations.map(el =>
-
-                                    <Stack key={el.id} direction='row' justifyContent='space-between'
-                                           className='!bg-black/30 !p-4'
-                                           borderRadius={2}>
-                                        <Stack>
-                                            <p className='text-2xl text-white '>Studied
-                                                of {el.fieldofstudy} At {el.school}  </p>
-                                            <p className='text-md text-white'>From {formatDate(el.from, 'PPP')} {el.to ? 'To ' + formatDate(el.to, 'PPP') : 'To now'}</p>
-                                        </Stack>
-
-
-                                        {
-                                            isAuthUser ? <Stack direction='row'>
-
-                                                <IconButton onClick={() => handleDelete(el.id, 'education')}
-                                                            size="medium"
-                                                            className='!text-white'>
-                                                    <Delete/></IconButton>
-                                                <IconButton onClick={() => openEducation(el)} size="medium"
-                                                            className='!text-white'>
-                                                    <Edit/></IconButton>
-                                            </Stack> : <></>
-                                        }
-
-
-                                    </Stack>
-                                )}
-                            </Stack>
-
-                            <Stack maxWidth='full' gap={2}>
-                                <Stack direction='row' alignItems='center' justifyContent='space-between'>
-                                    <h2 className="text-xl font-bold mt-4 mb-2">Experience</h2>
-                                    {
-                                        isAuthUser ? <IconButton onClick={() => openExperience(null)} size="large"
-                                                                 className='!text-white !min-h-fit'>
-                                            <AddIcon/></IconButton> : <></>
-                                    }
-                                </Stack>
-
-
-                                {profile.experiences.map(el =>
-                                    <Stack key={el.id} direction='row' justifyContent='space-between'
-                                           className='!bg-black/30 !p-4'
-                                           borderRadius={2}>
-                                        <Stack>
-                                            <p className='text-2xl text-white'>Worked
-                                                as {el.job_title} At {el.location}  </p>
-                                            <p className='text-md text-white'>From {formatDate(el.from, 'PPP')} {el.to ? 'To ' + formatDate(el.to, 'PPP') : 'To now'}</p>
-                                        </Stack>
-
-                                        {
-                                            isAuthUser ? <Stack direction='row'>
-                                                <IconButton onClick={() => handleDelete(el.id, 'experience')}
-                                                            size="medium"
-                                                            className='!text-white'>
-                                                    <Delete/></IconButton>
-                                                <IconButton onClick={() => openExperience(el)} size="medium"
-                                                            className='!text-white'>
-                                                    <Edit/></IconButton>
-                                            </Stack> : <></>
-                                        }
-
-                                    </Stack>
-                                )}
-
+                                </div>
                                 {
-                                    messages ? <Chat open={chatToggle} messages={messages}
-                                                     receiverId={profile.user_id}/> : <></>
+                                    <List className='bg-black/30 rounded-xl text-white !h-fit !pb-5 flex-1'>
+                                        <h1 className='text-xl p-4 font-bold text-white'>Friends</h1>
 
+                                        {friends.length > 0 ?
+                                            <>
+                                                {friends.map((friend, i) => (
+                                                    <ListItem key={i}
+                                                              className='flex gap-2 hover:scale-105  duration-300'>
+                                                        <Avatar src={`/${friend.profile_image}`}/>
+                                                        <Link href={route('profiles.show', friend.profile.id)}>
+                                                            <p>{friend.name}</p>
+                                                            <p className='text-xs'>{friend.profile.status}</p>
+                                                        </Link>
+                                                    </ListItem>
+                                                ))}
+                                            </> :
+                                            <div>
+                                                <h3 className="block text-white py-2 text-xs font-bold mb-2 text-center">
+                                                    user has no friends yet !
+                                                </h3>
+                                            </div>
+                                        }
+                                    </List>
                                 }
 
-                            </Stack>
-
-                        </div>
-
-
-                        <Modal
-                            open={open}
-                            onClose={handleClose}
-                            className='!z-40 flex justify-center items-center'
-                        >
-                            <>{card}</>
-
-                        </Modal>
-
-
-                    </Stack>
-
-                </>) : (<>
-                    <div className="flex justify-center items-center">
-                        <div className="bg-gray-900 opacity-75  shadow-lg rounded-lg px-8 pt-6 pb-8 my-4">
-                            <div className="mb-4">
-                                <h3 className="block text-blue-300 py-2 font-bold mb-2 text-center">
-                                    It looks like you don't have a profile yet. Let's create one now!
-                                </h3>
-                                <div className="flex flex-wrap justify-center">
-                                    <PrimaryButton><Link href={route('profiles-create')}>Create Profile</Link>
-                                    </PrimaryButton>
+                            </div>
+                            <Modal open={open} onClose={handleClose} className='!z-40 flex justify-center items-center'>
+                                <>{card}</>
+                            </Modal>
+                        </>
+                    ) : (
+                        <div className="flex justify-center items-center">
+                            <div className="bg-gray-900 opacity-75 shadow-lg rounded-lg px-8 pt-6 pb-8 my-4">
+                                <div className="mb-4">
+                                    <h3 className="block text-blue-300 py-2 font-bold mb-2 text-center">
+                                        It looks like you don't have a profile yet. Let's create one now!
+                                    </h3>
+                                    <div className="flex flex-wrap justify-center">
+                                        <PrimaryButton><Link href={route('profiles.create')}>Create
+                                            Profile</Link></PrimaryButton>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </>)}
-
+                    )}
+                </Stack>
             </Container>
         </AuthenticatedLayout>
-
-
-    );
+    )
+        ;
 }

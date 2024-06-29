@@ -10,7 +10,10 @@ class PostController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Posts/index', ['posts' => Post::with('user', 'comments', 'likes')->latest()->paginate(6)]);
+        return Inertia::render('Posts/index', ['posts' => Post::with('user', 'comments', 'likes')
+            ->visibleToUser(auth()->user()->id)
+            ->latest()
+            ->paginate(6)]);
     }
 
     public function store()
@@ -39,7 +42,17 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
-        $post->load('user', 'comments.user', 'likes');
+        $post->load([
+            'user',
+            'comments' => function ($query) {
+                $userId = auth()->id();
+                $query->visibleToUser($userId);
+            },
+            'comments.user',
+            'comments.replies',
+            'comments.replies.user',
+            'likes',
+        ]);
 
         return Inertia::render('Posts/show', ['post' => $post]);
     }

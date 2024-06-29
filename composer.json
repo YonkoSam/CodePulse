@@ -9,15 +9,16 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-redis": "*",
         "inertiajs/inertia-laravel": "^1.0",
         "laravel/framework": "^11.9",
         "laravel/reverb": "@beta",
         "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.15",
         "laravel/tinker": "^2.9",
         "predis/predis": "^2.2",
         "pusher/pusher-php-server": "^7.2",
-        "tightenco/ziggy": "^2.0",
-        "ext-redis": "*"
+        "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

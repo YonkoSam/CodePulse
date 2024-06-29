@@ -1,17 +1,17 @@
-import { useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 
 
-const TITLES = ['Unite with fellow coders to share knowledge, solve problems, and create groundbreaking solutions.\n' +
+const TITLES = ['Unite with fellow coders to share knowledge, solve problems, and createAndUpdate groundbreaking solutions.\n' +
 '\n', 'Your gateway to limitless coding possibilities. Discover, connect, and excel with Tawasol for Programmers.\n' +
 '\n', 'Join a thriving community where ideas become innovations. Collaborate, learn, and grow with Tawsol.\n' +
 '\n'];
-export default function  LandingTitle  () {
+export default function LandingTitle() {
     const [titleIndex, setTitleIndex] = useState(0)
     const [fadeIn, setFadeIn] = useState(true)
 
     useEffect(() => {
-        let interval : ReturnType<typeof setInterval>;
-        let timout: ReturnType<typeof setTimeout> ;
+        let interval: ReturnType<typeof setInterval>;
+        let timout: ReturnType<typeof setTimeout>;
         interval = setInterval(() => {
             setTitleIndex(titleIndex + 1);
             setFadeIn(true);
@@ -32,7 +32,7 @@ export default function  LandingTitle  () {
         }
 
 
-    },[titleIndex]);
+    }, [titleIndex]);
     return <div className="leading-normal text-base md:text-2xl mb-8 text-center md:text-left bg-transparent"><p
         className={fadeIn ? 'animate-fadeIn ' : 'animate-fadeOut'}>{TITLES[titleIndex]}</p></div>
 }

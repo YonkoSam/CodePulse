@@ -14,6 +14,7 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
+    Stack,
     TextField,
     Typography,
 } from '@mui/material';
@@ -25,11 +26,15 @@ import Swal from "sweetalert2";
 import InputError from "@/Components/InputError";
 import {Errors} from "@inertiajs/inertia";
 import {EditIcon} from "lucide-react";
+import ReplyIcon from '@mui/icons-material/Reply';
 
 const Show = ({post}: PageProps<{ post: Post }>) => {
 
     const {auth} = usePage<PageProps>().props;
     const [newComment, setNewComment] = useState('');
+    const [reply, setReplay] = useState(-1);
+    const [newReply, setNewReply] = useState('');
+
     const [errors, setErrors] = useState<Errors>(
         {
             text: "",
@@ -38,16 +43,11 @@ const Show = ({post}: PageProps<{ post: Post }>) => {
     const isAuthUser = post.user_id === auth.user.id;
 
 
-    const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setNewComment(event.target.value);
-    };
-
     const handleCommentSubmit = () => {
         const newCommentObject: { post_id: number; user_id: number; author: string; text: string } = {
             text: newComment,
             user_id: auth.user.id,
             post_id: post.id,
-            author: auth.user.name,
         };
 
         router.post(route('comment.store'), newCommentObject, {
@@ -58,6 +58,23 @@ const Show = ({post}: PageProps<{ post: Post }>) => {
         setNewComment('');
     };
 
+    const handleKeyDown = (event, commentId) => {
+        if (event.key === 'Enter') {
+            const newReplyObject: { post_id: number; user_id: number; author: string; text: string } = {
+                text: newReply,
+                user_id: auth.user.id,
+                post_id: post.id,
+                comment_id: commentId,
+            };
+
+            router.post(route('reply'), newReplyObject, {
+                preserveScroll: true,
+                onError: (err) => setErrors(err)
+            });
+            setNewReply('');
+            setReplay(-1);
+        }
+    };
 
     const handleCommentDelete = (id: number) => {
 
@@ -121,20 +138,77 @@ const Show = ({post}: PageProps<{ post: Post }>) => {
                 </Typography>
                 {(post.comments.length > 0) ? (
                     <List>
-                        {post.comments.map((comment: Comment, index: number) => (
+                        {post.comments.filter(el => !el.comment_id).map((comment: Comment, index: number) => (
                             <ListItem key={index} alignItems="flex-start">
                                 <ListItemAvatar>
                                     <Avatar alt={comment.user.name} src={'/' + comment.user.profile_image}/>
                                 </ListItemAvatar>
-                                <ListItemText
-                                    primary={comment.text}
-                                    secondary={`by ${comment.user.name}`}
-                                />
+                                <Stack>
+                                    <Stack direction='row'>
+                                        <ListItemText className='max-w-2xl'
+                                                      primary={<span
+                                                          className=' break-words'> {comment.text} </span>}
+                                                      secondary={`by ${comment.user.name}`}
+                                        />
+                                        <IconButton className='!h-fit !mt-auto'
+                                                    onClick={() => setReplay(comment.id == reply ? -1 : comment.id)}><ReplyIcon/></IconButton>
+                                    </Stack>
+
+                                    <List>
+                                        {comment.replies && comment.replies.map((reply: Comment, index: number) => (
+                                            <ListItem key={index} alignItems="flex-start">
+                                                <ListItemAvatar>
+                                                    <Avatar alt={reply.user.name}
+                                                            src={'/' + reply.user.profile_image}/>
+                                                </ListItemAvatar>
+                                                <ListItemText className='max-w-2xl'
+                                                              primary={<span
+                                                                  className='break-words '> {reply.text} </span>}
+                                                              secondary={
+                                                                  <span className="inline-flex items-center">
+                                                        by {reply.user.name}
+                                                                      {reply.user_id === post.user_id && (
+                                                                          <span
+                                                                              className="ml-2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
+                                                    Author
+                                                    </span>
+                                                                      )}
+                                                    </span>
+
+                                                              }
+
+
+                                                />
+                                                {reply.user_id === auth.user.id ? <IconButton
+                                                    onClick={() => handleCommentDelete(reply.id)}><Clear/></IconButton> : <></>}
+                                            </ListItem>
+
+                                        ))
+                                        }
+                                    </List>
+                                    {reply === comment.id ?
+                                        <Stack>
+                                            <TextField
+                                                label="Reply"
+                                                rows={1}
+                                                variant="outlined"
+                                                fullWidth
+                                                name='text'
+                                                value={newReply}
+                                                onKeyDown={(e) => handleKeyDown(e, comment.id)}
+                                                onChange={e => setNewReply(e.target.value)}
+                                            />
+                                            <InputError message={errors.text} className="mt-2"/>
+                                        </Stack> : <></>}
+
+                                </Stack>
                                 {comment.user_id === auth.user.id ? <IconButton
-                                    onClick={() => handleCommentDelete(comment.id)}><Clear/></IconButton> : <></>}
+                                    onClick={() => handleCommentDelete(comment.id)}><Clear/></IconButton> : <></>
+                                }
                             </ListItem>
                         ))}
                     </List>
+
                 ) : (
                     <Typography variant="body2" style={{color: '#999'}}>Be the First One to Write a
                         Comments</Typography>
@@ -151,7 +225,7 @@ const Show = ({post}: PageProps<{ post: Post }>) => {
                         fullWidth
                         name='text'
                         value={newComment}
-                        onChange={handleCommentChange}
+                        onChange={e => setNewComment(e.target.value)}
                     />
                     <InputError message={errors.text} className="mt-2"/>
                     <Box mt={2} display="flex" justifyContent="flex-end">

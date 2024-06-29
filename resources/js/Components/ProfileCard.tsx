@@ -8,8 +8,8 @@ import {Checkbox} from "@/Components/ui/checkbox";
 import {Button, Stack} from "@mui/material";
 import {EditIcon,} from "lucide-react";
 import InputError from "@/Components/InputError";
-import Swal from "sweetalert2";
 import AddIcon from "@mui/icons-material/Add";
+import {Toast} from "@/utils";
 
 interface ProfileCardProps {
     type: {
@@ -35,17 +35,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({type, object, callback}) => {
 
     const {data, setData, post, patch, errors} = useForm(initialValues);
 
-    const Toast = useMemo(() => Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-        }
-    }), []);
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -73,7 +62,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({type, object, callback}) => {
 
     return (
         <form onSubmit={onSubmit}>
-            <Card className="w-[400px] bg-gray-600 text-white rounded-lg">
+            <Card className="w-[400px] bg-gray-900 text-white rounded-lg">
                 <CardHeader>
                     <CardTitle>Add {type.title}</CardTitle>
                     <CardDescription>*= required field</CardDescription>

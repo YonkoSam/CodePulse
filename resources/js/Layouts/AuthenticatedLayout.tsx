@@ -1,17 +1,27 @@
-import {PropsWithChildren, ReactNode, useState} from 'react';
+import React, {PropsWithChildren, ReactNode, useState} from 'react';
 import {User} from '@/types';
 import Sidebar from "@/Components/Sidebar";
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import Dropdown from '@/Components/Dropdown';
 import {Box, Stack} from "@mui/material";
-import Notifications from "@/Components/Notifications";
+import ChatContainer from "@/Components/ChatContainer";
+import Notifications from "@/Components/notifications/Notifications";
 
-export default function Authenticated({user, header, children}: PropsWithChildren<{
+export default function Authenticated({
+                                          user,
+                                          header,
+                                          children,
+                                          callback,
+                                          renderChat = true,
+                                          renderNotifications = true
+                                      }: PropsWithChildren<{
     user: User,
     header?: ReactNode
+    callback?: any
+    renderChat?: boolean
+    renderNotifications?: boolean
 }>) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-
 
     return (
         <>
@@ -26,9 +36,9 @@ export default function Authenticated({user, header, children}: PropsWithChildre
                             </header>
                         )}
 
-                        <Box className='!ml-auto'>
+                        {renderNotifications ? <Box className='!ml-auto'>
                             <Notifications/>
-                        </Box>
+                        </Box> : <></>}
                         <Box>
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="flex justify-between h-16">
@@ -124,7 +134,12 @@ export default function Authenticated({user, header, children}: PropsWithChildre
                         </Box>
                     </Stack>
 
-                    <main>{children}</main>
+                    <main>
+                        {children}
+                    </main>
+                    {renderChat ? <ChatContainer id={callback}/> : <></>}
+
+
                 </div>
             </div>
         </>

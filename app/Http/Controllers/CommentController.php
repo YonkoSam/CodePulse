@@ -31,6 +31,7 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
 
+        $comment->replies()->delete();
         $comment->delete();
         $notification = DB::table('notifications')
             ->where('data->comment_id', $comment->id)

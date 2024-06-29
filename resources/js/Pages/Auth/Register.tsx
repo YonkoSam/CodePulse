@@ -5,6 +5,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import {Head, Link, useForm} from '@inertiajs/react';
+import {GitHub} from "@mui/icons-material";
 
 export default function Register() {
     const {data, setData, post, processing, errors, reset} = useForm({
@@ -105,10 +106,15 @@ export default function Register() {
                     <InputError message={errors.password_confirmation} className="mt-2"/>
                 </div>
 
-                <div className="flex items-center justify-center">
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                <div className="flex flex-col items-center justify-center space-y-3 ">
+                    <PrimaryButton className="min-w-64" disabled={processing}>
                         Register
                     </PrimaryButton>
+
+                    <a href="/socialite/github"> <PrimaryButton type='button' className="min-w-64">
+                        <GitHub/> Register Using GitHub?
+                    </PrimaryButton>
+                    </a>
                 </div>
             </form>
             <p className="text-sm font-light text-gray-400 ">
