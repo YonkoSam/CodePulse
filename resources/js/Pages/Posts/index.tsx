@@ -1,7 +1,7 @@
 import React from 'react';
 import {PageProps, Post} from "@/types";
 import PostCard from "@/Components/PostCard";
-import {Head, Link, usePage} from "@inertiajs/react";
+import {Link, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import {Box, Stack} from "@mui/material";
 import PrimaryButton from "@/Components/PrimaryButton";
@@ -12,10 +12,9 @@ const Index = ({posts}: any) => {
     const {auth} = usePage<PageProps>().props;
 
     return (
-        <AuthenticatedLayout user={auth.user}
+        <AuthenticatedLayout user={auth.user} title='Posts'
                              header={
                                  <h2 className="font-semibold text-xl text-white leading-tight">Posts</h2>}>
-            <Head title="Posts"/>
             <Stack justifyContent='start' gap={3} padding={3}>
                 <Link href={route('posts.create')} className='flex justify-end'><PrimaryButton> Add New
                     Post</PrimaryButton></Link>

@@ -26,7 +26,7 @@ function Pagination({links, currentPage, lastPage}: any) {
             shape="rounded"
             style={{padding: 10}}
             size='large'
-            sx={{'& .MuiPaginationItem-root': {color: 'white', fontWeight: 'bold'}}} // Change color to white
+            sx={{'& .MuiPaginationItem-root': {color: 'white', fontWeight: 'bold'}}}
 
         />
     );

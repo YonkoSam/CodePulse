@@ -7,8 +7,7 @@ import MarkChatUnreadIcon from '@mui/icons-material/MarkChatUnread';
 import {handleDelete, listenForEvent, renderNotificationActions, StopListening} from "./renderNotificationActions";
 import {PageProps} from "@/types";
 
-export default function Notifications() {
-    const {notifications}: any = usePage().props;
+export default function Notifications({notifications, count}) {
     const [displayNotifications, setDisplayNotifications] = useState<boolean | undefined>(false);
     const {auth} = usePage<PageProps>().props;
 
@@ -23,7 +22,7 @@ export default function Notifications() {
         <>
             <Badge className='!text-white hover:scale-110 hover:rotate-6  duration-300 ease-in-out cursor-pointer '
                    color="error"
-                   badgeContent={notifications.filter((e: any) => !e.read_at).length}
+                   badgeContent={count}
                    overlap="circular"
                    onClick={() => setDisplayNotifications(!displayNotifications)}><NotificationsRounded/>
             </Badge>
@@ -46,7 +45,7 @@ export default function Notifications() {
 
                             <ListItemText
                                 primary={<span
-                                    className='line-clamp-3 text-sm'> {notification.data.message} </span>}/>
+                                    className='line-clamp-3 text-sm px-2'> {notification.data.message} </span>}/>
                             {!notification.read_at && renderNotificationActions(notification)}
                             <ListItemIcon className='pl-2'>
                                 <Clear onClick={() => handleDelete(notification.id, notification.data.request_id)}/>

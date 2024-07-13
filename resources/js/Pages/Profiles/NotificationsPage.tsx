@@ -10,7 +10,7 @@ import {
 } from "@/Components/notifications/renderNotificationActions";
 import {Clear} from "@mui/icons-material";
 import Pagination from "@/Components/Pagination";
-import {Head, usePage} from "@inertiajs/react";
+import {usePage} from "@inertiajs/react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {PageProps} from "@/types";
 
@@ -26,9 +26,8 @@ export default function NotificationsPage({notifications}) {
 
 
     return (
-        <AuthenticatedLayout user={auth.user} renderNotifications={false}
+        <AuthenticatedLayout user={auth.user} renderNotifications={false} title='Notifications'
                              header={<h2 className="font-semibold text-xl text-white leading-tight">Notifications</h2>}>
-            <Head title="Notifications"/>
             <div style={{padding: '20px'}}>
                 <Typography variant="h3" gutterBottom>Old Notifications</Typography>
                 <List>

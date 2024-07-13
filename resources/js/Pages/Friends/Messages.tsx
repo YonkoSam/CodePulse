@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Avatar, Box, Button, CircularProgress, Container, Divider, Grid, Paper, Typography} from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {Head, Link, router, usePage} from "@inertiajs/react";
+import {Link, router, usePage} from "@inertiajs/react";
 import {PageProps} from "@/types";
 import TextInput from "@/Components/TextInput";
 import Echo from "laravel-echo";
@@ -132,10 +132,9 @@ const Messages = ({messages, friends, receiver}) => {
     };
 
     return (
-        <AuthenticatedLayout renderChat={false} user={auth.user}
+        <AuthenticatedLayout renderChat={false} user={auth.user} title='Messages'
                              header={<Typography variant="h5" className="font-semibold text-white">Your
                                  Profile</Typography>}>
-            <Head title="Home"/>
             <Container>
                 <Grid container spacing={2} className="bg-white rounded-xl shadow-md">
                     <Grid ref={MessageBoxRef} item xs={8}

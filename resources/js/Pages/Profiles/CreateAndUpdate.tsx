@@ -1,6 +1,6 @@
 import React, {FormEventHandler, useEffect, useState} from 'react';
 import Avatar from "../../../assets/images/default-avatar.svg";
-import {Head, Link, router, useForm, usePage} from "@inertiajs/react";
+import {Link, router, useForm, usePage} from "@inertiajs/react";
 import {buttonStyle, inputStyle} from "@/utils";
 import PrimaryButton from "@/Components/PrimaryButton";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -162,14 +162,14 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
 
 
     return (
-        <AuthenticatedLayout user={auth.user} header={<h2
-            className="font-semibold text-xl text-white leading-tight">{!profile ? 'Create Your Profile' : 'Update Your Profile'}</h2>}>
+        <AuthenticatedLayout user={auth.user} title={!profile ? 'Create Your Profile' : 'Update Your Profile'}
+                             header={<h2
+                                 className="font-semibold text-xl text-white leading-tight">{!profile ? 'Create Your Profile' : 'Update Your Profile'}</h2>}>
             <div>
             </div>
-            <Head title={!profile ? 'Create Your Profile' : 'Update Your Profile'}/>
             <div
-                className=" min-h-screen flex  justify-center bg-center min-w-full py-12 px-4 sm:px-6 lg:px-8 bg-black-500   relative items-center">
-                <div className="max-w-2xl w-full space-y-8 p-10 rounded-lg shadow bg-gray-900 opacity-75">
+                className=" min-h-screen flex  justify-center bg-center min-w-full py-12 px-4 sm:px-6 lg:px-8    relative items-center">
+                <div className="max-w-2xl w-full space-y-8 p-10 rounded-lg shadow bg-black/30">
                     <div className="grid gap-8 grid-cols-1">
                         <div className="flex flex-col">
                             <div className="flex flex-col sm:flex-row items-center">

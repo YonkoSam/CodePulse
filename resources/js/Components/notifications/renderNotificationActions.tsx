@@ -60,11 +60,11 @@ const renderNotificationActions = (notification: any) => {
                 <Stack direction='row' spacing={2}>
                     <Button variant="contained" color="success" size='small'
                             onClick={() => acceptRequest(notification.id, notification.data.request_id)}>
-                        Accept Request
+                        Accept
                     </Button>
                     <Button variant="contained" color="error" size='small'
                             onClick={() => rejectRequest(notification.id, notification.data.request_id)}>
-                        Reject Request
+                        Reject
                     </Button>
                 </Stack>
             );

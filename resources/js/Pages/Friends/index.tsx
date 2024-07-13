@@ -1,5 +1,5 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {Head, Link, router} from "@inertiajs/react";
+import {Link, router} from "@inertiajs/react";
 import {Box, Button} from "@mui/material";
 import Avatar from "../../../assets/images/default-avatar.svg";
 import React from "react";
@@ -45,9 +45,8 @@ const Index = ({friends, blockedFriends, auth}: any) => {
     }
 
     return (
-        <AuthenticatedLayout user={auth.user}
+        <AuthenticatedLayout user={auth.user} title='My Friends'
                              header={<h2 className="font-semibold text-xl text-white leading-tight">My Friends</h2>}>
-            <Head title="My Friends"/>
             <div className="flex flex-col justify-center items-center">
                 {!hasFriends ? (
                     <div className="bg-gray-900 opacity-75 shadow-lg rounded-lg px-8 pt-6 pb-8 my-4">
@@ -87,7 +86,7 @@ const Index = ({friends, blockedFriends, auth}: any) => {
 
                 {hasBlockedFriends ? (
                     <div className="mt-8">
-                        <h2 className="font-semibold text-xl text-white leading-tight">Blocked Friends</h2>
+                        <h2 className="font-semibold text-xl text-white leading-tight px-6">Blocked Friends</h2>
                         <div className='grid gap-2 p-2 md:grid-cols-2 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-5'>
                             {blockedFriends.map((blockedUser: any) => (
                                 <Box key={blockedUser.id}>

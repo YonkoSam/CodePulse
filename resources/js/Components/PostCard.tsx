@@ -33,15 +33,15 @@ const PostCard = ({post}: PageProps<{ post: Post }>) => {
                 </Link>
 
                 <Box mt={2} display="flex" justifyContent="space-between">
-                    <IconButton
-                        onClick={() => router.post(route('like.store'), {'post_id': post.id}, {preserveScroll: true})}
-                        style={{color: post.likes.some(e => e.user_id === auth.user.id) ? '#1976d2' : '#fff'}}
+                    <IconButton className='hover:scale-110 duration-300 ease-in-out'
+                                onClick={() => router.post(route('like.store'), {'post_id': post.id}, {preserveScroll: true})}
+                                style={{color: post.likes.some(e => e.user_id === auth.user.id) ? '#1976d2' : '#fff'}}
                     >
                         <ThumbUpIcon/>
                         <Typography variant="body2" style={{marginLeft: '5px'}}>{post.likes.length}</Typography>
                     </IconButton>
                     <Link href={route('posts.show', post.id)} style={{textDecoration: 'none', color: '#fff'}}>
-                        <IconButton className='!text-white'>
+                        <IconButton className='!text-white hover:scale-110 duration-300 ease-in-out '>
                             <CommentIcon/>
                             <Typography variant="body2" style={{marginLeft: '5px'}}>{post.comments.length}</Typography>
                         </IconButton>

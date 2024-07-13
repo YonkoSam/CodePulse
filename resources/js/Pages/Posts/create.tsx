@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {Head, useForm, usePage} from "@inertiajs/react";
+import {useForm, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {PageProps} from "@/types";
 import {Button, Stack} from '@mui/material';
@@ -43,10 +43,9 @@ const Create = () => {
     };
 
     return (
-        <AuthenticatedLayout user={auth.user}
+        <AuthenticatedLayout user={auth.user} title='Create Post'
                              header={<h2 className="font-semibold text-xl text-white leading-tight">Create A New
                                  Post</h2>}>
-            <Head title="Create Post"/>
             <div
                 className=" min-h-full flex justify-center bg-center min-w-full py-12 px-2 sm:px-3 lg:px-4 bg-black-500  relative items-center">
                 <div className="max-w-xl w-full space-y-4 p-2 rounded-xl shadow bg-gray-900 opacity-75">

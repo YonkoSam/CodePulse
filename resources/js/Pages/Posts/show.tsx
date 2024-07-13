@@ -19,7 +19,7 @@ import {
     Typography,
 } from '@mui/material';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import {Head, router, usePage} from "@inertiajs/react";
+import {router, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {Clear} from "@mui/icons-material";
 import Swal from "sweetalert2";
@@ -109,9 +109,8 @@ const Show = ({post}: PageProps<{ post: Post }>) => {
 
 
     return (
-        <AuthenticatedLayout user={auth.user}
+        <AuthenticatedLayout user={auth.user} title={post.title}
                              header={<h2 className="font-semibold text-xl text-white leading-tight">Posts</h2>}>
-            <Head title={post.title}/>
             <IconButton><EditIcon/></IconButton>
             <Container className="rounded-xl p-5 shadow-md w-9/12" style={{backgroundColor: '#f5f5f5', color: '#333'}}>
                 <Card style={{backgroundColor: '#fff', color: '#333'}}>

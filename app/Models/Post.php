@@ -6,9 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
 
 class Post extends Model
 {
+    use HasSelfHealingUrls;
+
+    protected string $slug = 'title';
+
     protected $fillable = ['user_id', 'text', 'title'];
 
     use HasFactory;

@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
 
 class Profile extends Model
 {
     use HasFactory;
+    use HasSelfHealingUrls;
 
     protected $fillable = [
         'user_id',

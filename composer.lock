@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d22e9d1b083bf7e8070e6b46a96256d9",
+    "content-hash": "8e7ac4d8e84ff7ad6610889c0ab222de",
     "packages": [
         {
             "name": "brick/math",
@@ -2410,6 +2410,58 @@
                 "source": "https://github.com/thephpleague/oauth1-client/tree/v1.10.1"
             },
             "time": "2022-04-15T14:02:14+00:00"
+        },
+        {
+            "name": "lukeraymonddowning/self-healing-urls",
+            "version": "v0.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lukeraymonddowning/self-healing-urls.git",
+                "reference": "fb0fcd873f442f55ccf5bb9904228efedacf1303"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lukeraymonddowning/self-healing-urls/zipball/fb0fcd873f442f55ccf5bb9904228efedacf1303",
+                "reference": "fb0fcd873f442f55ccf5bb9904228efedacf1303",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^10.0|^11.0",
+                "php": "^8.1|^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.13",
+                "orchestra/testbench": "^8.15|^9.0",
+                "pestphp/pest": "^2.25"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Lukeraymonddowning\\SelfHealingUrls\\Providers\\SelfHealingUrlsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Lukeraymonddowning\\SelfHealingUrls\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "lukeraymonddowning",
+                    "email": "lukeraymonddowning@gmail.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/lukeraymonddowning/self-healing-urls/issues",
+                "source": "https://github.com/lukeraymonddowning/self-healing-urls/tree/v0.5.1"
+            },
+            "time": "2024-05-07T08:46:43+00:00"
         },
         {
             "name": "monolog/monolog",

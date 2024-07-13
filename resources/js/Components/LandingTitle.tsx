@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 
 
-const TITLES = ['Unite with fellow coders to share knowledge, solve problems, and createAndUpdate groundbreaking solutions.\n' +
+const TITLES = ['Unite with fellow coders to share knowledge, solve problems, and create groundbreaking solutions.\n' +
 '\n', 'Your gateway to limitless coding possibilities. Discover, connect, and excel with Tawasol for Programmers.\n' +
 '\n', 'Join a thriving community where ideas become innovations. Collaborate, learn, and grow with Tawsol.\n' +
 '\n'];

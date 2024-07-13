@@ -212,18 +212,17 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
         </div>;
     }
     return (
-        <AuthenticatedLayout user={auth.user} callback={chatToggle}
+        <AuthenticatedLayout user={auth.user} callback={chatToggle} title='Profile'
                              header={<h2 className="font-semibold text-xl text-white leading-tight">Profile</h2>}>
-            <Head title="Profile"/>
             {auth.hasProfile ? <></> : <CreateProfilePrompt/>}
 
             <Container maxWidth='xl'>
                 <Stack>
                     {profile ? (
                         <>
-                            <div className='relative !max-h-96 mb-10 rounded-xl'>
-                                <div className='relative '>
-                                    <img className='object-cover object-top h-72 w-full bg-white/50'
+                            <div className='relative !max-h-96 mb-10 rounded-xl shadow-xl shadow-black/20'>
+                                <div className='relative  '>
+                                    <img className='object-cover object-top h-72 w-full bg-white/50 '
                                          src={preview ? preview : profile.cover ? '/' + profile.cover : '/covers/default.avif'}
                                          alt="cover"/>
                                     <form onSubmit={handleSubmit}>
@@ -255,14 +254,14 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
 
                                 </div>
                                 <div className='absolute bottom-10 w-full'>
-                                    <div className='p-4'>
-                                        <Avatar
-                                            className='!w-36 !h-36 !border-4 !border-white !object-cover !object-top'
-                                            src={`/${profile.user.profile_image}`}/>
+                                    <div className=' p-4 '>
+                                        <Avatar sx={{'& .MuiAvatar-img': {objectPosition: 'top'}}}
+                                                className='!w-36 !h-36 !border-4 !border-white   shadow-2xl shadow-black hover:scale-110 hover:rotate-6 duration-300 ease-in-out'
+                                                src={`/${profile.user.profile_image}`}/>
                                     </div>
                                 </div>
                                 <div
-                                    className='bg-black/30 w-full  flex flex-col md:flex-row md:justify-between justify-center  rounded-xl p-4'>
+                                    className='bg-black/30 w-full  flex flex-col md:flex-row md:justify-between justify-center  rounded-xl py-2 '>
                                     <div className='ml-40 text-white '>
                                         <Stack direction='row' alignItems='center' gap={1}>
                                             <h1 className='text-2xl lg:text-4xl font-bold'>{_.startCase(_.toLower(profile.user.name))}</h1>
@@ -307,7 +306,7 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
                             </div>
 
                             <div className='flex flex-col justify-between gap-6 lg:flex-row mt-6'>
-                                <div className='w-full lg:w-1/4'>
+                                <div className='w-full lg:w-1/4 shadow-xl shadow-black'>
                                     <Slider {...settings}>
                                         <List className='bg-black/30 rounded-xl text-white !min-h-96'>
                                             <h1 className='text-xl p-4 font-bold'>About</h1>
@@ -345,7 +344,8 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
                                                 ))}
                                             </ListItem>
                                         </List>
-                                        <Box className='bg-black/30 rounded-xl text-white !min-h-96'>
+                                        <Box
+                                            className='bg-black/30 rounded-xl text-white !min-h-96'>
                                             <Stack direction='row' alignItems='center' justifyContent='space-between'
                                                    gap={1}>
                                                 <h1 className='text-xl p-4 font-bold'>Education</h1>
@@ -356,31 +356,37 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
                                                     </IconButton>
                                                 )}
                                             </Stack>
-                                            {profile.educations.map(el => (
-                                                <div key={el.id}>
-                                                    <p className='p-4 text-xl'>Studied <span
-                                                        className='font-bold'>{el.fieldofstudy} </span> at {el.school}
-                                                    </p>
-                                                    <p className='px-4 text-sm'>From {format(new Date(el.from), 'PPP')} {el.to ? 'to ' + format(new Date(el.to), 'PPP') : 'to now'}</p>
-                                                    {isAuthUser && (
-                                                        <Stack direction='row' justifyContent='end'>
-                                                            <IconButton onClick={() => handleDelete(el.id, 'education')}
-                                                                        size="medium"
-                                                                        className='!text-white hover:scale-105'>
-                                                                <Delete/>
-                                                            </IconButton>
-                                                            <IconButton onClick={() => openEducation(el)} size="medium"
-                                                                        className='!text-white hover:scale-105'>
-                                                                <Edit/>
-                                                            </IconButton>
-                                                        </Stack>
-                                                    )}
-                                                    <Divider className='!m-3 !bg-white'/>
+                                            {profile.educations.length > 0 ?
+                                                profile.educations.map(el => (
+                                                    <div key={el.id}>
+                                                        <p className='p-4 text-xl'>Studied <span
+                                                            className='font-bold'>{el.fieldofstudy} </span> at {el.school}
+                                                        </p>
+                                                        <p className='px-4 text-sm'>From {format(new Date(el.from), 'PPP')} {el.to ? 'to ' + format(new Date(el.to), 'PPP') : 'to now'}</p>
+                                                        {isAuthUser && (
+                                                            <Stack direction='row' justifyContent='end'>
+                                                                <IconButton
+                                                                    onClick={() => handleDelete(el.id, 'education')}
+                                                                    size="medium"
+                                                                    className='!text-white hover:scale-105'>
+                                                                    <Delete/>
+                                                                </IconButton>
+                                                                <IconButton onClick={() => openEducation(el)}
+                                                                            size="medium"
+                                                                            className='!text-white hover:scale-105'>
+                                                                    <Edit/>
+                                                                </IconButton>
+                                                            </Stack>
+                                                        )}
+                                                        <Divider className='!m-3 !bg-white'/>
 
-                                                </div>
-                                            ))}
+                                                    </div>
+                                                )) : <>    <p className='p-4  text-sm text-center '>No education details
+                                                    provided yet.</p>
+                                                </>}
                                         </Box>
-                                        <Box className='bg-black/30 rounded-xl text-white !min-h-96'>
+                                        <Box
+                                            className='bg-black/30 rounded-xl text-white !min-h-96 '>
                                             <Stack direction='row' alignItems='center' justifyContent='space-between'
                                                    gap={1}>
                                                 <h1 className='text-xl p-4 font-bold'>Experience</h1>
@@ -391,7 +397,7 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
                                                     </IconButton>
                                                 )}
                                             </Stack>
-                                            {profile.experiences.map(el => (
+                                            {profile.experiences.length > 0 ? profile.experiences.map(el => (
                                                 <div key={el.id}>
                                                     <p className='p-4 text-xl'>
                                                         Worked as <span
@@ -415,23 +421,30 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
                                                     <Divider className='!m-3 !bg-white'/>
 
                                                 </div>
-                                            ))}
+                                            )) : <p className='p-4  text-sm text-center '>No experiences details
+                                                provided yet.</p>
+
+                                            }
                                         </Box>
                                     </Slider>
                                 </div>
 
-                                <div className='max-w-screen-md mx-2'>
+                                <div
+                                    className='flex-1 max-w-screen-md mx-2 bg-black/30 rounded-xl p-3 shadow-xl shadow-black'>
                                     <h1 className='text-xl p-4 font-bold text-white'>Posts</h1>
                                     <Divider className='!mb-2 !bg-white'/>
                                     {
-                                        posts.length > 0 ?
-                                            <Slider {...postSettings}>
-                                                {posts.map((post: Post) => (
-                                                    <div className='mb-4' key={post.id}>
-                                                        <PostCard post={post} auth={auth}/>
-                                                    </div>
-                                                ))}
-                                            </Slider>
+                                        posts.length > 0 ? posts.length == 1 ?
+                                                <PostCard post={posts[0]} auth={auth}/>
+                                                :
+                                                <Slider {...postSettings}>
+                                                    {
+                                                        posts.map((post: Post) => (
+                                                            <div className='mb-4' key={post.id}>
+                                                                <PostCard post={post} auth={auth}/>
+                                                            </div>
+                                                        ))}
+                                                </Slider>
                                             :
                                             <div
                                                 className="bg-black/30  shadow-lg rounded-xl px-8 pt-6 pb-8 my-4 min-w-[600px]">
@@ -444,7 +457,8 @@ export default function Home({profile, auth, friends, posts, isFriend, isBlocked
                                     }
                                 </div>
                                 {
-                                    <List className='bg-black/30 rounded-xl text-white !h-fit !pb-5 flex-1'>
+                                    <List
+                                        className='bg-black/30 rounded-xl text-white !h-fit !pb-5 flex-1 shadow-xl shadow-black/30'>
                                         <h1 className='text-xl p-4 font-bold text-white'>Friends</h1>
 
                                         {friends.length > 0 ?
