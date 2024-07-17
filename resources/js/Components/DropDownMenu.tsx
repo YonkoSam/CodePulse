@@ -43,7 +43,8 @@ const DropDownMenu = ({user}: { user: User }) => {
                                     href={route('profile.edit')}>
                                     Settings
                                 </Dropdown.Link>
-                                <Dropdown.Link href={route('logout')} method="post" as="button">
+                                <Dropdown.Link href={route('logout')} method="post" as="button"
+                                               onClick={() => localStorage.removeItem('receiverIds')}>
                                     Log Out
                                 </Dropdown.Link>
 

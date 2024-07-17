@@ -20,8 +20,6 @@ return new class extends Migration
             $table->foreignId('blocked_initiator')->constrained('users')->onDelete('cascade');
             $table->timestamps();
             $table->unique(['user_id', 'friend_id']);
-            $table->unique(['friend_id', 'user_id']);
-
         });
     }
 

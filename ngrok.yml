@@ -1,0 +1,15 @@
+version: "2"
+authtoken: 2jKsdpg0jDPEznMnycyvb2qkemG_5vSHhrw6BmZ6XaZNkc5BS
+
+
+tunnels:
+  website:
+    addr: 8888
+    basic_auth:
+      - "bob:bobpassword"
+    schemes:
+      - https
+    host_header: "myapp.ngrok.dev"
+    inspect: false
+    proto: http
+    domain: myapp.ngrok.dev

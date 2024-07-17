@@ -4,6 +4,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageSeen;
 use App\Events\MessageSent;
 use App\Models\Message;
 use App\Models\User;
@@ -52,6 +53,15 @@ class ChatController extends Controller
                 $friend->online = $friend->isOnline();
             });
 
+        foreach ($messages as $message) {
+            if ($message->receiver_id == $user->id && ! $message->seen_at) {
+                $message->seen_at = now();
+                $message->save();
+                event(new MessageSeen($message->sender_id));
+            }
+
+        }
+
         return Inertia::render('Friends/Messages', [
             'messages' => $messages,
             'friends' => array_merge($friendOf->toArray(), $friends->toArray()),
@@ -80,10 +90,19 @@ class ChatController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
+
         if ($messages->count() <= 0) {
             return response()->json([
                 'receiver' => User::findOrFail($receiverId),
             ]);
+        }
+
+        foreach ($messages as $message) {
+            if ($message->receiver_id == $user_id && ! $message->seen_at) {
+                $message->seen_at = now();
+                $message->save();
+                event(new MessageSeen($message->sender_id));
+            }
         }
 
         return response()->json($messages->reverse()->values());

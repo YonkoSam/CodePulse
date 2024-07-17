@@ -7,6 +7,7 @@ use App\Models\Profile;
 use App\Models\Social;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ProfilesController extends Controller
@@ -94,19 +95,22 @@ class ProfilesController extends Controller
         Social::updateOrCreate(
             ['profile_id' => $profile->id],
             $social);
+
         if (request()->hasFile('profile_image')) {
             request()->validate([
                 'profile_image' => 'image',
             ]);
-            $file = request()->file('profile_image');
-            $fileName = $user->id.'.'.$file->getClientOriginalExtension();
-            $filePath = $file->storeAs('profile_images', $fileName, 'public');
 
+            $filePath = request()->profile_image->store('profile_images');
+            $oldAvatar = auth()->user()->profile_image;
             $user->update(
                 [
                     'profile_image' => $filePath ?? '',
                 ]
             );
+            if ($oldAvatar) {
+                Storage::delete($oldAvatar);
+            }
 
         }
 

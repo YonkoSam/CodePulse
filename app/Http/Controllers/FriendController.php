@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Friendship;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class FriendController extends Controller
@@ -13,24 +12,27 @@ class FriendController extends Controller
     public function index()
     {
         $user = Auth::user();
-
         $friends = $user->friends()->with(['profile' => function ($query) {
             $query->select('user_id', 'status', 'profiles.id');
         }])->get();
         $friendOf = $user->friendOf()->with(['profile' => function ($query) {
             $query->select('user_id', 'status', 'profiles.id');
         }])->get();
-        $blockedFriends = DB::table('friendships')
-            ->join('users', 'friendships.friend_id', '=', 'users.id')
-            ->join('profiles', 'users.id', '=', 'profiles.user_id')
-            ->select('users.*', 'profiles.status')
-            ->where('friendships.blocked', true)
-            ->where('friendships.blocked_initiator', $user->id)
-            ->get();
+        $blockedFriendShip = Friendship::where(['blocked_initiator' => $user->id, 'blocked' => '1'])->get();
+
+        $blockedFriends = [];
+        foreach ($blockedFriendShip as $friendShip) {
+            if ($friendShip->user_id == $user->id) {
+                $blockedFriends[] = User::find($friendShip->friend_id);
+            }
+            if ($friendShip->friend_id == $user->id) {
+                $blockedFriends[] = User::find($friendShip->user_id);
+            }
+        }
 
         return Inertia::render('Friends/index', [
             'friends' => array_merge($friends->toArray(), $friendOf->toArray()),
-            'blockedFriends' => $blockedFriends->toArray(),
+            'blockedFriends' => $blockedFriends,
         ]);
     }
 
@@ -55,7 +57,6 @@ class FriendController extends Controller
     public function block(User $friend)
     {
         $user = Auth::user();
-
         $friendship = Friendship::where(function ($query) use ($user, $friend) {
             $query->where('user_id', $user->id)
                 ->where('friend_id', $friend->id);
@@ -76,7 +77,6 @@ class FriendController extends Controller
         } else {
             return back()->withErrors(['message' => 'Friendship was not found!']);
         }
-
     }
 
     public function unblock(User $friend)

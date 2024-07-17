@@ -13,6 +13,9 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import InputError from "@/Components/InputError";
 import {Errors} from "@inertiajs/inertia";
 import FriendStatus from "@/Components/FriendStatus";
+import AudioRecorderComp from "@/Components/AudioRecorderComp";
+import DoneIcon from '@mui/icons-material/Done';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 
 const Messages = ({messages, friends, receiver}) => {
     const {auth} = usePage<PageProps>().props;
@@ -49,6 +52,9 @@ const Messages = ({messages, friends, receiver}) => {
             })
             .listen('.is-typing', (e) => {
                 setIsTyping(e.isTyping);
+            })
+            .listen('.is-seen', (e) => {
+                fetchMessages();
             });
 
         return () => {
@@ -86,9 +92,12 @@ const Messages = ({messages, friends, receiver}) => {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, []);
 
+
     const renderMessages = () => {
         return messages.map((msg, index) => {
             const isSameSenderAsPrevious = index > 0 && messages[index - 1].sender_id === msg.sender_id;
+            const isSeen = msg.seen_at !== null;
+
             return (
                 <div key={msg.id}
                      className={`flex ${msg.sender_id === auth.user.id ? 'justify-end' : 'justify-start'} gap-2.5 mb-1`}>
@@ -104,15 +113,31 @@ const Messages = ({messages, friends, receiver}) => {
                         )}
                         <div className={`w-max grid ${msg.sender_id === auth.user.id ? 'ml-auto' : ''}`}>
                             <Box
-                                className={`px-3.5 py-2 ${msg.sender_id === auth.user.id ? 'bg-indigo-600' : 'bg-gray-100'} rounded-3xl`}>
+                                className={`px-3.5 py-2 ${msg.sender_id === auth.user.id ? 'bg-indigo-600' : 'bg-gray-300'} rounded-3xl`}>
                                 <Typography variant="body2"
                                             className={`${msg.sender_id === auth.user.id ? 'text-white' : 'text-gray-900'}`}>
                                     {msg.message}
                                 </Typography>
                             </Box>
-                            <Typography variant="caption" className="text-gray-500 py-1">
-                                {format(new Date(msg.created_at), 'Ppp')}
-                            </Typography>
+                            <div className="flex items-center">
+                                <Typography variant="caption" className="text-gray-500 py-1 text-right">
+                                    {format(new Date(msg.created_at), 'Ppp')}
+
+                                    {msg.sender_id === auth.user.id && isSeen ?
+                                        <span className='block text-xs text-blue-500 font-light'>
+                                            <span
+                                                className='font-medium'>seen at</span> {format(new Date(msg.seen_at), 'Ppp')}
+                                                </span>
+                                        : <></>}
+
+                                </Typography>
+                                {msg.sender_id === auth.user.id && (
+                                    <span className="ml-2 flex items-center">
+                                    {isSeen ? <DoneAllIcon fontSize="small" color="primary"/> :
+                                        <DoneIcon fontSize="small" color="disabled"/>}
+                                </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                     {msg.sender_id === auth.user.id && !isSameSenderAsPrevious && (
@@ -122,6 +147,7 @@ const Messages = ({messages, friends, receiver}) => {
             );
         });
     };
+
 
     const renderFriends = () => {
         return friends.map(friend => (
@@ -144,7 +170,7 @@ const Messages = ({messages, friends, receiver}) => {
                                 {renderMessages()}
                                 {isTyping && (
                                     <div className="flex items-center px-3.5 py-2 space-x-1">
-                                        <p className="text-xs text-gray-400">{receiver.name} is typing</p>
+                                        <p className="text-xs text-gray-400">{receiver?.name} is typing</p>
                                         <div
                                             className="h-2.5 w-2.5 bg-gray-400 rounded-full animate-bounce delay-100"></div>
                                         <div
@@ -167,6 +193,7 @@ const Messages = ({messages, friends, receiver}) => {
                                         onBlur={handleBlur}
                                         onChange={e => setMessage(e.target.value)}
                                     />
+                                    <AudioRecorderComp/>
                                     <Button variant="contained" color="primary" type="submit"
                                             disabled={message.length <= 0 || (friends.length <= 0 && messages.length <= 0) || isLoading}
                                             endIcon={isLoading ? <CircularProgress size={20}/> : <SendIcon/>}>

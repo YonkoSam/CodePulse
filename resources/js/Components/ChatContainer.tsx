@@ -14,6 +14,7 @@ const ChatContainer = ({id}) => {
 
     useEffect(() => {
         const storedReceiverIds = localStorage.getItem('receiverIds');
+
         if (storedReceiverIds) {
             setReceiverIds(new Set(JSON.parse(storedReceiverIds)));
         }
@@ -27,7 +28,11 @@ const ChatContainer = ({id}) => {
         }
     }, [id]);
 
+
+    console.log(chatBoxRef.current);
     useEffect(() => {
+
+
         const fetchMessagesAndUpdateState = async (id: number) => {
             try {
                 const response = await fetch(`/my-chat/${id}`);
