@@ -16,6 +16,6 @@ class isTypingController extends Controller
 
         $receiver = $request->receiver;
         $isTyping = $request->isTyping;
-        event(new isTypingEvent($receiver, $isTyping));
+        event(new isTypingEvent($receiver, auth()->id(), $isTyping));
     }
 }

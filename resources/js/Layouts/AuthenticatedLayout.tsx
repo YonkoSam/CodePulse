@@ -2,7 +2,7 @@ import React, {PropsWithChildren, ReactNode} from 'react';
 import {User} from '@/types';
 import Sidebar from "@/Components/Sidebar";
 import {Box, Stack} from "@mui/material";
-import ChatContainer from "@/Components/ChatContainer";
+import ChatContainer from "@/Components/chat/ChatContainer";
 import Notifications from "@/Components/notifications/Notifications";
 import DropDownMenu from "@/Components/DropDownMenu";
 import {Head, usePage} from "@inertiajs/react";

@@ -43,6 +43,14 @@ class ChatController extends Controller
             ->get()
             ->each(function ($friend) {
                 $friend->online = $friend->isOnline();
+                $unreadMessagesCount = Message::where('seen_at', null)
+                    ->where('receiver_id', auth()->id())
+                    ->where('sender_id', $friend->id)
+                    ->limit(100)->count();
+                if ($unreadMessagesCount > 99) {
+                    $unreadMessagesCount = '+99';
+                }
+                $friend->unreadMessagesCount = $unreadMessagesCount;
             });
 
         $friendOf = $user->friendOf()->with(['profile' => function ($query) {
@@ -51,6 +59,14 @@ class ChatController extends Controller
             ->get()
             ->each(function ($friend) {
                 $friend->online = $friend->isOnline();
+                $unreadMessagesCount = Message::where('seen_at', null)
+                    ->where('receiver_id', auth()->id())
+                    ->where('sender_id', $friend->id)
+                    ->limit(100)->count();
+                if ($unreadMessagesCount > 99) {
+                    $unreadMessagesCount = '+99';
+                }
+                $friend->unreadMessagesCount = $unreadMessagesCount;
             });
 
         foreach ($messages as $message) {
@@ -59,6 +75,11 @@ class ChatController extends Controller
                 $message->save();
                 event(new MessageSeen($message->sender_id));
             }
+
+        }
+
+        function unreadMessagesCount()
+        {
 
         }
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Avatar, Box, Button, CircularProgress, Container, Divider, Grid, Paper, Typography} from "@mui/material";
+import {Avatar, Badge, Box, Button, CircularProgress, Container, Divider, Grid, Paper, Typography} from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {Link, router, usePage} from "@inertiajs/react";
@@ -12,15 +12,14 @@ import {audio, echoConfig, useScrollToBottom} from "@/utils";
 import PrimaryButton from "@/Components/PrimaryButton";
 import InputError from "@/Components/InputError";
 import {Errors} from "@inertiajs/inertia";
-import FriendStatus from "@/Components/FriendStatus";
-import AudioRecorderComp from "@/Components/AudioRecorderComp";
 import DoneIcon from '@mui/icons-material/Done';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import FriendStatus from "@/Components/FriendStatus";
+import {isTypingNotification, sendIsTyping, sendStoppedTyping} from "@/Components/chat/isTypingNotification";
 
 const Messages = ({messages, friends, receiver}) => {
     const {auth} = usePage<PageProps>().props;
     const [message, setMessage] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const MessageBoxRef = useScrollToBottom(messages);
     const [errors, setErrors] = useState<Errors>({message: ""});
@@ -39,7 +38,7 @@ const Messages = ({messages, friends, receiver}) => {
     };
 
     const fetchMessages = () => {
-        router.reload({only: ['messages']});
+        router.reload();
     };
 
     useEffect(() => {
@@ -50,9 +49,6 @@ const Messages = ({messages, friends, receiver}) => {
                 fetchMessages();
                 audio.play();
             })
-            .listen('.is-typing', (e) => {
-                setIsTyping(e.isTyping);
-            })
             .listen('.is-seen', (e) => {
                 fetchMessages();
             });
@@ -62,36 +58,9 @@ const Messages = ({messages, friends, receiver}) => {
         };
     }, [auth.user.id]);
 
-    const sendIsTyping = () => {
 
-        if (receiver) {
-            router.post(route('is-typing', {receiver: receiver.id, isTyping: true}), {}, {
-                preserveScroll: true,
-                preserveState: true
-            });
-        }
-
-    };
-
-    const sendStoppedTyping = () => {
-        if (receiver) {
-            router.post(route('is-typing', {receiver: receiver.id, isTyping: false}), {}, {
-                preserveScroll: true,
-                preserveState: true
-            });
-        }
-    };
-
-    const handleFocus = () => sendIsTyping();
-    const handleBlur = () => sendStoppedTyping();
-
-    useEffect(() => {
-        const handleBeforeUnload = () => sendStoppedTyping();
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, []);
-
+    const handleFocus = () => sendIsTyping(receiver.id);
+    const handleBlur = () => sendStoppedTyping(receiver.id);
 
     const renderMessages = () => {
         return messages.map((msg, index) => {
@@ -151,8 +120,13 @@ const Messages = ({messages, friends, receiver}) => {
 
     const renderFriends = () => {
         return friends.map(friend => (
-            <Link href={route('chatWithId.index', friend.id)} className="cursor-pointer" key={friend.id}>
+            <Link href={route('chatWithId.index', friend.id)} className="cursor-pointer flex gap-x-3 " key={friend.id}>
                 <FriendStatus friend={friend}/>
+                <Badge
+                    color="error"
+                    badgeContent={friend.unreadMessagesCount}
+                    overlap="circular">
+                </Badge>
             </Link>
         ));
     };
@@ -168,21 +142,11 @@ const Messages = ({messages, friends, receiver}) => {
                         <Paper elevation={3} className="p-4">
                             <div className="grid pb-11">
                                 {renderMessages()}
-                                {isTyping && (
-                                    <div className="flex items-center px-3.5 py-2 space-x-1">
-                                        <p className="text-xs text-gray-400">{receiver?.name} is typing</p>
-                                        <div
-                                            className="h-2.5 w-2.5 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-                                        <div
-                                            className="h-2.5 w-2.5 bg-gray-400 rounded-full animate-bounce delay-200"></div>
-                                        <div
-                                            className="h-2.5 w-2.5 bg-gray-400 rounded-full animate-bounce delay-300"></div>
-                                    </div>
-                                )}
+                                {isTypingNotification(receiver)}
                             </div>
                             <Divider/>
                             <div className="w-full pl-3 pr-1 py-1 flex items-center justify-between flex-col">
-                                <form onSubmit={handleSubmit} className="flex w-full">
+                                <form onSubmit={handleSubmit} className="flex w-full space-x-3">
                                     <TextInput
                                         size="small"
                                         name="message"
@@ -193,7 +157,6 @@ const Messages = ({messages, friends, receiver}) => {
                                         onBlur={handleBlur}
                                         onChange={e => setMessage(e.target.value)}
                                     />
-                                    <AudioRecorderComp/>
                                     <Button variant="contained" color="primary" type="submit"
                                             disabled={message.length <= 0 || (friends.length <= 0 && messages.length <= 0) || isLoading}
                                             endIcon={isLoading ? <CircularProgress size={20}/> : <SendIcon/>}>

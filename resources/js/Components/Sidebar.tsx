@@ -1,6 +1,13 @@
-import {Link} from "@inertiajs/react";
+import {Link, usePage} from "@inertiajs/react";
+import {PageProps} from "@/types";
+import {Badge} from "@mui/material";
+import React from "react";
+import {MessageSharp} from "@mui/icons-material";
 
 const Sidebar = () => {
+
+    const {unreadMessagesCount} = usePage<PageProps>().props;
+
     return (
         <div>
             <div className="flex min-h-full">
@@ -43,19 +50,17 @@ const Sidebar = () => {
                                     My Friends
                                 </Link>
                                 <Link href={route('chat.index')}
-                                      className="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-400 hover:bg-opacity-25 rounded-2xl">
-                                    <svg width="32" height="32" viewBox="0 0 32 32"
-                                         className=" text-white  ">
-                                        <path fill="currentColor"
-                                              d="M4 3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h1v2a1 1 0 0 0 1.707.707L9.414 13H15a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4Z"
-                                              clipRule="currentColor"/>
-                                        <path fill="currentColor"
-                                              d="M8.023 17.215c.033-.03.066-.062.098-.094L10.243 15H15a3 3 0 0 0 3-3V8h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1v2a1 1 0 0 1-1.707.707L14.586 18H9a1 1 0 0 1-.977-.785Z"
-                                              clipRule="currentColor"/>
-                                    </svg>
-
-                                    My Messages
+                                      className='text-gray-100  hover:bg-gray-400 hover:bg-opacity-25 rounded-2xl'>
+                                    <Badge
+                                        className='items-center px-4 gap-2 py-2 text-gray-100  '
+                                        color="error"
+                                        badgeContent={unreadMessagesCount}
+                                        overlap="circular">
+                                        <MessageSharp/>
+                                    </Badge>
+                                    Messages
                                 </Link>
+
 
                             </div>
                         </nav>

@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import Pusher from "pusher-js";
 import Echo from "laravel-echo";
 import {usePage} from "@inertiajs/react";
-import Chat from "@/Components/Chat";
+import Chat from "@/Components/chat/Chat";
 import {PageProps} from "@/types";
 import {audio, echoConfig} from "@/utils";
 
@@ -13,7 +13,7 @@ const ChatContainer = ({id}) => {
     const {auth} = usePage<PageProps>().props;
 
     useEffect(() => {
-        const storedReceiverIds = localStorage.getItem('receiverIds');
+        const storedReceiverIds = sessionStorage.getItem('receiverIds');
 
         if (storedReceiverIds) {
             setReceiverIds(new Set(JSON.parse(storedReceiverIds)));
@@ -29,7 +29,6 @@ const ChatContainer = ({id}) => {
     }, [id]);
 
 
-    console.log(chatBoxRef.current);
     useEffect(() => {
 
 
@@ -85,12 +84,13 @@ const ChatContainer = ({id}) => {
     }, [auth.user.id]);
 
     useEffect(() => {
-        localStorage.setItem('receiverIds', JSON.stringify(Array.from(receiverIds)));
+        sessionStorage.setItem('receiverIds', JSON.stringify(Array.from(receiverIds)));
     }, [receiverIds]);
 
     const messageSent = async (receiverId: number) => {
         setReceiverIds(prevIds => new Set([...prevIds, receiverId]));
     };
+
 
     const close = (id) => {
         setFriendsChat(prevState => {

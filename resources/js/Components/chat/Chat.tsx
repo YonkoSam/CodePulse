@@ -5,6 +5,9 @@ import {Avatar, IconButton, Slide, Stack, TextField} from "@mui/material";
 import {SendIcon} from "lucide-react";
 import {CloseRounded} from "@mui/icons-material";
 import {useScrollToBottom} from "@/utils";
+import {isTypingNotification, sendIsTyping, sendStoppedTyping} from "@/Components/chat/isTypingNotification";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
+import DoneIcon from "@mui/icons-material/Done";
 
 const Chat = forwardRef(({open, messages, receiverId, messageSent, close}: any, ref) => {
 
@@ -18,12 +21,20 @@ const Chat = forwardRef(({open, messages, receiverId, messageSent, close}: any, 
         e.preventDefault();
         router.post(route('chat.store'), {message, 'receiver_id': receiverId}, {
             onSuccess: () => {
-                setMessage('');
-                messageSent(receiverId);
+                MessagesRefresh();
 
             }
         });
     };
+
+
+    const MessagesRefresh = () => {
+        setMessage('');
+        messageSent(receiverId);
+    }
+
+    const handleFocus = () => sendIsTyping(receiverId ?? messages.receiver.id);
+    const handleBlur = () => sendStoppedTyping(receiverId ?? messages.receiver.id);
 
     const handleToggleMinimize = () => {
         setMinimized(!minimized);
@@ -87,17 +98,30 @@ const Chat = forwardRef(({open, messages, receiverId, messageSent, close}: any, 
                                             </Stack>
 
                                         )}
-                                        <p className={msg.sender_id === auth.user.id ? 'px-3.5 text-blue-500 py-2 bg-gray-100 rounded-3xl rounded-br-none my-2 max-w-52  break-words'
-                                            : 'px-3.5 py-2 bg-gray-100 rounded-3xl rounded-tl-none my-2 max-w-52  break-words'}>
-                                            {msg.message}
-                                        </p>
+                                        <div className='flex'>
+                                            <p className={msg.sender_id === auth.user.id ? 'px-3.5 text-blue-500 py-2 bg-gray-100 rounded-3xl rounded-br-none my-2 max-w-52  break-words'
+                                                : 'px-3.5 py-2 bg-gray-100 rounded-3xl rounded-tl-none my-2 max-w-52  break-words'}>
+                                                {msg.message}
+
+                                            </p>
+                                            {msg.sender_id === auth.user.id && (
+                                                <span className="ml-2 flex items-center">
+                                    {msg.seen_at ? <DoneAllIcon fontSize="small" color="primary"/> :
+                                        <DoneIcon fontSize="small" color="disabled"/>}
+                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             }) : null}
+
+                            {isTypingNotification(messages.receiver ?? (messages[0].receiver_id === auth.user.id ? messages[0].sender : messages[0].receiver), MessagesRefresh)}
                         </div>
                         <form onSubmit={handleSubmit} className='flex gap-2'>
                             <TextField
                                 variant="outlined"
+                                onFocus={handleFocus}
+                                onBlur={handleBlur}
                                 fullWidth
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}

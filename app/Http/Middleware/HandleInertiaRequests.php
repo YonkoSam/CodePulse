@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,13 +30,22 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $unreadMessagesCount = Message::where('seen_at', null)
+            ->where('receiver_id', auth()->id())
+            ->limit(100)->count();
+        if ($unreadMessagesCount > 99) {
+            $unreadMessagesCount = '+99';
+        }
 
         return [
             ...parent::share($request),
+
             'auth' => [
                 'user' => $request->user(),
                 'hasProfile' => $request->user()?->profile()->exists(),
             ],
+
+            'unreadMessagesCount' => $unreadMessagesCount,
             'notifications' => $request->user()?->notifications()->limit(10)->get(),
         ];
     }

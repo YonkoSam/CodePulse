@@ -25,7 +25,7 @@ const Navbar = () => {
                         </>
                     ) : (
                         <Link method="post" href={route('logout')} as="button" className={liStyle}
-                              onClick={() => localStorage.removeItem('receiverIds')}>Logout </Link>
+                              onClick={() => sessionStorage.removeItem('receiverIds')}>Logout </Link>
                     )}
                 </ul>
 

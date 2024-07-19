@@ -15,13 +15,17 @@ class isTypingEvent implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public int $id;
+    public int $receiver;
+
+    public int $sender;
 
     public bool $isTyping;
 
-    public function __construct($id, $isTyping)
+    public function __construct($receiver, $sender, $isTyping)
     {
-        $this->id = $id;
+        $this->sender = $sender;
+        $this->receiver = $receiver;
+
         $this->isTyping = $isTyping;
     }
 
@@ -30,7 +34,7 @@ class isTypingEvent implements ShouldBroadcast
      */
     public function broadcastOn(): string
     {
-        return new Channel('my-messages-'.$this->id);
+        return new Channel('my-messages-'.$this->receiver.'-'.$this->sender);
 
     }
 
