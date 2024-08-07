@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {List, ListItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
+import {List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
 import MarkChatReadIcon from "@mui/icons-material/MarkChatRead";
 import MarkChatUnreadIcon from "@mui/icons-material/MarkChatUnread";
 import {
@@ -9,14 +9,16 @@ import {
     StopListening
 } from "@/Components/notifications/renderNotificationActions";
 import {Clear} from "@mui/icons-material";
-import Pagination from "@/Components/Pagination";
-import {usePage} from "@inertiajs/react";
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Pagination from "@/Components/genralComp/Pagination";
 import {PageProps} from "@/types";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import {usePage} from "@inertiajs/react";
 
 export default function NotificationsPage({notifications}) {
 
     const {auth} = usePage<PageProps>().props;
+
+
     useEffect(() => {
         listenForEvent(auth.user);
         return () => {
@@ -26,10 +28,9 @@ export default function NotificationsPage({notifications}) {
 
 
     return (
-        <AuthenticatedLayout user={auth.user} renderNotifications={false} title='Notifications'
+        <AuthenticatedLayout user={auth.user} renderNotifications={false} title="Notification"
                              header={<h2 className="font-semibold text-xl text-white leading-tight">Notifications</h2>}>
-            <div style={{padding: '20px'}}>
-                <Typography variant="h3" gutterBottom>Old Notifications</Typography>
+            <div className='container'>
                 <List>
                     {notifications.data.map((notification: any) => (
                         <ListItem
@@ -44,7 +45,7 @@ export default function NotificationsPage({notifications}) {
                             <ListItemText primary={notification.data.message}/>
                             {!notification.read_at && renderNotificationActions(notification)}
                             <ListItemIcon className='pl-2'>
-                                <Clear onClick={() => handleDelete(notification.id, notification.data.request_id)}/>
+                                <Clear onClick={() => handleDelete(notification.id)}/>
                             </ListItemIcon>
                         </ListItem>
                     ))}

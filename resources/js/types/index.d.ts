@@ -4,6 +4,9 @@ export interface User {
     email: string;
     email_verified_at: string;
     profile_image: string;
+    unreadMessagesCount?: number;
+    last_time_online: string | null;
+
     // relations
     profile: Profile
 
@@ -43,30 +46,53 @@ export interface Experience {
     profile: Profile
 }
 
-export interface Post {
+interface LiveAudioVisualizer {
+    mediaRecorder: MediaRecorder;
+    barWidth: number;
+    gap: number;
+    width: number;
+    height: number;
+    fftSize: number;
+    maxDecibels: number;
+    minDecibels: number;
+    smoothingTimeConstant: number;
+}
+
+export interface Pulse {
     // columns
     id: number
     title: string
     text: string
     user_id: number
-    created_at: Date | string
+    created_at: string
     updated_at: Date | null
+    code:
+        {
+            language: string
+            sourceCode: string
+        }
+        | null
+
+    language?: string;
+    comments_count: number | null;
+    team_id: number | null
     // relations
     user: User
     likes: Like[]
     comments: Comment[]
+    team: Team
 }
 
 export interface Like {
     // columns
     id: number
     user_id: number
-    poster_id: number
+    pulse_id: number
     created_at: string | null
     updated_at: string | null
     // relations
     user: User
-    post: Post
+    Pulse: Pulse
 }
 
 export interface Comment {
@@ -75,14 +101,21 @@ export interface Comment {
     id: number
     text: string
     user_id: number
-    post_id: number
-    replies: []
+    pulse_id: number
     created_at: string | null
     updated_at: string | null
+    code:
+        {
+            language: string
+            sourceCode: string
+        }
+        | null
+
     // relations
     user: User
-    post: Post
+    Pulse: Pulse
     comment: Comment
+    replies: Comment[]
 }
 
 export interface Profile {
@@ -121,11 +154,23 @@ export interface Social {
 }
 
 
+export interface Team {
+    id: number
+    owner_id: number | null
+    name: string
+    created_at: string | null
+    updated_at: string | null
+    unreadMessagesCount?: number;
+
+    users: User[]
+}
+
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     auth: {
         user: User;
-        hasProfile: boolean
+        currentTeam: Team;
     };
+    unreadMessagesCount: number | null
 };
 
 

@@ -8,9 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Comment extends Model
 {
-    protected $fillable = ['user_id', 'post_id', 'text', 'comment_id'];
+    protected $fillable = ['user_id', 'pulse_id', 'text', 'comment_id', 'code'];
 
-    public function scopeVisibleToUser($query, $userId)
+    protected $casts = [
+        'code' => 'array',
+    ];
+
+    public function scopeVisibleToUser($query, int $userId)
     {
         return $query->whereNotIn('user_id', function ($query) use ($userId) {
             $query->select('friend_id')
@@ -31,13 +35,13 @@ class Comment extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function post(): BelongsTo
+    public function pulse(): BelongsTo
     {
-        return $this->belongsTo(Post::class);
+        return $this->belongsTo(Pulse::class);
     }
 
     public function replies(): hasMany
     {
-        return $this->hasMany(Comment::class, 'comment_id');
+        return $this->hasMany(Comment::class, 'comment_id')->with('replies','user');
     }
 }

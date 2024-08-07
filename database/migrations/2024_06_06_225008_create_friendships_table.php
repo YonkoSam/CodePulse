@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('friend_id')->constrained('users')->onDelete('cascade');
             $table->boolean('blocked')->default(false);
-            $table->foreignId('blocked_initiator')->constrained('users')->onDelete('cascade');
+            $table->foreignId('blocked_initiator')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
             $table->unique(['user_id', 'friend_id']);
         });

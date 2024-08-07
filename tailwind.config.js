@@ -2,7 +2,8 @@
 module.exports = {
     darkMode: ["class"],
     content: [
-        './resources/js/**/*.tsx'
+        './resources/js/**/*.tsx',
+        './resources/js/**/*.ts'
     ],
     prefix: "",
     theme: {
@@ -14,6 +15,9 @@ module.exports = {
             },
         },
         extend: {
+            fontFamily: {
+                hanken: ["Hanken Grotesk", "sans-serif"]
+            },
             colors: {
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
@@ -75,8 +79,8 @@ module.exports = {
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
-                fadeIn: 'fadeIn 2s ease-in-out',
-                fadeOut: 'fadeOut 2s ease-in-out',
+                fadeIn: 'fadeIn 4s ease-in-out',
+                fadeOut: 'fadeOut 4s ease-in-out',
             },
         },
     },

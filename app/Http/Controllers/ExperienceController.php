@@ -15,8 +15,8 @@ class ExperienceController extends Controller
             'job_title' => ['required', 'string', 'min:1', 'max:255'],
             'company' => ['required', 'string', 'min:1', 'max:255'],
             'location' => ['nullable', 'string', 'min:1', 'max:255'],
-            'from' => ['required', 'date', 'before:to'],
-            'to' => ['nullable', 'date'],
+            'from' => ['required', 'date'],
+            'to' => ['nullable', 'after:from'],
             'current' => ['required', 'boolean'],
             'description' => ['nullable', 'string', 'min:1'],
 

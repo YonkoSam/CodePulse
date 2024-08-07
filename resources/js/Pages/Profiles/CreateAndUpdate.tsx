@@ -1,63 +1,36 @@
 import React, {FormEventHandler, useEffect, useState} from 'react';
-import Avatar from "../../../assets/images/default-avatar.svg";
 import {Link, router, useForm, usePage} from "@inertiajs/react";
-import {buttonStyle, inputStyle} from "@/utils";
-import PrimaryButton from "@/Components/PrimaryButton";
+import {buttonStyle, inputStyle, spanStyle, usePreview} from "@/utils";
+import PrimaryButton from "@/Components/formComp/PrimaryButton";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {PageProps, Profile} from "@/types";
-import InputError from "@/Components/InputError";
-import TextInput from "@/Components/TextInput";
-import InputLabel from "@/Components/InputLabel";
-import Swal from 'sweetalert2';
-import {MenuItem, Select} from "@mui/material";
-import SkillInput from "@/Components/SkillInput";
+import InputError from "@/Components/formComp/InputError";
+import TextInput from "@/Components/formComp/TextInput";
+import InputLabel from "@/Components/formComp/InputLabel";
+import {Avatar, MenuItem, Select} from "@mui/material";
+import SkillInput from "@/Components/formComp/SkillInput";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import TwitterIcon from "@mui/icons-material/Twitter";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import {YouTube} from "@mui/icons-material";
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 
-export default function createAndUpdate({profile}: PageProps<{ profile: Profile }>) {
+export default function createAndUpdate({profile, hasProfile}: { profile: Profile, hasProfile: boolean }) {
+
 
     const {auth} = usePage<PageProps>().props;
-    const {url} = usePage();
     const [skill, setSkill] = useState(profile ? profile.skills.split(',') : []);
-
-    const [characterCount, setCharacterCount] = useState(0)
-    const [selectedFile, setSelectedFile] = useState<File>()
-    const [preview, setPreview] = useState<string>(auth.user.profile_image)
+    const {preview, selectedFile, onSelectFile} = usePreview();
+    const [characterCount, setCharacterCount] = useState(profile?.bio.length)
     const [displaySocialInputs, toggleSocialInputs] = useState(false)
 
-    if (auth.hasProfile && url === '/createAndUpdate-profile') {
+    const {url} = usePage();
+    if (hasProfile && url === '/create-profile') {
         router.visit(route('profiles.edit'));
     }
 
-    useEffect((): void => {
-        if (!selectedFile) {
-            setPreview('')
-            return
-        }
-        const objectUrl = URL.createObjectURL(selectedFile)
-        setPreview(objectUrl);
-    }, [selectedFile])
-
-
-    const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (files && files.length === 1) {
-            const fileType = files[0].type;
-            if (!fileType.startsWith('image/')) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Selected file was not an image!",
-                });
-                setSelectedFile(undefined)
-                return
-            } else {
-                setSelectedFile(files[0])
-                setData('profile_image', files[0]);
-            }
-
-        }
-
-    }
 
     const handleCharacterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCharacterCount(event.target.value.length);
@@ -68,6 +41,10 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
             }
         )
     };
+
+    useEffect(() => {
+        setData('profile_image', selectedFile)
+    }, [selectedFile]);
 
     interface InitialValues {
         company: string;
@@ -162,9 +139,9 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
 
 
     return (
-        <AuthenticatedLayout user={auth.user} title={!profile ? 'Create Your Profile' : 'Update Your Profile'}
+        <AuthenticatedLayout user={auth.user} title={profile ? 'Update Your Profile' : 'Create Your Profile'}
                              header={<h2
-                                 className="font-semibold text-xl text-white leading-tight">{!profile ? 'Create Your Profile' : 'Update Your Profile'}</h2>}>
+                                 className="font-semibold text-xl text-white leading-tight">{!profile ? 'Create  Profile' : 'Update  Profile'}</h2>}>
             <div>
             </div>
             <div
@@ -173,7 +150,7 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                     <div className="grid gap-8 grid-cols-1">
                         <div className="flex flex-col">
                             <div className="flex flex-col sm:flex-row items-center">
-                                <h2 className="font-semibold text-lg mr-auto">Profile Info</h2>
+                                <h2 className="font-semibold text-lg mr-auto text-white">Profile Info</h2>
                             </div>
                             <div className="mt-5">
                                 <form onSubmit={onSubmit}>
@@ -186,22 +163,24 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                                     {auth.user.profile_image && !selectedFile ? (
                                                             <img src={auth.user.profile_image}
                                                                  alt='preview'/>) :
-                                                        selectedFile ? (<img src={preview} alt='preview'/>) :
-                                                            <img src={Avatar} alt='Avatar'/>}
-
+                                                        <Avatar className='!w-32 !h-32' src={preview}/>}
                                                 </div>
                                                 <label className="cursor-pointer">
-                                            <span
-                                                className={buttonStyle}>Browse</span>
+                                                    <div className={buttonStyle}>
+                                                         <span className={spanStyle}
+                                                         >Browse</span>
+                                                    </div>
+
                                                     <input type="file"
                                                            onChange={onSelectFile}
                                                            accept='image/*'
                                                            className="hidden"/>
 
                                                 </label>
-                                                <InputError message={errors.profile_image} className="mt-2"/>
 
                                             </div>
+                                            <InputError message={errors.profile_image} className="mt-2"/>
+
                                         </div>
 
                                         <div className="w-full flex flex-col mb-3 ">
@@ -214,31 +193,34 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                             </div>
                                             <InputLabel>Status<abbr
                                                 title="required">*</abbr></InputLabel>
-                                            <Select
-                                                variant="standard"
-                                                className='!bg-white !p-2'
-                                                autoWidth
-                                                required
-                                                name="status"
-                                                value={status}
-                                                onChange={e => setData('status', e.target.value)}
-                                            >
-                                                <MenuItem disabled value=""><em>Selected Professional
-                                                    Status</em></MenuItem>
-                                                <MenuItem value="Developer">Developer</MenuItem>
-                                                <MenuItem value="Junior Developer">Junior Developer</MenuItem>
-                                                <MenuItem value="Senior Developer">Senior Developer</MenuItem>
-                                                <MenuItem value="Manager">Manager</MenuItem>
-                                                <MenuItem value="Senior Manager">Senior Manager</MenuItem>
-                                                <MenuItem value="Team Lead">Team Lead</MenuItem>
-                                                <MenuItem value="Intern">Intern</MenuItem>
-                                                <MenuItem value="Consultant">Consultant</MenuItem>
-                                                <MenuItem value="Student">Student</MenuItem>
-                                            </Select>
-                                        </div>
-                                        <InputError message={errors.status} className="mt-2"/>
+                                            <div>
+                                                <Select
+                                                    variant="standard"
+                                                    className='!text-white !p-2'
+                                                    autoWidth
+                                                    required
+                                                    name="status"
+                                                    value={status || "default"}
+                                                    onChange={e => setData('status', e.target.value)}
+                                                >
+                                                    <MenuItem disabled value="default"><em>Selected Professional
+                                                        Status</em></MenuItem>
+                                                    <MenuItem value="Developer">Developer</MenuItem>
+                                                    <MenuItem value="Junior Developer">Junior Developer</MenuItem>
+                                                    <MenuItem value="Senior Developer">Senior Developer</MenuItem>
+                                                    <MenuItem value="Manager">Manager</MenuItem>
+                                                    <MenuItem value="Senior Manager">Senior Manager</MenuItem>
+                                                    <MenuItem value="Team Lead">Team Lead</MenuItem>
+                                                    <MenuItem value="Intern">Intern</MenuItem>
+                                                    <MenuItem value="Consultant">Consultant</MenuItem>
+                                                    <MenuItem value="Student">Student</MenuItem>
+                                                </Select>
+                                                <InputError message={errors.status} className="mt-2"/>
 
+                                            </div>
+                                        </div>
                                     </div>
+
                                     <div className="md:flex flex-row md:space-x-4 w-full text-xs">
                                         <div className="mb-3 space-y-2 w-full text-xs">
                                             <InputLabel>Company Name</InputLabel>
@@ -293,30 +275,32 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                     <div className="flex-auto w-full mb-1 text-xs space-y-2">
                                         <InputLabel>Bio</InputLabel>
                                         <TextInput
-                                            multiline
-                                            rows={3}
                                             onChange={handleCharacterChange}
                                             name="bio"
                                             value={bio}
+                                            isTextArea={true}
                                             className={`w-full min-h-[100px] max-h-[300px] ${inputStyle}`}
                                             placeholder="a shorter bio of yourself "
                                         ></TextInput>
+
                                         <p className="text-xs text-gray-400 text-left my-3">You
                                             inserted {characterCount} characters</p>
+                                        <InputError message={errors.bio} className="mt-2"/>
+
                                     </div>
 
                                     <div>
-                                        <button type='button' className={buttonStyle}
-                                                onClick={() => toggleSocialInputs(!displaySocialInputs)}>Social Networks
-                                        </button>
+                                        <PrimaryButton type='button'
+                                                       onClick={() => toggleSocialInputs(prevState => !prevState)}>Social
+                                            Networks
+                                        </PrimaryButton>
                                         {displaySocialInputs &&
                                             (
                                                 <div className='grid grid-cols-2 gap-2 mt-4'>
                                                     <div className={`flex items-center gap-1 ${inputStyle}`}>
-                                                        <i className='fab fa-twitter fa-2x text-white'></i>
-                                                        <input
+                                                        <TwitterIcon className='!text-white'/>
+                                                        <TextInput
                                                             type="text"
-                                                            className={inputStyle}
                                                             placeholder="Twitter URL"
                                                             name="twitter"
                                                             value={twitter}
@@ -324,10 +308,9 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                                         />
                                                     </div>
                                                     <div className={`flex items-center gap-1 ${inputStyle}`}>
-                                                        <i className='fab fa-facebook fa-2x text-white'></i>
-                                                        <input
+                                                        <FacebookIcon className='!text-white'/>
+                                                        <TextInput
                                                             type="text"
-                                                            className={inputStyle}
                                                             placeholder="Facebook URL"
                                                             name="facebook"
                                                             value={facebook}
@@ -335,10 +318,9 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                                         />
                                                     </div>
                                                     <div className={`flex items-center gap-1 ${inputStyle}`}>
-                                                        <i className='fab fa-instagram fa-2x text-white'></i>
-                                                        <input
+                                                        <InstagramIcon className='!text-white'/>
+                                                        <TextInput
                                                             type="text"
-                                                            className={inputStyle}
                                                             placeholder="Instagram URL"
                                                             name="instagram"
                                                             value={instagram}
@@ -346,10 +328,9 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                                         />
                                                     </div>
                                                     <div className={`flex items-center gap-1 ${inputStyle}`}>
-                                                        <i className='fab fa-linkedin fa-2x text-white'></i>
-                                                        <input
+                                                        <LinkedInIcon className='!text-white'/>
+                                                        <TextInput
                                                             type="text"
-                                                            className={inputStyle}
                                                             placeholder="LinkedIn URL"
                                                             name="linkedin"
                                                             value={linkedin}
@@ -357,10 +338,9 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                                         />
                                                     </div>
                                                     <div className={`flex items-center gap-1 ${inputStyle}`}>
-                                                        <i className='fab fa-youtube fa-2x text-white'></i>
-                                                        <input
+                                                        <YouTube className='!text-white'/>
+                                                        <TextInput
                                                             type="text"
-                                                            className={inputStyle}
                                                             placeholder="YouTube URL"
                                                             name="youtube"
                                                             value={youtube}
@@ -368,10 +348,9 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
                                                         />
                                                     </div>
                                                     <div className={`flex items-center gap-1 ${inputStyle}`}>
-                                                        <i className='fab fa-github fa-2x text-white'></i>
-                                                        <input
+                                                        <GitHubIcon className='!text-white'/>
+                                                        <TextInput
                                                             type="text"
-                                                            className={inputStyle}
                                                             placeholder="GitHub URL"
                                                             name="github"
                                                             value={github}
@@ -385,7 +364,8 @@ export default function createAndUpdate({profile}: PageProps<{ profile: Profile 
 
 
                                     <div className="flex justify-end gap-4">
-                                        <PrimaryButton><Link href='/'> Cancel</Link></PrimaryButton>
+                                        <Link href={route('home')}><PrimaryButton>
+                                            Cancel</PrimaryButton></Link>
                                         <PrimaryButton type='submit'>Save</PrimaryButton>
                                     </div>
                                 </form>

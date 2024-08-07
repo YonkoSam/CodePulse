@@ -13,7 +13,7 @@ class NotificationSent implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * Create a new event instance.
+     * CreateAndUpdate a new event instance.
      */
     public $id;
 

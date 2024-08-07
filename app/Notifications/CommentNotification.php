@@ -14,7 +14,7 @@ class CommentNotification extends Notification
     protected $comment;
 
     /**
-     * Create a new notification instance.
+     * CreateAndUpdate a new notification instance.
      */
     public function __construct(Comment $comment)
     {
@@ -37,8 +37,8 @@ class CommentNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line($this->comment->user->name.' has comment on one of your posts.')
-            ->action('View Request', url('/pots/'.$this->comment->post_id))
+            ->line($this->comment->user->name.' has comment on one of your pulses.')
+            ->action('View Request', url('/pots/'.$this->comment->pulse_id))
             ->line('Thank you for using our application!');
     }
 
@@ -52,8 +52,8 @@ class CommentNotification extends Notification
 
         return [
             'comment_id' => $this->comment->id,
-            'message' => $this->comment->user->name.'has commented on one of your post "'.$this->comment->text.' "',
-            'url' => route('posts.show', ['post' => $this->comment->post_id]),
+            'message' => $this->comment->user->name.' has commented on one of your Pulse "'.$this->comment->text.' "',
+            'url' => route('pulses.show', ['pulse' => $this->comment->pulse_id]),
         ];
     }
 }

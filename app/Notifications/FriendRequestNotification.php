@@ -14,7 +14,7 @@ class FriendRequestNotification extends Notification
     protected $friendRequest;
 
     /**
-     * Create a new notification instance.
+     * CreateAndUpdate a new notification instance.
      */
     public function __construct(FriendRequest $friendRequest)
     {

@@ -16,7 +16,7 @@ class ReplyNotification extends Notification
     protected $message;
 
     /**
-     * Create a new notification instance.
+     * CreateAndUpdate a new notification instance.
      */
     public function __construct(Comment $reply, string $message = ' has replied on one of your comments.')
     {
@@ -41,7 +41,7 @@ class ReplyNotification extends Notification
     {
         return (new MailMessage)
             ->line($this->reply->user->name.$this->message)
-            ->action('View Request', url('/pots/'.$this->reply->post_id))
+            ->action('View Request', url('/pots/'.$this->reply->pulse_id))
             ->line('Thank you for using our application!');
     }
 
@@ -56,7 +56,7 @@ class ReplyNotification extends Notification
         return [
             'reply_id' => $this->reply->id,
             'message' => $this->reply->user->name.$this->message.'" '.$this->reply->text.' "',
-            'url' => route('posts.show', ['post' => $this->reply->post_id]),
+            'url' => route('pulses.show', ['pulse' => $this->reply->pulse_id]),
         ];
     }
 }

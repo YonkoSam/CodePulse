@@ -1,10 +1,10 @@
 import {FormEventHandler, useEffect} from 'react';
-import Checkbox from '@/Components/Checkbox';
+import Checkbox from '@/Components/formComp/Checkbox';
 import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import InputError from '@/Components/formComp/InputError';
+import InputLabel from '@/Components/formComp/InputLabel';
+import PrimaryButton from '@/Components/formComp/PrimaryButton';
+import TextInput from '@/Components/formComp/TextInput';
 import {Head, Link, useForm} from '@inertiajs/react';
 import {GitHub} from "@mui/icons-material";
 
@@ -32,10 +32,10 @@ export default function Login({status, canResetPassword}: { status?: string, can
             <Head title="Log in"/>
 
             {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
-            <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl dark:text-white">
+            <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl ">
                 Sign in to your account
             </h1>
-            <form className="space-y-4 md:space-y-6" onSubmit={submit}>
+            <form className="space-y-4 md:space-y-6  " onSubmit={submit}>
                 <div>
 
                     <InputLabel htmlFor="email" value="Email"/>

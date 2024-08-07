@@ -7,7 +7,53 @@ body {
     background-image: url("../assets/images/header.png");
     line-height: 1.5;
     letter-spacing: 0em;
-    --tw-text-opacity: 1;     color: rgb(129 140 248 / var(--tw-text-opacity)) ;
+    --tw-text-opacity: 1;
+    color: rgb(129 140 248 / var(--tw-text-opacity));
     background-size: cover;
     background-attachment: fixed;
+
+    @apply font-hanken
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-black/30
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-purple-700 to-blue-500;
+    border-radius: 10px;
+}
+
+.slick-dots button:before {
+    color: White !important;
+}
+
+
+.swal2-modal {
+    @apply bg-gradient-to-br from-violet-600 to-indigo-600 text-white rounded-2xl;
+}
+
+.swal2-icon {
+    @apply !text-white !border-white
+}
+
+.swal2-styled {
+    @apply !rounded-2xl
+}
+
+.swal2-success-fix {
+    @apply hidden
+
+}
+
+.swal2-success-circular-line-left {
+    @apply hidden
+}
+
+.swal2-success-circular-line-right {
+    @apply hidden
 }

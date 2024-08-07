@@ -15,6 +15,7 @@ class UpdateUserActivity
         if (Auth::check()) {
             $userId = Auth::id();
             Redis::setex('user-online-'.$userId, 30, true);
+            Redis::setex('user-last-time-online-'.$userId, 24 * 120 * 60, now()->toDateTimeString());
         }
 
         return $response;

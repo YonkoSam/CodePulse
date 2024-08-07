@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Teamwork;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -30,6 +31,18 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
+
+        if ($token = session('invite_token')) {
+            $invite = Teamwork::getInviteFromAcceptToken($token);
+
+            if ($invite) {
+                Teamwork::acceptInvite($invite);
+                session()->forget('invite_token');
+
+                return redirect()->route('teams.index');
+
+            }
+        }
 
         $request->session()->regenerate();
 

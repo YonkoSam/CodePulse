@@ -1,11 +1,13 @@
-import React, {PropsWithChildren, ReactNode} from 'react';
+import React, {PropsWithChildren, ReactNode, useEffect} from 'react';
 import {User} from '@/types';
-import Sidebar from "@/Components/Sidebar";
+import Sidebar from "@/Components/genralComp/Sidebar";
 import {Box, Stack} from "@mui/material";
 import ChatContainer from "@/Components/chat/ChatContainer";
 import Notifications from "@/Components/notifications/Notifications";
-import DropDownMenu from "@/Components/DropDownMenu";
-import {Head, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
+import Footer from "@/Components/ui/Footer";
+import {audio} from "@/utils";
+import StaggeredDropDown from "@/Components/ui/DropDownMenu";
 
 export default function Authenticated({
                                           user,
@@ -24,28 +26,47 @@ export default function Authenticated({
     renderNotifications?: boolean
 }>) {
 
-    const {notifications}: any = usePage().props;
-    const notificationsCount = notifications.filter((e: any) => !e.read_at).length;
-    return (
-        <>
 
-            <div className="flex bg-opacity-45 bg-black min-w-full min-h-screen overflow-hidden">
+    const {notifications, unreadNotificationsCount}: any = usePage().props;
+    useEffect(() => {
+        window.Echo.channel(`my-messages-${user.id}`)
+            .listen('.message-sent', () => {
+                router.reload({only: ['messages', 'friends', 'teams']});
+                audio.play().catch();
+            })
+
+        return () => {
+            window.Echo.leaveChannel(`public:my-messages-${user.id}`);
+        };
+    }, [user.id]);
+
+
+    return (
+        <div className="grid  grid-rows-[auto,1fr] bg-opacity-45 bg-black ">
+            <div className='flex min-h-[calc(100dvh_-_52px)]'>
                 <Sidebar/>
-                <div className="flex-col w-full">
+                <div className="flex-col flex-1">
                     <Stack direction='row' justifyContent='space-between' alignItems='center'>
                         {header && (
-                            <header className=" ">
+                            <header>
                                 <div
-                                    className="max-w-7xl  mx-auto py-6 px-4 sm:px-6 lg:px-8 min-w-full">{header}</div>
+                                    className="max-w-7xl ml-10 lg:mx-auto py-6 px-4 sm:px-6 lg:px-8 min-w-full">{header}</div>
                             </header>
                         )}
 
-                        {renderNotifications ? <Box className='!ml-auto'>
-                            <Notifications notifications={notifications} count={notificationsCount}/>
-                        </Box> : <></>}
-                        <DropDownMenu user={user}/>
+                        {renderNotifications ? <>
+                                <Head
+                                    title={` ${unreadNotificationsCount ? `(${unreadNotificationsCount})` : ''} ${title}`}/>
+                                <Box className='!ml-auto'>
+                                    <Notifications notifications={notifications} count={unreadNotificationsCount}/>
+                                </Box>
+                            </>
+                            : <>
+                                <Head title={`${title}`}/>
+                            </>}
+                        <StaggeredDropDown title={user.name}/>
                     </Stack>
-                    <Head title={` ${notificationsCount ? `(${notificationsCount})` : ''} ${title}`}/>
+
                     <main>
                         {children}
                     </main>
@@ -54,7 +75,10 @@ export default function Authenticated({
 
                 </div>
             </div>
-        </>
+
+            <Footer/>
+        </div>
+
 
     )
         ;

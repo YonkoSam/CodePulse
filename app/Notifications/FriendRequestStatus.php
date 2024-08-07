@@ -15,7 +15,7 @@ class FriendRequestStatus extends Notification
     protected $status;
 
     /**
-     * Create a new notification instance.
+     * CreateAndUpdate a new notification instance.
      */
     public function __construct($name, $status = 'accepted')
     {

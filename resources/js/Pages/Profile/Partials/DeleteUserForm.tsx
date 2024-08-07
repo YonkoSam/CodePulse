@@ -1,11 +1,11 @@
 import {FormEventHandler, useRef, useState} from 'react';
-import DangerButton from '@/Components/DangerButton';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import TextInput from '@/Components/TextInput';
+import DangerButton from '@/Components/formComp/DangerButton';
+import InputError from '@/Components/formComp/InputError';
+import InputLabel from '@/Components/formComp/InputLabel';
+import SecondaryButton from '@/Components/formComp/SecondaryButton';
+import TextInput from '@/Components/formComp/TextInput';
 import {useForm} from '@inertiajs/react';
+import SpringModal from "@/Components/ui/SpringModal";
 
 export default function DeleteUserForm({className = ''}: { className?: string }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
@@ -56,13 +56,13 @@ export default function DeleteUserForm({className = ''}: { className?: string })
 
             <DangerButton onClick={confirmUserDeletion}>Delete Account</DangerButton>
 
-            <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-lg font-medium text-gray-900">
+            <SpringModal isOpen={confirmingUserDeletion} setIsOpen={closeModal}>
+                <form onSubmit={deleteUser} className="p-2">
+                    <h2 className="text-lg font-medium text-white">
                         Are you sure you want to delete your account?
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-white">
                         Once your account is deleted, all of its resources and data will be permanently deleted. Please
                         enter your password to confirm you would like to permanently delete your account.
                     </p>
@@ -93,7 +93,7 @@ export default function DeleteUserForm({className = ''}: { className?: string })
                         </DangerButton>
                     </div>
                 </form>
-            </Modal>
+            </SpringModal>
         </section>
     );
 }

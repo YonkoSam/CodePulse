@@ -15,8 +15,8 @@ class EducationController extends Controller
                 'school' => ['required', 'string', 'min:1', 'max:255'],
                 'degree' => ['required', 'string', 'min:1', 'max:255'],
                 'fieldofstudy' => ['required', 'string', 'min:1', 'max:255'],
-                'from' => ['required', 'date', 'before:to'],
-                'to' => ['nullable', 'date'],
+                'from' => ['required', 'date'],
+                'to' => ['nullable', 'date', 'after:from'],
                 'current' => ['required', 'boolean'],
             ]
         );

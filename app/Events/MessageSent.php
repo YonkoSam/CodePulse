@@ -16,15 +16,18 @@ class MessageSent implements ShouldBroadcast
 
     public int $receiver_id;
 
+    public string $type;
+
     /**
-     * Create a new event instance.
+     * CreateAndUpdate a new event instance.
      *
      * @return void
      */
-    public function __construct($sender_id, $receiver_id)
+    public function __construct($sender_id, $receiver_id,$type='user')
     {
         $this->sender_id = $sender_id;
         $this->receiver_id = $receiver_id;
+        $this->type = $type;
     }
 
     public function broadcastOn(): string
@@ -43,6 +46,7 @@ class MessageSent implements ShouldBroadcast
 
         return [
             'id' => $this->receiver_id,
+            'type' => $this->type,
         ];
     }
 }

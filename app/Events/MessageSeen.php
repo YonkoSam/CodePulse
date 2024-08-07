@@ -13,7 +13,7 @@ class MessageSeen implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * Create a new event instance.
+     * CreateAndUpdate a new event instance.
      */
     public int $id;
 
@@ -28,7 +28,6 @@ class MessageSeen implements ShouldBroadcast
     public function broadcastOn(): string
     {
         return new Channel('my-messages-'.$this->id);
-
     }
 
     public function broadcastAs(): string

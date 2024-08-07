@@ -1,40 +1,32 @@
-import React, {forwardRef, useImperativeHandle, useState} from 'react';
-import {Link, router, usePage} from "@inertiajs/react";
+import React, {forwardRef, useImperativeHandle, useMemo, useState} from 'react';
+import {Link, usePage} from "@inertiajs/react";
 import {PageProps} from "@/types";
-import {Avatar, IconButton, Slide, Stack, TextField} from "@mui/material";
-import {SendIcon} from "lucide-react";
+import {Avatar, Button, IconButton, Slide, Stack} from "@mui/material";
 import {CloseRounded} from "@mui/icons-material";
 import {useScrollToBottom} from "@/utils";
-import {isTypingNotification, sendIsTyping, sendStoppedTyping} from "@/Components/chat/isTypingNotification";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import DoneIcon from "@mui/icons-material/Done";
+import {isTypingNotification} from "@/Components/chat/isTypingNotification";
+import {renderMessages} from "@/Components/chat/renderMessages";
+import MessageSubmitForm from "@/Components/chat/MessageSubmitForm";
 
-const Chat = forwardRef(({open, messages, receiverId, messageSent, close}: any, ref) => {
+const Chat = forwardRef(({open, messages, receiverId, messageSent, close, showName}: any, ref) => {
 
-    const [message, setMessage] = useState('');
     const {auth} = usePage<PageProps>().props;
     const [openChat, setOpenChat] = useState(false);
     const [minimized, setMinimized] = useState(true);
     const chatBoxRef = useScrollToBottom([openChat, open, minimized, messages]);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        router.post(route('chat.store'), {message, 'receiver_id': receiverId}, {
-            onSuccess: () => {
-                MessagesRefresh();
-
-            }
-        });
-    };
+    const [imagePreview, setImagePreview] = useState(null)
 
 
+    const reversedMessages = useMemo(() => {
+        if (messages.length && !messages.receiver) {
+            return [...messages].reverse();
+        }
+        return messages;
+    }, [messages]);
     const MessagesRefresh = () => {
-        setMessage('');
         messageSent(receiverId);
     }
 
-    const handleFocus = () => sendIsTyping(receiverId ?? messages.receiver.id);
-    const handleBlur = () => sendStoppedTyping(receiverId ?? messages.receiver.id);
 
     const handleToggleMinimize = () => {
         setMinimized(!minimized);
@@ -44,7 +36,6 @@ const Chat = forwardRef(({open, messages, receiverId, messageSent, close}: any, 
         openChat() {
             setMinimized(false);
         }
-
     }));
 
 
@@ -52,22 +43,23 @@ const Chat = forwardRef(({open, messages, receiverId, messageSent, close}: any, 
         <Slide direction="up" in={open || openChat} mountOnEnter unmountOnExit>
 
             <div
-                className='rounded bg-white max-w-2xl text-xs text-gray-800 min-w-52 mt-auto'>
+                className={`rounded bg-gray-800 rounded-t-2xl max-w-2xl text-xs text-white ${showName && 'min-w-72'}  mt-auto `}>
                 <Stack direction='row' alignItems='center'>
 
-                    <div className='!text-gray-800 !h-fit flex justify-between w-full cursor-pointer'
+                    <div className='text-white !h-fit flex justify-between  w-full cursor-pointer'
                          onClick={handleToggleMinimize}>
                         {messages && messages.length > 0 ? (
                             <div className='text-sm font-medium p-3 flex items-center gap-2'>
                                 <Avatar className='!w-6 !h-6'
-                                        src={`/${messages[0].receiver?.name === auth.user.name ? messages[0].sender.profile_image : messages[0].receiver?.profile_image}`}>
+                                        src={`/${messages[0].receiver?.id === auth.user.id ? messages[0].sender.profile_image : messages[0].receiver?.profile_image}`}>
                                 </Avatar>
-                                {messages[0].receiver?.name === auth.user.name ? messages[0].sender.name : messages[0].receiver.name}
+                                {(showName || !minimized) && (messages[0].receiver?.id === auth.user.id ? messages[0].sender.name : messages[0].receiver.name)}
                             </div>
                         ) : (
                             <div className='text-sm font-medium p-3 flex items-center gap-2'>
-                                <Avatar className='!w-6 !h-6' src={`/${messages.receiver.profile_image}`}></Avatar>
-                                <span>{messages.receiver.name}</span>
+                                <Avatar className='!w-6 !h-6'
+                                        src={messages.receiver.profile_image && '/' + messages.receiver.profile_image}></Avatar>
+                                <span>{(showName || !minimized) && messages.receiver.name}</span>
                             </div>
                         )}
                         <IconButton onClick={() => close(receiverId)}>
@@ -79,59 +71,30 @@ const Chat = forwardRef(({open, messages, receiverId, messageSent, close}: any, 
                      className={`overflow-y-auto max-h-96   h-fit ${minimized ? '' : 'border-2 p-2'} `}>
                     <div style={{display: minimized ? 'none' : 'block'}}>
                         <div id="chat-box">
-                            {messages.length >= 10 ? <Link href={route('chatWithId.index', receiverId)}><span
-                                className='text-gray-600 mb-1 font-bold flex justify-center '>more messages ... </span>
+                            {messages.length >= 10 ? <Link href={route('chat.user', receiverId)}>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    className="!mb-2 !text-xs !font-bold hover:bg-blue-600"
+                                    size='small'
+                                >
+                                    See previous messages...
+                                </Button>
                             </Link> : <></>
                             }
 
-                            {messages && !messages.receiver ? messages.map((msg, index) => {
-                                const isSameSenderAsPrevious = index > 0 && messages[index - 1].sender_id === msg.sender_id;
-                                return (
-                                    <div key={msg.id}
-                                         className={`flex flex-col ${msg.sender_id === auth.user.id ? 'items-end' : 'items-start'}`}>
-                                        {!isSameSenderAsPrevious && (
-                                            <Stack direction={msg.sender_id === auth.user.id ? 'row-reverse' : 'row'}
-                                                   alignItems='center' gap={1}>
-                                                <Avatar src={'/' + msg.sender.profile_image}></Avatar>
-                                                <strong
-                                                    className='text-gray-900 font-semibold leading-snug pb-1'>{msg.sender_id === auth.user.id ? 'You' : msg.sender.name} </strong>
-                                            </Stack>
-
-                                        )}
-                                        <div className='flex'>
-                                            <p className={msg.sender_id === auth.user.id ? 'px-3.5 text-blue-500 py-2 bg-gray-100 rounded-3xl rounded-br-none my-2 max-w-52  break-words'
-                                                : 'px-3.5 py-2 bg-gray-100 rounded-3xl rounded-tl-none my-2 max-w-52  break-words'}>
-                                                {msg.message}
-
-                                            </p>
-                                            {msg.sender_id === auth.user.id && (
-                                                <span className="ml-2 flex items-center">
-                                    {msg.seen_at ? <DoneAllIcon fontSize="small" color="primary"/> :
-                                        <DoneIcon fontSize="small" color="disabled"/>}
-                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            }) : null}
+                            {reversedMessages && !messages.receiver ? renderMessages(reversedMessages, imagePreview, setImagePreview, true) :
+                                <p className='text-center pb-2 text-xs text-gray-400 font-bold'>Be
+                                    the
+                                    First One to Send a
+                                    Message</p>}
 
                             {isTypingNotification(messages.receiver ?? (messages[0].receiver_id === auth.user.id ? messages[0].sender : messages[0].receiver), MessagesRefresh)}
                         </div>
-                        <form onSubmit={handleSubmit} className='flex gap-2'>
-                            <TextField
-                                variant="outlined"
-                                onFocus={handleFocus}
-                                onBlur={handleBlur}
-                                fullWidth
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Type a message..."
-                                size='small'
-                            />
-                            <IconButton type="submit" disabled={message.length <= 0}>
-                                <SendIcon/>
-                            </IconButton>
-                        </form>
+
+                        <div className='bg-blue-500 rounded-2xl max-w-80 p-1'>
+                            <MessageSubmitForm receiverId={receiverId} callBack={MessagesRefresh} size='small'/>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -18,14 +18,17 @@ class FriendRequestController extends Controller
         $sender = User::find($request->sender_id);
         $receiver = User::find($request->receiver_id);
 
+        if ($sender->profile->isFriend($receiver)) {
+            return back()->withErrors(['message' => 'You are already a friend with this user !']);
+        }
+
         if ($sender && $receiver && $sender->id !== $receiver->id) {
             if (! $sender->sentFriendRequests()->where('receiver_id', $receiver->id)->exists()) {
-                $friendrequest = FriendRequest::create([
+                $friendRequest = FriendRequest::create([
                     'sender_id' => $sender->id,
                     'receiver_id' => $receiver->id,
                 ]);
-
-                $receiver->notify(new FriendRequestNotification($friendrequest));
+                $receiver->notify(new FriendRequestNotification($friendRequest));
                 event(new NotificationSent($request->receiver_id));
 
                 return back()->with(['message' => 'Friend request sent!']);
@@ -73,40 +76,6 @@ class FriendRequestController extends Controller
             return back()->with(['message' => 'Friend request rejected!']);
         }
 
-        return back()->with(['message' => 'Friend request was not found!']);
-    }
-
-    public function deleteNotification(Request $request)
-    {
-        if ($request->has('request_id')) {
-            $friendRequest = FriendRequest::find($request->request_id);
-
-            if ($friendRequest) {
-                $friendRequest->delete();
-            }
-        }
-        $notification = auth()->user()->notifications()->find($request->id);
-
-        if ($notification) {
-            $notification->delete();
-
-            return back()->with(['message' => 'Notification deleted successfully!']);
-        }
-
-        return back()->with(['message' => 'Notification was not found!']);
-    }
-
-    public function markAsRead(Request $request)
-    {
-
-        $notification = auth()->user()->notifications()->find($request->id);
-
-        if ($notification) {
-            $notification->markAsRead();
-
-            return back()->with(['message' => 'Notification marked as read!']);
-        }
-
-        return back()->with(['message' => 'Notification was not found!']);
+        return back()->withErrors(['message' => 'Friend request was not found!']);
     }
 }

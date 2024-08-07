@@ -15,7 +15,7 @@ class LikeNotification extends Notification
     protected $like;
 
     /**
-     * Create a new notification instance.
+     * CreateAndUpdate a new notification instance.
      */
     public function __construct(Like $like)
     {
@@ -38,8 +38,8 @@ class LikeNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line($this->like->user->name.'has Liked on one of your post.')
-            ->action('View Request', url('/pots/'.$this->like->post_id))
+            ->line($this->like->user->name.' has Liked on one of your Pulse.')
+            ->action('View Request', url('/pots/'.$this->like->pulse_id))
             ->line('Thank you for using our application!');
     }
 
@@ -51,10 +51,10 @@ class LikeNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'post_id' => $this->like->post_id,
+            'pulse_id' => $this->like->pulse_id,
             'user_id' => $this->like->user_id,
-            'message' => $this->like->user->name.'has Liked on one of your post',
-            'url' => route('posts.show', ['post' => $this->like->post_id]),
+            'message' => $this->like->user->name.' has Liked on one of your Pulse.',
+            'url' => route('pulses.show', ['pulse' => $this->like->pulse_id]),
         ];
     }
 
@@ -62,10 +62,10 @@ class LikeNotification extends Notification
     {
 
         return new BroadcastMessage([
-            'post_id' => $this->like->post_id,
+            'pulse_id' => $this->like->pulse_id,
             'user_id' => $this->like->user_id,
-            'message' => $this->like->user->name.'has Liked on one of your post',
-            'url' => route('posts.show', ['post' => $this->like->post_id]),
+            'message' => $this->like->user->name.' has Liked on one of your Pulse',
+            'url' => route('pulses.show', ['pulse' => $this->like->pulse_id]),
         ]);
     }
 }

@@ -1,18 +1,18 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import {Link, useForm, usePage} from '@inertiajs/react';
+import InputError from '@/Components/formComp/InputError';
+import InputLabel from '@/Components/formComp/InputLabel';
+import PrimaryButton from '@/Components/formComp/PrimaryButton';
+import TextInput from '@/Components/formComp/TextInput';
+import {Link, useForm} from '@inertiajs/react';
 import {Transition} from '@headlessui/react';
 import {FormEventHandler} from 'react';
-import {PageProps} from '@/types';
+import {User} from '@/types';
 
-export default function UpdateProfileInformation({mustVerifyEmail, status, className = ''}: {
+export default function UpdateProfileInformation({user, mustVerifyEmail, status, className = ''}: {
+    user: User,
     mustVerifyEmail: boolean,
     status?: string,
     className?: string
 }) {
-    const user = usePage<PageProps>().props.auth.user;
 
     const {data, setData, patch, errors, processing, recentlySuccessful} = useForm({
         name: user.name,

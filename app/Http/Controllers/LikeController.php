@@ -13,41 +13,42 @@ class LikeController extends Controller
 {
     public function store(Request $request)
     {
+
         $data = $request->validate([
-            'post_id' => 'required|exists:posts,id',
+            'pulse_id' => 'required|exists:pulses,id',
         ]);
 
         $user = Auth::user()->id;
 
         $existingLike = Like::where('user_id', $user)
-            ->where('post_id', $data['post_id'])
+            ->where('pulse_id', $data['pulse_id'])
             ->first();
 
         if ($existingLike) {
             $existingLike->delete();
 
-            return back();
+            return response()->json(['like', false]);
         } else {
             $like = Like::create([
                 'user_id' => $user,
-                'post_id' => $data['post_id'],
+                'pulse_id' => $data['pulse_id'],
             ]);
 
             $notificationExists = DB::table('notifications')
                 ->where('type', 'App\Notifications\LikeNotification')
-                ->where('data->post_id', $data['post_id'])
+                ->where('data->pulse_id', $data['pulse_id'])
                 ->where('data->user_id', $user)
                 ->exists();
 
-            if (! $notificationExists && $like->user_id != $like->post->user_id) {
+            if (! $notificationExists && $like->user_id != $like->pulse->user_id) {
 
                 $notification = new LikeNotification($like);
-                $like->post->user->notify($notification);
-                event(new NotificationSent($like->post->user_id));
+                $like->pulse->user->notify($notification);
+                event(new NotificationSent($like->pulse->user_id));
 
             }
 
-            return back();
+            return response()->json(['like', true]);
 
         }
 

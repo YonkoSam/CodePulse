@@ -12,29 +12,25 @@ class ReplyController extends Controller
     {
         $commentData = request()->validate([
             'text' => 'required|min:1',
-            'post_id' => 'required',
+            'pulse_id' => 'required',
             'user_id' => 'required',
             'comment_id' => 'required',
+            'code' => 'nullable',
         ]);
 
+        if (! isset(request()->code['sourceCode'])) {
+            $commentData['code'] = null;
+        }
         $reply = Comment::create($commentData);
         $comment = Comment::with('replies.user')->find($reply->comment_id);
-        $uniqueUsers = [];
 
-        foreach ($comment->replies as $reply) {
-            if (! isset($uniqueUsers[$reply->user_id]) && $reply->user_id != $comment->user_id && $reply->user_id != auth()->user()->id) {
-                $uniqueUsers[$reply->user_id] = $reply->user;
+        if ($reply->user_id != $comment->user_id ) {
+            if($comment->comment_id){
+                $comment->user->notify(new ReplyNotification($reply,' has replied on one of your replies'));
             }
-        }
-        foreach ($uniqueUsers as $user) {
-            $latestReply = $comment->replies()->latest()->first();
-            sleep(0.2);
-            $user->notify(new ReplyNotification($latestReply, ' has replied on a comment you follow.'));
-            event(new NotificationSent($user->id));
-        }
-
-        if ($reply->user_id != $comment->user_id) {
-            $comment->user->notify(new ReplyNotification($reply));
+            else {
+                $comment->user->notify(new ReplyNotification($reply));
+            }
             event(new NotificationSent($comment->user_id));
         }
 

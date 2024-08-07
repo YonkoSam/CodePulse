@@ -13,15 +13,19 @@ class CommentController extends Controller
     {
         $comment = request()->validate([
             'text' => 'required|min:1',
-            'post_id' => 'required',
+            'pulse_id' => 'required',
             'user_id' => 'required',
+            'code' => 'nullable',
         ]);
 
+        if (! isset(request()->code['sourceCode'])) {
+            $comment['code'] = null;
+        }
         $commentObject = Comment::create($comment);
 
-        if ($commentObject->user != $commentObject->post->user) {
-            $commentObject->post->user->notify(new CommentNotification($commentObject));
-            event(new NotificationSent($commentObject->post->user_id));
+        if ($commentObject->user != $commentObject->pulse->user) {
+            $commentObject->pulse->user->notify(new CommentNotification($commentObject));
+            event(new NotificationSent($commentObject->pulse->user_id));
         }
 
         return back();
@@ -31,6 +35,9 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
 
+        if($comment->user_id != auth()->id()){
+            abort(403);
+        }
         $comment->replies()->delete();
         $comment->delete();
         $notification = DB::table('notifications')

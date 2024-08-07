@@ -7,16 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Like extends Model
 {
-    protected $fillable = ['user_id', 'post_id'];
+    protected $fillable = ['user_id', 'pulse_id'];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function post(): BelongsTo
+    public function pulse(): BelongsTo
     {
-        return $this->belongsTo(Post::class);
+        return $this->belongsTo(Pulse::class);
     }
 }
-

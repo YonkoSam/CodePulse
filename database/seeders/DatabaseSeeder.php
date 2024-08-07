@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Message;
+use App\Models\Pulse;
 use Illuminate\Database\Seeder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -20,6 +20,6 @@ class DatabaseSeeder extends Seeder
         //            'email' => 'test@example.com',
         //        ]);
 
-        Message::factory(100)->create();
+        Pulse::factory(20)->create();
     }
 }

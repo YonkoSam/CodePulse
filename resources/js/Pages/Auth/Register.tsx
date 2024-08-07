@@ -1,9 +1,9 @@
 import {FormEventHandler, useEffect} from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import InputError from '@/Components/formComp/InputError';
+import InputLabel from '@/Components/formComp/InputLabel';
+import PrimaryButton from '@/Components/formComp/PrimaryButton';
+import TextInput from '@/Components/formComp/TextInput';
 import {Head, Link, useForm} from '@inertiajs/react';
 import {GitHub} from "@mui/icons-material";
 

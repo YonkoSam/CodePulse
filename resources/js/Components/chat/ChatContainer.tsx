@@ -1,10 +1,8 @@
 import {useEffect, useRef, useState} from 'react';
-import Pusher from "pusher-js";
-import Echo from "laravel-echo";
 import {usePage} from "@inertiajs/react";
 import Chat from "@/Components/chat/Chat";
 import {PageProps} from "@/types";
-import {audio, echoConfig} from "@/utils";
+import {audio, Toast} from "@/utils";
 
 const ChatContainer = ({id}) => {
     const [receiverIds, setReceiverIds] = useState(new Set<number>());
@@ -19,18 +17,28 @@ const ChatContainer = ({id}) => {
             setReceiverIds(new Set(JSON.parse(storedReceiverIds)));
         }
 
+
         if (id) {
+            if (friendsChat.size >= 10) {
+                Toast.fire({
+                    icon: "info",
+                    title: "You have reached the maximum number of chat boxes.",
+                    text: "Please close an existing one to open a new chat.",
+                    width: 500
+
+                });
+                return;
+            }
             setReceiverIds(prevIds => new Set([...prevIds, id]));
             if (chatBoxRef.current.get(id)) {
                 chatBoxRef.current.get(id).openChat();
-
             }
         }
+
+
     }, [id]);
 
-
     useEffect(() => {
-
 
         const fetchMessagesAndUpdateState = async (id: number) => {
             try {
@@ -45,7 +53,6 @@ const ChatContainer = ({id}) => {
                     return newState;
                 });
 
-
             } catch (error) {
                 console.error('Failed to fetch messages:', error);
             }
@@ -58,28 +65,31 @@ const ChatContainer = ({id}) => {
     }, [receiverIds]);
 
     useEffect(() => {
-        window.Pusher = Pusher;
-        window.Echo = new Echo(echoConfig);
-
         window.Echo.channel(`my-messages-${auth.user.id}`)
             .listen('.message-sent', async (e) => {
-                setReceiverIds(prevIds => new Set([...prevIds, e.id]));
-                await audio.play();
+                if (e.type == 'user') {
+                    setReceiverIds(prevIds => new Set([...prevIds, e.id]));
+                    try {
+                        audio.play().catch();
+                    } catch (e) {
+                        console.error(`Error: ${e}`);
+                    }
 
-                if (chatBoxRef.current) {
-                    if (chatBoxRef.current.get(e.id)) {
-                        chatBoxRef.current.get(e.id).openChat();
-                    } else {
-                        setTimeout(() => {
+                    if (chatBoxRef.current) {
+                        if (chatBoxRef.current.get(e.id)) {
                             chatBoxRef.current.get(e.id).openChat();
-                        }, 100);
+                        } else {
+                            setTimeout(() => {
+                                chatBoxRef.current.get(e.id)?.openChat();
+                            }, 400);
+                        }
                     }
                 }
 
             });
 
         return () => {
-            window.Echo.leaveChannel(`my-messages-${auth.user.id}`);
+            window.Echo.leaveChannel(`public:my-messages-${auth.user.id}`);
         };
     }, [auth.user.id]);
 
@@ -99,6 +109,7 @@ const ChatContainer = ({id}) => {
             return newState;
         });
 
+
         setReceiverIds(prevState => {
                 const newState = new Set(prevState);
                 newState.delete(id);
@@ -108,20 +119,25 @@ const ChatContainer = ({id}) => {
 
     }
     return (
-        <div className="fixed right-20 bottom-0 flex gap-2 ">
-            {friendsChat && Array.from(friendsChat).map(([receiverId, messages]) => (
 
-                <Chat
-                    ref={(el) => (chatBoxRef.current.set(receiverId, el))}
-                    key={receiverId}
-                    open={true}
-                    messages={messages}
-                    receiverId={receiverId}
-                    messageSent={messageSent}
-                    close={close}
-                />
-            ))}
+        <div className='fixed right-20 bottom-0 flex gap-2 z-50'>
+            {
+                Array.from(friendsChat).map(([receiverId, messages], index) => (
+                    <Chat
+                        ref={(el) => (chatBoxRef.current.set(receiverId, el))}
+                        key={receiverId}
+                        open={true}
+                        showName={index > friendsChat.size - 4}
+                        messages={messages}
+                        receiverId={receiverId}
+                        messageSent={messageSent}
+                        close={close}
+                    />
+                ))
+            }
         </div>
+
+
     );
 };
 

@@ -13,7 +13,7 @@ test('confirm password screen can be rendered', function () {
 test('password can be confirmed', function () {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post('/confirm-password', [
+    $response = $this->actingAs($user)->Pulse('/confirm-password', [
         'password' => 'password',
     ]);
 
@@ -24,7 +24,7 @@ test('password can be confirmed', function () {
 test('password is not confirmed with invalid password', function () {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post('/confirm-password', [
+    $response = $this->actingAs($user)->Pulse('/confirm-password', [
         'password' => 'wrong-password',
     ]);
 
