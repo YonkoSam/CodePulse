@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
 
 class Profile extends Model
@@ -26,33 +27,35 @@ class Profile extends Model
         'bio',
     ];
 
-    public function isFriend(User $user): bool
-    {
 
-        return $this->user->friends()->where('friend_id', $user->id)->exists() ||
-            $this->user->friendOf()->where('user_id', $user->id)->exists();
-    }
-
-    public function isBlocked(User $user): bool
-    {
-        $friendship = Friendship::where('user_id', $this->user->id)
-            ->where('friend_id', $user->id)
-            ->orWhere('user_id', $user->id)
-            ->where('friend_id', $this->user->id)
-            ->first();
-
-        if ($friendship) {
-            return $friendship->blocked;
-        }
-
-        return false;
-    }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function scopeVisible($query, int  $userId)
+    {
+
+        return $query->whereNotIn('id', function ($query) use ($userId) {
+            $query->select('friend_id')
+                ->from('friendships')
+                ->where('user_id', $userId)
+                ->where('blocked', true)
+                ->union(function ($query) use ($userId) {
+                    $query->select('user_id')
+                        ->from('friendships')
+                        ->where('friend_id', $userId)
+                        ->where('blocked', true);
+                })
+            ;
+        });
+    }
     public function experiences(): HasMany
     {
         return $this->hasMany(Experience::class);

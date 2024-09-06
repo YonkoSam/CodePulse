@@ -8,18 +8,19 @@ import TimeAgo from "javascript-time-ago";
 import en from 'javascript-time-ago/locale/en'
 import {createTheme} from "@mui/material/styles";
 import {ThemeProvider} from "@mui/material";
-import {purple} from "@mui/material/colors";
 
 TimeAgo.addDefaultLocale(en)
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 const theme = createTheme({
+        typography: {
+            "fontFamily": `"JetBrains Mono", monospace`,
+        },
         palette: {
             primary: {
-                main: purple[900]
+                main: '#4f46e5'
             },
-
             secondary: {
                 main: '#92ff53',
             },

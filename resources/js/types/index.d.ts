@@ -5,7 +5,7 @@ export interface User {
     email_verified_at: string;
     profile_image: string;
     unreadMessagesCount?: number;
-    last_time_online: string | null;
+    last_activity: string;
 
     // relations
     profile: Profile
@@ -60,6 +60,7 @@ interface LiveAudioVisualizer {
 
 export interface Pulse {
     // columns
+    is_answered: boolean;
     id: number
     title: string
     text: string
@@ -132,6 +133,8 @@ export interface Profile {
     bio: string | null
     created_at: string | null
     updated_at: string | null
+    xp: number;
+
     // relations
     user: User
     experiences: Experience[]
@@ -153,6 +156,41 @@ export interface Social {
     updated_at: string | null
 }
 
+interface Pivot {
+    message_id: number;
+    user_id: number;
+    seen_at: string;
+}
+
+interface UserSeen {
+    id: number;
+    name: string;
+    profile_image: string;
+    pivot: Pivot;
+}
+
+type CallBackFunction = (message?: Message, userSeen?: UserSeen[]) => void;
+
+interface Message {
+    users_seen_count: number | null;
+    id: number;
+    sender_id: number;
+    receiver_id: number | null;
+    message: string;
+    type: number | null;
+    seen_at: string | null;
+    team_id: number | null;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+
+
+    users_seen: UserSeen[];
+    sender: User,
+    receiver: User,
+
+}
+
 
 export interface Team {
     id: number
@@ -163,6 +201,21 @@ export interface Team {
     unreadMessagesCount?: number;
 
     users: User[]
+}
+
+type NotificationData = {
+    message: string;
+    [key: string]: any;
+};
+
+// Define the main notification type.
+export interface Notification {
+    id: string;
+    type: string;
+    data: NotificationData;
+    read_at: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {

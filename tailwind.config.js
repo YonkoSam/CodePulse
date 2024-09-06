@@ -16,7 +16,8 @@ module.exports = {
         },
         extend: {
             fontFamily: {
-                hanken: ["Hanken Grotesk", "sans-serif"]
+                hanken: ["Hanken Grotesk", "sans-serif"],
+                jetBrains: ["JetBrains Mono", "monospace"]
             },
             colors: {
                 border: "hsl(var(--border))",

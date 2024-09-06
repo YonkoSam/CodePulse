@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -12,27 +14,28 @@ class MessageSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public int $sender_id;
+
 
     public int $receiver_id;
+    public User|null $sender;
+    public Team|null $team;
 
-    public string $type;
 
     /**
      * CreateAndUpdate a new event instance.
      *
      * @return void
      */
-    public function __construct($sender_id, $receiver_id,$type='user')
+    public function __construct( $receiver_id,$sender=null,$team=null)
     {
-        $this->sender_id = $sender_id;
         $this->receiver_id = $receiver_id;
-        $this->type = $type;
+        $this->sender = $sender;
+        $this->team = $team;
     }
 
     public function broadcastOn(): string
     {
-        return new Channel('my-messages-'.$this->sender_id);
+        return new Channel("my-messages-{$this->receiver_id}");
 
     }
 
@@ -44,9 +47,13 @@ class MessageSent implements ShouldBroadcast
     public function broadcastWith(): array
     {
 
+        if($this->sender)
         return [
-            'id' => $this->receiver_id,
-            'type' => $this->type,
+            'sender' => $this->sender,
         ];
+        else
+            return [
+                'team' => $this->team,
+            ];
     }
 }

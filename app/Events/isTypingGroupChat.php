@@ -34,7 +34,7 @@ class isTypingGroupChat implements ShouldBroadcast
      */
     public function broadcastOn(): string
     {
-        return new Channel('my-group-chat-'.$this->teamId);
+        return new Channel("my-group-chat-{$this->teamId}");
 
     }
 

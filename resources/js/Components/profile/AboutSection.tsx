@@ -33,6 +33,15 @@ const AboutSection = ({profile, isAuthUser}) => {
         slidesToScroll: 1,
         autoplay: true,
         autoplaySpeed: 5000,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    arrows: false,
+                }
+            }
+        ]
+
     };
     const experience = {
         title: "Experience",
@@ -76,12 +85,12 @@ const AboutSection = ({profile, isAuthUser}) => {
     };
     const openExperience = useCallback((object: object | null) => {
         setOpen(true);
-        setCard(<ProfileCard type={experience} object={object}/>);
+        setCard(<ProfileCard type={experience} object={object} setOpen={setOpen}/>);
     }, [experience]);
 
     const openEducation = useCallback((object: object | null) => {
         setOpen(true);
-        setCard(<ProfileCard type={education} object={object}/>);
+        setCard(<ProfileCard type={education} object={object} setOpen={setOpen}/>);
     }, [education]);
 
     const iconMap = {
@@ -94,7 +103,7 @@ const AboutSection = ({profile, isAuthUser}) => {
     };
 
 
-    return <>
+    return <div className="max-w-sm mx-auto">
         <h1 className='text-xl p-4 font-bold text-white  rounded-t-xl'>About me</h1>
         <Divider className=' !bg-white'/>
 
@@ -141,32 +150,35 @@ const AboutSection = ({profile, isAuthUser}) => {
                             animate={{scale: 1, opacity: 1}}
                             transition={{duration: 0.3, delay: i * 0.2}}
                             key={i}
-                            className='!text-white font-bold hover:scale-105 transition-all duration-300 ease-in-out'
+                            className='!text-white font-bold shadow hover:scale-105 transition-all duration-300 ease-in-out'
                             label={skill}/>
                     ))}
                 </ListItem>
-                <ListItem className='flex flex-wrap'>
-                    {Object.entries(profile.socials).filter(([key, value]) => value)
-                        .map(([key, value]: [string, string], i: number) => {
-                            const IconComponent = iconMap[key.toLowerCase()];
-                            if (!IconComponent) return null;
-                            return <motion.div
-                                initial={{x: -50, opacity: 0}}
-                                animate={{x: 0, opacity: 1}}
-                                transition={{duration: 0.3, delay: i * 0.2}}
-                                key={key}
-                            >
-                                <a href={value} target='_blank' rel='noopener noreferrer'>
-                                    <IconButton
-                                        className="!text-white !p-2 hover:scale-125 transition-all duration-300">
-                                        <IconComponent/>
-                                    </IconButton>
-                                </a>
-                            </motion.div>
+                {
+                    profile.socials &&
+                    <ListItem className='flex flex-wrap'>
+                        {Object.entries(profile.socials).filter(([key, value]) => value)
+                            .map(([key, value]: [string, string], i: number) => {
+                                const IconComponent = iconMap[key.toLowerCase()];
+                                if (!IconComponent) return null;
+                                return <motion.div
+                                    initial={{x: -50, opacity: 0}}
+                                    animate={{x: 0, opacity: 1}}
+                                    transition={{duration: 0.3, delay: i * 0.2}}
+                                    key={key}
+                                >
+                                    <a href={value} target='_blank' rel='noopener noreferrer'>
+                                        <IconButton
+                                            className="!text-white !p-2 hover:scale-125 transition-all duration-300">
+                                            <IconComponent/>
+                                        </IconButton>
+                                    </a>
+                                </motion.div>
 
-                        })
-                    }
-                </ListItem>
+                            })
+                        }
+                    </ListItem>
+                }
             </List>
             <Box
                 className=' rounded-xl text-white     h-[400px] overflow-y-auto'>
@@ -254,7 +266,7 @@ const AboutSection = ({profile, isAuthUser}) => {
         <SpringModal setIsOpen={setOpen} isOpen={open}>
             {card}
         </SpringModal>
-    </>
+    </div>
 
 }
 

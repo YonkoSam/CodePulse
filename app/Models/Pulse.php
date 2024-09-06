@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
-use Mpociot\Teamwork\TeamworkTeam;
 
 class Pulse extends Model
 {
@@ -15,11 +16,21 @@ class Pulse extends Model
 
     protected string $slug = 'title';
 
-    protected $fillable = ['user_id', 'text', 'title', 'code', 'team_id'];
+    protected $fillable = ['user_id', 'text', 'title', 'code', 'team_id','is_answered'];
 
     protected $casts = [
         'code' => 'array',
     ];
+
+    public function bestAnswer(): HasOne
+    {
+        return $this->hasOne(Comment::class)->where('is_best_answer', true);
+    }
+    public function markAsAnswered(): void
+    {
+        $this->is_answered = true;
+        $this->save();
+    }
 
     public function user(): BelongsTo
     {
@@ -28,7 +39,12 @@ class Pulse extends Model
 
     public function team(): BelongsTo
     {
-        return $this->belongsTo(TeamworkTeam::class);
+        return $this->belongsTo(Team::class);
+    }
+
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
     }
 
     public function scopeVisibleToUser($query, $userId)

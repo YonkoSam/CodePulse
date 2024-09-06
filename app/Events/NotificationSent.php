@@ -6,6 +6,7 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Queue\SerializesModels;
 
 class NotificationSent implements ShouldBroadcast
@@ -15,11 +16,11 @@ class NotificationSent implements ShouldBroadcast
     /**
      * CreateAndUpdate a new event instance.
      */
-    public $id;
+    protected DatabaseNotification $notification;
 
-    public function __construct($id)
+    public function __construct(DatabaseNotification $notification)
     {
-        $this->id = $id;
+        $this->notification = $notification;
     }
 
     /**
@@ -27,7 +28,7 @@ class NotificationSent implements ShouldBroadcast
      */
     public function broadcastOn(): string
     {
-        return new Channel('my-notification-'.$this->id);
+        return new Channel("my-notification-{$this->notification->notifiable_id}");
 
     }
 
@@ -39,6 +40,8 @@ class NotificationSent implements ShouldBroadcast
     public function broadcastWith(): array
     {
 
-        return [];
+        return [
+            'notification' => $this->notification,
+        ];
     }
 }

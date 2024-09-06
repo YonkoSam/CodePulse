@@ -21,6 +21,7 @@ class CreateProfilesTable extends Migration
             $table->string('location')->nullable();
             $table->string('status');
             $table->string('skills');
+            $table->unsignedInteger('xp')->default(200);
             $table->text('bio')->nullable();
             $table->timestamps();
         });

@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\NotificationSent;
+use App\Enums\XpAction;
 use App\Models\Comment;
+use App\Models\Pulse;
 use App\Notifications\CommentNotification;
+use App\Notifications\MarkedAsBestAnswerNotification;
+use App\Services\ProfanityFilterService;
+use App\Services\XpService;
 use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
 {
-    public function store()
+    public function store(ProfanityFilterService $profanityFilterService,XpService $xpService)
     {
+
         $comment = request()->validate([
             'text' => 'required|min:1',
             'pulse_id' => 'required',
@@ -21,23 +26,33 @@ class CommentController extends Controller
         if (! isset(request()->code['sourceCode'])) {
             $comment['code'] = null;
         }
+        $comment = $profanityFilterService->filter($comment,['text']);
         $commentObject = Comment::create($comment);
 
         if ($commentObject->user != $commentObject->pulse->user) {
-            $commentObject->pulse->user->notify(new CommentNotification($commentObject));
-            event(new NotificationSent($commentObject->pulse->user_id));
+             $commentObject->pulse->user->notify(new CommentNotification($commentObject));
+            $xpService->assignPoints($commentObject->pulse->user?->profile, XpAction::RECEIVE_LIKE_ON_PULSE);
         }
 
         return back();
 
     }
+    public function update(Comment $comment,ProfanityFilterService  $profanityFilterService)
+    {
 
+        $commentObject = request()->validate([
+            'text' => 'required|min:1',
+        ]);
+
+        $commentObject = $profanityFilterService->filter($commentObject,['text']);
+
+        $comment->update($commentObject);
+
+        return back();
+    }
     public function destroy(Comment $comment)
     {
 
-        if($comment->user_id != auth()->id()){
-            abort(403);
-        }
         $comment->replies()->delete();
         $comment->delete();
         $notification = DB::table('notifications')
@@ -51,4 +66,20 @@ class CommentController extends Controller
         return back();
 
     }
+
+    public function markBestAnswer(Pulse $pulse, Comment $comment,XpService $xpService)
+    {
+        if ($pulse->is_answered) {
+            return back()->withErrors(['message'=>'this pulse already answered']);
+        }
+        $comment->markAsBestAnswer();
+        $pulse->markAsAnswered();
+        if($comment->user_id != $pulse->user_id) {
+            $xpService->assignPoints($comment->user?->profile, XPAction::BE_CHOSEN_BEST_ANSWER);
+            $comment->user->notify(new MarkedAsBestAnswerNotification($comment));
+        }
+
+        return back();
+    }
+
 }

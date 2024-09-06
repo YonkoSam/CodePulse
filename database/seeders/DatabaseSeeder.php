@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Pulse;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -20,6 +20,20 @@ class DatabaseSeeder extends Seeder
         //            'email' => 'test@example.com',
         //        ]);
 
-        Pulse::factory(20)->create();
+//        $user =User::find(1);
+////        $otherUsers = User::whereNotIn('id', $user->allFriends()->pluck('id'))->get();
+////        foreach ($otherUsers as $otherUser) {
+////            $user->friends()->attach($otherUser->id);
+////        }
+//        $user2 =User::find(2);
+//
+//        Message::factory(50)->create([
+//            'sender_id' => $user->id,
+//            'receiver_id' => $user2->id,
+//        ]);
+
+        User::factory(100)->create();
+
     }
+
 }

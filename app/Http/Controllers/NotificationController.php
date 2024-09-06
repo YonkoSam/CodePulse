@@ -39,11 +39,11 @@ class NotificationController extends Controller
 
         if ($notification) {
             $notification->delete();
-
-            return back()->with(['message' => 'Notification deleted successfully!']);
+            return response()->json(['message' => 'Notification deleted successfully!']);
         }
 
-        return back()->with(['message' => 'Notification was not found!']);
+        abort(404);
+
     }
 
     public function markAsRead(Request $request)
@@ -54,9 +54,9 @@ class NotificationController extends Controller
         if ($notification) {
             $notification->markAsRead();
 
-            return back()->with(['message' => 'Notification marked as read!']);
+            return response()->json(['message' => 'Notification marked as read!']);
         }
 
-        return back()->with(['message' => 'Notification was not found!']);
+        return response()->json(['message' => 'Notification was not found!']);
     }
 }

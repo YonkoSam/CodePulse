@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class pulse extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -27,13 +27,6 @@ class pulse extends Migration
             $table->timestamps();
         });
 
-        Schema::create('likes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('pulse_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
-
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -42,6 +35,13 @@ class pulse extends Migration
             $table->string('text');
             $table->json('code')->nullable();
 
+            $table->timestamps();
+        });
+        Schema::create('likes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('pulse_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('comment_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -57,4 +57,5 @@ class pulse extends Migration
         Schema::dropIfExists('likes');
         Schema::dropIfExists('comments');
     }
-}
+
+};

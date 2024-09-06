@@ -17,11 +17,7 @@ const Index = ({pulses, teams}: { pulses: any, teams: Team[] }) => {
     const {auth} = usePage<PageProps>().props;
 
     const handleChange = (teamId) => {
-        router.post(route('teams.api.switch', teamId), {}, {
-            onFinish: () => {
-                router.visit(route('pulses.index'));
-            }
-        });
+        router.get(route('teams.switch', {team: teamId}));
     };
 
     return (
@@ -83,11 +79,8 @@ const Index = ({pulses, teams}: { pulses: any, teams: Team[] }) => {
 
                 <Stack justifyContent='center' alignItems='center'>
                     <Box maxWidth={'fit-content'}>
-                        <Pagination
-                            links={pulses.links}
-                            currentPage={pulses.current_page}
-                            lastPage={pulses.last_page}
-                        />
+                        <Pagination currentPage={pulses.current_page}
+                                    lastPage={pulses.last_page} paginatedDataName={'pulses'}/>
                     </Box>
                 </Stack>
             </Stack>

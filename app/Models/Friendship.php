@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Friendship extends Model
 {
-    protected $fillable = ['user_id', 'friend_id', 'blocked', 'blocked_initiator'];
+    protected $fillable = ['user_id', 'friend_id', 'blocked', 'blocked_initiator','last_message_timestamp'];
 
     public static function findFriendShip(int $friendId): ?Friendship
     {
@@ -21,4 +21,11 @@ class Friendship extends Model
                 ->where('friend_id', $userId);
         })->first();
     }
+
+    public function updateLastMessageTimestamp(): void
+    {
+        $this->update(['last_message_timestamp' => now()]);
+    }
+
+
 }

@@ -4,9 +4,7 @@ import {Pagination as PaginationMui, PaginationItem} from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-function Pagination({links, currentPage, lastPage}: any) {
-
-    const paginatedDataName = links[1]?.url.split('/')[3].split('?')[0];
+function Pagination({currentPage, lastPage, paginatedDataName}: any) {
 
     const handlePageChange = (event: any, page: any) => {
 

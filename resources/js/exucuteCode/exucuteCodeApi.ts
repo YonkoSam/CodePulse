@@ -7,9 +7,8 @@ const API = axios.create({
 
 
 export const executeCode = async (language: string, sourceCode: string) => {
-
     const response = await API.post("/execute", {
-        language: language.toLowerCase(),
+        language: language,
         version: LANGUAGE_VERSIONS[language],
         files: [
             {

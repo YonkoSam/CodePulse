@@ -1,6 +1,7 @@
 import * as React from "react";
 import {CopyToClipboard} from "react-copy-to-clipboard";
 import {CopyAll} from "@mui/icons-material";
+import {Tooltip} from "@mui/material";
 
 type Props = {
     text: string;
@@ -9,12 +10,15 @@ type Props = {
 
 function CopyButton({text, onCopy}: Props) {
     return (
-        <button
-            className=" absolute cursor-pointer top-[4px] right-[10px]  z-10 text-white hover:scale-110 duration-300">
-            <CopyToClipboard text={text} onCopy={onCopy}>
-                <CopyAll/>
-            </CopyToClipboard>
-        </button>
+        <Tooltip title="copy code">
+            <button
+                className="bg-gray-700 hover:bg-gray-600 text-white p-1 rounded"
+            >
+                <CopyToClipboard text={text} onCopy={onCopy}>
+                    <CopyAll fontSize="small"/>
+                </CopyToClipboard>
+            </button>
+        </Tooltip>
     );
 }
 

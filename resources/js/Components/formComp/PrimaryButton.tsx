@@ -18,7 +18,7 @@ export default function PrimaryButton({
             disabled={disabled}
         >
             <span
-                className='block text-black px-4 py-2 font-semibold rounded-3xl bg-white hover:bg-transparent hover:text-white transition'>{children}</span>
+                className='block text-black px-4 py-2 font-semibold rounded-3xl bg-white hover:bg-transparent hover:text-white transition '>{children}</span>
         </button>
     );
 }

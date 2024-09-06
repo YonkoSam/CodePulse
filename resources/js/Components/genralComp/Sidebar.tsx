@@ -1,16 +1,14 @@
 import {Link, usePage} from "@inertiajs/react";
-import {PageProps} from "@/types";
 import {Badge} from "@mui/material";
 import React, {useState} from "react";
-import {Groups2, MessageSharp, Person, Terminal} from "@mui/icons-material";
+import {Groups2, Leaderboard, MessageSharp, Person, Terminal} from "@mui/icons-material";
 import Logo from "@/Components/genralComp/Logo";
 import {Activity} from "lucide-react";
 import {motion} from "framer-motion";
 import {BACKGROUND_GRADIENT, useWindowSize} from "@/utils";
 import AnimatedHamburgerButton from "@/Components/animatedComp/AnimatedHamburgerButton";
 
-const Sidebar = () => {
-    const {unreadMessagesCount} = usePage<PageProps>().props;
+const Sidebar = ({unreadCount}: { unreadCount: number }) => {
     const {url} = usePage();
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const {width} = useWindowSize();
@@ -84,7 +82,7 @@ const Sidebar = () => {
                                     <Badge
                                         className='items-center px-4 gap-2 py-2 '
                                         color="error"
-                                        badgeContent={unreadMessagesCount}
+                                        badgeContent={unreadCount}
                                         overlap="circular"
                                     >
                                         <MessageSharp/>
@@ -100,6 +98,16 @@ const Sidebar = () => {
                                 >
                                     <Terminal/>
                                     <Link href={route('testing-ground')}>Testing Ground</Link>
+                                </motion.div>
+
+                                <motion.div
+                                    variants={linkVariants}
+                                    initial="initial"
+                                    whileHover="hover"
+                                    className={`flex items-center gap-3 px-4 py-2 rounded-xl ${url === '/leader-board' ? 'bg-white text-gray-600' : 'text-gray-100 hover:bg-gray-400 hover:bg-opacity-25'}`}
+                                >
+                                    <Leaderboard/>
+                                    <Link href={route('leader-board')}>Leaderboard</Link>
                                 </motion.div>
                             </div>
                         </nav>

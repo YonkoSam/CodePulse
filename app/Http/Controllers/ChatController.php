@@ -4,106 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Enums\MessageType;
 use App\Events\MessageSeen;
-use App\Events\MessageSent;
+use App\Events\MessageSeenGroupChat;
+use App\Http\Requests\MessageRequest;
 use App\Models\Friendship;
 use App\Models\Message;
+use App\Models\Team;
 use App\Models\User;
+use App\Services\ProfanityFilterService;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Mpociot\Teamwork\TeamworkTeam;
 
 class ChatController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-
-        $latestMessage = Message::where(function ($query) use ($user) {
-            $query->where(function ($subQuery) use ($user) {
-                $subQuery->where('sender_id', $user->id)
-                    ->whereNotNull('receiver_id')
-                    ->orWhere('receiver_id', $user->id);
-            })
-                ->orWhere(function ($subQuery) use ($user) {
-                    $subQuery->where('sender_id', $user->id)
-                        ->whereIn('team_id', $user->teams()->pluck('id'));
-                })
-            ;
-        })->latest()->first();
+        $user = auth()->user();
+        $latestMessage = $this->getLatestMessageForUser($user);
 
         if ($latestMessage) {
-            if ($latestMessage->team_id) {
-                return redirect()->route('chat.team', ['teamId' => $latestMessage->team_id]);
-            } else {
-                return redirect()->route('chat.user', ['receiverId' => $latestMessage->sender_id === $user->id ? $latestMessage->receiver_id : $latestMessage->sender_id]);
-            }
-        } else {
-            $friend = $user->allFriends()->first();
-            if ($friend) {
-                return redirect()->route('chat.user', ['receiverId' => $friend->id]);
-            } else {
-                $team = $user->teams()->first();
-                if ($team) {
-                    return redirect()->route('chat.team', ['teamId' => $team->id]);
-                } else {
-                    return $this->renderChat(null);
-                }
-            }
+            return $this->redirectBasedOnLatestMessage($latestMessage, $user);
         }
+
+        return $this->redirectToFirstFriendOrTeam($user);
     }
+
+    private function getLatestMessageForUser($user)
+    {
+        return $user->sentMessages()->latest()->first() ?? $user->receivedMessages()->latest()->first() ;
+    }
+
+    private function redirectBasedOnLatestMessage($latestMessage, $user)
+    {
+        if ($latestMessage->team_id) {
+            return redirect()->route('chat.team', ['teamId' => $latestMessage->team_id]);
+        }
+
+        $receiverId = $latestMessage->sender_id === $user->id ? $latestMessage->receiver_id : $latestMessage->sender_id;
+
+        return redirect()->route('chat.user', ['receiverId' => $receiverId]);
+    }
+
+    private function redirectToFirstFriendOrTeam($user)
+    {
+        $friend = $user->allFriends()->first();
+        if ($friend) {
+            return redirect()->route('chat.user', ['receiverId' => $friend->id]);
+        }
+
+        $team = $user->teams()->first();
+        if ($team) {
+            return redirect()->route('chat.team', ['teamId' => $team->id]);
+        }
+
+        return $this->renderChat(null);
+    }
+
 
     protected function renderChat($messages, $receiver = null, $team = null)
     {
         $user = Auth::user();
-        $friends = $user->allFriends()
-            ->with([
-                'profile' => function ($query) {
-                    $query->select('user_id', 'profiles.id');
-                },
-            ])
-            ->withCount([
-                'receivedMessages as last_message_timestamp' => function ($query) use ($user) {
-                    $query->select(DB::raw('MAX(created_at)'))
-                        ->where(function ($q) use ($user) {
-                            $q->where('sender_id', $user->id)
-                                ->orWhere('receiver_id', $user->id);
-                        });
-                },
-            ])
-            ->orderByDesc('last_message_timestamp')
-            ->simplePaginate(7, ['*'], 'friends');
 
-        $friends->getCollection()->transform(function ($friend) use ($user) {
-            if ($friend->isOnline()) {
-                $friend->online = $friend->isOnline();
-            } else {
-                $friend->lastTimeOnline = $friend->lastTimeOnline();
-            }
+        $friends = $this->getFriendsWithUnreadMessages($user);
+        $teams = $this->getTeamsWithUnreadMessages($user);
 
-            $friend->unreadMessagesCount = $user->unreadMessages($friend)->count();
+        $blockInitiatorId = $this->getBlockInitiatorId( $receiver);
 
-            return $friend;
-        });
-
-        $teams = $user->teams()->with(['users' => function ($query) {
-            $query->select('id', 'name', 'profile_image', 'current_team_id');
-            $query->with(['profile' => function ($profileQuery) {
-                $profileQuery->select('user_id', 'status');
-            }])->limit(5);
-        }])->get();
-
-        $teams->each(function ($team) use ($user) {
-            $team->unreadMessagesCount = $team->unreadMessages($user)->count();
-        });
-
-        $blockInitiatorId = ($receiver && $user->profile->isBlocked($receiver))
-            ? Friendship::findFriendShip($receiver->id)->blocked_initiator
-            : null;
-
-        return Inertia::render('Friends/Messages', [
+        return Inertia::render('Chat/Messages', [
             'messages' => $messages,
             'friends' => $friends,
             'receiver' => $receiver,
@@ -112,7 +81,51 @@ class ChatController extends Controller
             'teams' => $teams,
             'blockedList' => $user->blockedUsers(),
         ]);
+    }
 
+    private function getFriendsWithUnreadMessages($user)
+    {
+        return $user->allFriends(sort: true)
+            ->with([
+                'profile' => function ($query) {
+                    $query->select('user_id', 'profiles.id');
+                },
+            ])
+            ->simplePaginate(7, ['*'], 'friends')
+            ->through(function ($friend) use ($user) {
+                $friend->online = $friend->isOnline();
+                $friend->unreadMessagesCount = $user->unreadMessages($friend)->count();
+                return $friend;
+            });
+    }
+
+    private function getTeamsWithUnreadMessages($user)
+    {
+        return $user->teams()
+            ->with(['users' => function ($query) use ($user) {
+                $query->select('id', 'name', 'profile_image', 'current_team_id')
+                    ->visible($user->id)
+                    ->with(['profile' => function ($profileQuery) {
+                        $profileQuery->select('user_id', 'status');
+                    }])
+                    ->limit(5);
+            }])
+            ->orderByDesc('last_message_timestamp')
+            ->get()
+            ->each(function ($team) use ($user) {
+                $team->unreadMessagesCount = $team->unreadMessages($user)->count();
+            });
+
+    }
+
+    private function getBlockInitiatorId( $receiver)
+    {
+        if ($receiver) {
+            $friedShip = Friendship::findFriendShip($receiver->id);
+            if ($friedShip) {
+                return $friedShip->blocked ? $friedShip->blocked_initiator : null;
+            }}
+        return null;
     }
 
     public function userChat($receiverId = null)
@@ -123,23 +136,12 @@ class ChatController extends Controller
         if (! $receiver) {
             return redirect()->route('chat.index')->withErrors(['Receiver not found']);
         }
+         $receiver->online = $receiver->isOnline();
+        $receiver->load(['profile' => function ($query) {
+            $query->select('user_id', 'profiles.id');
+        }]);
 
-        if($receiver->isOnline()) {
-            $receiver->online = $receiver->isOnline();
-
-        }else {
-            $receiver->lastTimeOnline = $receiver->lastTimeOnline();
-
-        }
-
-        $messages = Message::where(function ($query) use ($user, $receiverId) {
-            $query->where('sender_id', $user->id)
-                ->where('receiver_id', $receiverId);
-        })
-            ->orWhere(function ($query) use ($user, $receiverId) {
-                $query->where('sender_id', $receiverId)
-                    ->where('receiver_id', $user->id);
-            })
+        $messages =$user->allMessagesWithFriend($receiver->id)
             ->latest()
             ->with(['sender', 'receiver'])
             ->simplePaginate(50, ['*'], 'messages');
@@ -153,7 +155,7 @@ class ChatController extends Controller
             ->update(['seen_at' => now()]);
 
         if ($updatedRowsCount) {
-            event(new MessageSeen($receiverId));
+            event(new MessageSeen($receiverId,$user->id));
         }
 
         return $this->renderChat($messages, $receiver);
@@ -162,7 +164,7 @@ class ChatController extends Controller
 
     public function teamChat($teamId = null)
     {
-        $team = TeamworkTeam::find($teamId);
+        $team = Team::find($teamId);
         $user = Auth::user();
 
         if (!$team) {
@@ -174,27 +176,35 @@ class ChatController extends Controller
         }
 
 
-        $messages = Message::where('team_id', $teamId)
-            ->visibleSinceJoined($teamId,$user->id)
-            ->with(['sender', 'team', 'team.users', 'usersSeen'])
+        $messages = $user->allMessagesWithTeam($teamId)
+            ->with([
+                'sender:id,name,profile_image',
+                'team:id,name',
+                'usersSeen' => function ($query) {
+                    $query->select(['users.id','users.name','users.profile_image'])->latest()->take(10);
+                },
+            ])
+            ->withCount('usersSeen')
             ->latest()
             ->simplePaginate(50, ['*'], 'messages');
 
+
+        $team->loadCount('users');
         $rowsAffected = false;
 
-        $messages->each(function ($message) use ($user, &$rowsAffected) {
+        foreach ($messages as $message) {
             if ($message->sender_id !== $user->id) {
-                $userSeen = $message->usersSeen()->where('user_id', $user->id)->first();
-                if (! $userSeen) {
+                $userSeen = $message->usersSeen()->where('user_id', $user->id)->exists();
+                if (!$userSeen) {
                     $rowsAffected = true;
-                    $message->usersSeen()->attach($user->id, ['seen_at' => now()]);
+                    $message->markAsSeen($user->id);
                 }
             }
-        });
+        }
 
 
         if ($rowsAffected) {
-            event(new MessageSeen($messages->first()->sender_id));
+            event(new MessageSeenGroupChat($teamId,$user));
         }
 
         return $this->renderChat($messages, null, $team);
@@ -203,23 +213,11 @@ class ChatController extends Controller
     public function show($receiverId)
     {
 
-        $user_id = Auth::user()?->id;
+        $user = Auth::user();
 
-        if (! $user_id) {
-            return response()->json(['error' => 'Unauthenticated'], 401);
-        }
-        $messages = Message::where(function ($query) use ($user_id, $receiverId) {
-            $query->where('sender_id', $user_id)
-                ->where('receiver_id', $receiverId);
-        })
-            ->orWhere(function ($query) use ($user_id, $receiverId) {
-                $query->where('sender_id', $receiverId)
-                    ->where('receiver_id', $user_id);
-            })
-            ->with(['sender', 'receiver'])
+        $messages = $user->allMessagesWithFriend($receiverId)->with(['sender', 'receiver'])
             ->orderBy('created_at', 'desc')
-            ->take(20)
-            ->get();
+            ->paginate(10);
 
         if ($messages->count() <= 0) {
             return response()->json([
@@ -228,90 +226,98 @@ class ChatController extends Controller
         }
 
         $messageIds = $messages->pluck('id')->toArray();
+
+
         $updatedRowsCount = DB::table('messages')
             ->whereIn('id', $messageIds)
-            ->where('receiver_id', $user_id)
+            ->where('receiver_id', $user->id)
             ->whereNull('seen_at')
             ->update(['seen_at' => now()]);
 
         if ($updatedRowsCount) {
-            event(new MessageSeen($receiverId));
+            event(new MessageSeen($receiverId,$user->id));
         }
+
 
         return response()->json($messages);
 
     }
 
-    public function store(Request $request)
+    public function store(MessageRequest $request, ProfanityFilterService $profanityFilterService)
     {
+        $validatedData = $request->validated();
 
-        $request->validate([
-            'receiver_id' => 'required_without:team_id',
-            'team_id' => 'required_without:receiver_id',
-            'code' => 'nullable',
-            'message' => 'required_without_all:code,audioBlob,image',
-            'audioBlob' => 'nullable|mimes:webm',
-            'image' => 'nullable|image',
-        ]);
+        $receiver = null;
+        $team = null;
 
-        $user = User::find($request->receiver_id);
-        if ($user) {
-            if ($user->profile->isBlocked(auth()->user())) {
-                return back()->withErrors(['message' => 'Sorry , you can not send a message to this user.']);
-            }
+        if (isset($validatedData['receiver_id'])) {
+            $this->validateReceiver($validatedData['receiver_id']);
+            $receiver = $validatedData['receiver_id'];
+        } elseif (isset($validatedData['team_id'])) {
+            $this->validateTeam($validatedData['team_id']);
+            $team = $validatedData['team_id'];
         }
 
         $message = new Message();
-        $message->sender_id = Auth::id();
-
-        if (request('team_id')) {
-            $team = TeamworkTeam::find(request('team_id'));
-            if (! $team) {
-                abort('404');
-            }
-
-            if (! $team->hasUser(auth()->user())) {
-                abort('404');
-            }
-            $message->team_id = $request->team_id;
-        }
-        if (request('receiver_id')) {
-            $message->receiver_id = $request->receiver_id;
-        }
-
-        if (request('audioBlob')) {
-            $audioPath = request('audioBlob')->store('audio-files');
-            $message->type = MessageType::audio;
-            $message->message = $audioPath;
-        } elseif (request('image')) {
-            $imagePath = request('image')->store('image-files');
-            $message->type = MessageType::image;
-            $message->message = $imagePath;
-        } else {
-            $message->type = MessageType::text;
-            $message->message = $request->message;
-        }
-
+        $message->sender_id = auth()->id();
+        $message->receiver_id = $receiver;
+        $message->team_id = $team;
+        $message->type = $this->determineMessageType($request);
+        $message->message = $this->processMessageContent($request, $profanityFilterService);
+        $message->seen_at = null;
         $message->save();
 
+        $message->load('sender', 'receiver');
 
-        if ($message->team_id) {
-
-            $memberIds = TeamworkTeam::find($message->team_id)->users()->pluck('id')->toArray();
-            foreach ($memberIds as $memberId) {
-                if($message->sender_id != $memberId) {
-                    event(new MessageSent($memberId,$message->sender_id,'team'));
-                }
-            }
-
-
-        } else {
-            event(new MessageSent($message->receiver_id, $message->sender_id));
-        }
-
-        return back();
+        return response()->json($message);
     }
 
+    private function validateReceiver($receiverId)
+    {
+        $user = auth()->user();
+        $receiver = User::findOrFail($receiverId);
+
+        if ($receiver->isBlocked($user->id) || !$user->isFriend($receiver)) {
+            throw ValidationException::withMessages([
+                'receiver_id' => ['Sorry, you are smart but not smart enough.'],
+            ]);
+        }
+    }
+
+    private function validateTeam($teamId)
+    {
+        $team = Team::findOrFail($teamId);
+
+        if (!$team->hasUser(auth()->user())) {
+            throw ValidationException::withMessages([
+                'team_id' => ['You are not a member of this team.'],
+            ]);
+        }
+
+    }
+
+
+    private function determineMessageType(MessageRequest $request)
+    {
+        if ($request->hasFile('audioBlob')) {
+            return MessageType::audio;
+        } elseif ($request->hasFile('image')) {
+            return MessageType::image;
+        } else {
+            return MessageType::text;
+        }
+    }
+
+    private function processMessageContent(MessageRequest $request, ProfanityFilterService $profanityFilterService)
+    {
+        if ($request->hasFile('audioBlob')) {
+            return $request->file('audioBlob')->store('audio-files');
+        } elseif ($request->hasFile('image')) {
+            return $request->file('image')->store('image-files');
+        } else {
+            return $profanityFilterService->filterString($request->input('message'));
+        }
+    }
 
     public function destroy(Message $message) {
 
@@ -326,4 +332,7 @@ class ChatController extends Controller
         $message->delete();
         return back();
     }
+
+
+
 }

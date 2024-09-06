@@ -2,11 +2,11 @@
 
 namespace App\Notifications;
 
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Mpociot\Teamwork\TeamInvite;
-use Mpociot\Teamwork\TeamworkTeam;
 
 class TeamInviteNotification extends Notification
 {
@@ -46,7 +46,7 @@ class TeamInviteNotification extends Notification
         return [
             'accept_token' => $this->invite->accept_token,
             'deny_token' => $this->invite->deny_token,
-            'message' => 'you have been invited to join the team '.TeamworkTeam::find($this->invite->team_id)->name.' by '
+            'message' => 'you have been invited to join the team '.Team::find($this->invite->team_id)->name.' by '
                 .$name,
         ];
     }

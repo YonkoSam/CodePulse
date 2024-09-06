@@ -25,7 +25,7 @@ const TeamSelector = ({teams, currentTeamId, placeholder, onChange, className = 
                         value={selectedTeam || -1}
                         onChange={handleChange}
                         className={className}
-                    >
+                        variant='standard'>
                         <MenuItem key={-1} value={-1}>
                             <Typography variant="body2">
                                 Global

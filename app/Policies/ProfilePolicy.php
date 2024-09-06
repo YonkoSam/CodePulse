@@ -12,6 +12,6 @@ class ProfilePolicy
 
     public function view(User $user, Profile $profile): bool
     {
-        return !$user->profile?->isBlocked($profile->user);
+        return !$user->isBlocked($profile->user_id);
     }
 }

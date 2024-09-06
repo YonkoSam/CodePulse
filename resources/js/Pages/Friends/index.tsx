@@ -4,13 +4,13 @@ import {Avatar, Box, Button, IconButton, Stack, Tooltip} from "@mui/material";
 import React, {useState} from "react";
 import PrimaryButton from "@/Components/formComp/PrimaryButton";
 import {User} from "@/types";
-import UserCard from "@/Components/profile/UserCard";
 import {dataType, handleUnblock} from "@/utils";
 import Pagination from "@/Components/genralComp/Pagination";
 import SearchBar from "@/Components/genralComp/SearchBar";
 import {EyeIcon} from "lucide-react";
 import {motion} from "framer-motion";
 import FirstTimeCard from "@/Components/genralComp/FirstTimeCard";
+import FriendCard from "@/Components/profile/FriendCard";
 
 const Index = ({["code-mates"]: codeMates, blockedList, auth}) => {
 
@@ -18,6 +18,7 @@ const Index = ({["code-mates"]: codeMates, blockedList, auth}) => {
     const hasBlockedList = blockedList && blockedList.length > 0;
 
     const [showBlockedList, setShowBlockedList] = useState(false);
+
 
     return (
         <AuthenticatedLayout
@@ -43,8 +44,8 @@ const Index = ({["code-mates"]: codeMates, blockedList, auth}) => {
                             Block List
                         </h2>
                         <div
-                            className="grid gap-2 px-4 py-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
-                        >
+                            className='grid gap-4 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6'>
+
                             {blockedList.map((blockedUser: User, i: number) => (
                                 <motion.div
                                     key={blockedUser.id}
@@ -102,16 +103,16 @@ const Index = ({["code-mates"]: codeMates, blockedList, auth}) => {
                                         animate={{x: 0, y: 0, opacity: 1}}
                                         transition={{duration: 0.3, delay: i * 0.05}}
                                     >
-                                        <UserCard friend={friend}/>
+                                        <FriendCard friend={friend}/>
                                     </motion.div>
                                 ))}
                             </div>
                             <Stack justifyContent="center" alignItems="center" mt={4}>
                                 <Box maxWidth="fit-content">
                                     <Pagination
-                                        links={codeMates.links}
                                         currentPage={codeMates.current_page}
                                         lastPage={codeMates.last_page}
+                                        paginatedDataName={'code-mates'}
                                     />
                                 </Box>
                             </Stack>

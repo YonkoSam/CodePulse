@@ -11,29 +11,33 @@ import {
     IconButton,
     List,
     ListItem,
-    ListItemAvatar,
-    ListItemText,
     Stack,
     Tooltip,
     Typography
 } from '@mui/material';
+
 import {Link, router, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {Clear, Edit, Terminal} from "@mui/icons-material";
+import {Edit, QuestionMark, Report, Terminal} from "@mui/icons-material";
 import Swal from "sweetalert2";
 import InputError from "@/Components/formComp/InputError";
 import {Errors} from "@inertiajs/inertia";
 import CodeBlock from "@/Components/codeComp/CodeBlock";
 import CodeEditor from "@/Components/codeComp/CodeEditor";
-import ReplyIcon from "@mui/icons-material/Reply";
 import ReactTimeAgo from "react-time-ago";
 import PrimaryButton from "@/Components/formComp/PrimaryButton";
 import {AnimatePresence, motion} from "framer-motion";
 import LikeButton from "@/Components/pulseComp/LikeButton";
 import TextInput from "@/Components/formComp/TextInput";
+import CommentSection from "@/Components/pulseComp/Comment";
+import {iconStyle, Toast} from "@/utils";
+import Pagination from "@/Components/genralComp/Pagination";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import 'github-markdown-css/github-markdown-dark.css'
+import ReportForm from "@/Components/ReportForm";
 
-const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comment[], likes: Like[] }>) => {
-
+const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: any, likes: Like[] }>) => {
     const {auth} = usePage<PageProps>().props;
     const [newComment, setNewComment] = useState('');
     const [currentReplyTargetId, setCurrentReplyTargetId] = useState(-1);
@@ -42,14 +46,16 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
     const [showReplyCodeEditor, setShowReplyCodeEditor] = useState(false);
     const [commentCode, setCommentCode] = useState({sourceCode: '', language: '',});
     const [replyCode, setReplyCode] = useState({sourceCode: '', language: '',});
+    const [openReportForm, setOpenReportForm] = useState(false)
 
     const replyRef = useRef(null);
     const commentRef = useRef(null);
 
+    const canMarkAsBestAnswer = auth.user.id == pulse.user_id && !pulse.is_answered;
+
     useEffect(() => {
         if (currentReplyTargetId != -1 && replyRef.current) {
             replyRef.current.focus();
-
         }
     }, [currentReplyTargetId]);
 
@@ -59,7 +65,6 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
         }
     );
 
-    const isAuthUser = pulse.user_id === auth.user.id;
 
     useEffect(() => {
 
@@ -99,13 +104,45 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
             onError: (err) => setErrors(err)
 
         });
+    };
 
+    const handleMarkAsBestAnswer = (pulseId: number, commentId: number) => {
+        router.put(route('pulses.best-answer', {pulse: pulseId, comment: commentId}), {},
+            {
+                preserveState: false,
+                onSuccess: () => {
+                    Toast.fire({
+                        title: 'comment marked as best answer successfully',
+                        icon: 'success',
+                    })
+                },
+                onError: (err) => setErrors(err)
+
+            }
+        )
+
+    }
+    const handleUpdate = async (commentId: number, text: string) => {
+
+        setErrors({
+            text: "",
+        });
+        router.patch(route('comment.update', commentId), {text}, {
+            preserveScroll: true,
+            only: ['comments'],
+            onSuccess: () => {
+                Toast.fire({
+                    icon: 'success',
+                    text: 'comment updated successfully'
+                });
+            },
+            onError: (err) => setErrors(err)
+        });
 
     };
 
 
     const handleReplySubmit = (commentId: number) => {
-
         setErrors({
             text: "",
         });
@@ -164,13 +201,13 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
             }
         })
 
-
     }
+
 
     const replyForm = (comment: Comment) => {
 
         return currentReplyTargetId === comment.id &&
-            <Stack>
+            <Stack marginY={2}>
                 {showReplyCodeEditor &&
                     <AnimatePresence>
                         <motion.div
@@ -178,8 +215,7 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
                             animate={{opacity: 1, scale: 1, y: 0}}
                             exit={{opacity: 0, scale: 0.5, y: 50}}
                             transition={{type: 'spring', stiffness: 300, damping: 20}}
-
-                            className='mb-4 max-w-screen-lg'>
+                            className='my-4 max-w-screen-lg'>
                             <CodeEditor setValue={setReplyCode} height="20vh"
                                         defaultLanguage={comment.code && {
                                             name: comment.code.language,
@@ -194,7 +230,9 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
                         ref={replyRef}
                         className="w-full bg-gray-800 bg-opacity-50 border-none outline-none text-white py-5 px-4 rounded-xl text-base disabled:cursor-not-allowed"
                         placeholder='reply ...'
-                        onChange={e => setNewReply(e.target.value)}
+                        onChange={(e: {
+                            target: { value: React.SetStateAction<string>; };
+                        }) => setNewReply(e.target.value)}
                     />
                     <PrimaryButton className='text-xs mx-1' disabled={newReply.length <= 0}
                                    onClick={() => handleReplySubmit(comment.id)}>
@@ -215,67 +253,41 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
 
     }
 
-    const renderReplies = (comment: Comment) => {
-        return (
-            <List className='!flex-wrap'>
-                {comment.replies && comment.replies.map((reply) => (
-                    <div key={reply.id} className={`lg:ml-[10px]`}>
-                        <ListItem alignItems="flex-start">
-                            <ListItemAvatar>
-                                <Avatar alt={reply.user.name} src={'/' + reply.user.profile_image}/>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={<span className='break-words'>{comment.user_id != reply.user_id && <span
-                                    className='text-xs text-blue-400 px-1'>@{comment.user.name} </span>}{reply.text}</span>}
-                                secondary={
-                                    <span className="inline-flex items-center">
-                                    <span className='font-bold text-white'>by {reply.user.name}</span>
-                                    <span className='ml-1 text-xs text-gray-300'>
-                                        <ReactTimeAgo date={Date.parse(reply.created_at)}/>
-                                    </span>
-                                        {reply.user_id === pulse.user_id && (
-                                            <span className="ml-2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
-                                            Author
-                                        </span>
-                                        )}
-                                </span>
-                                }
-                            />
+    const renderReplies = (comment: Comment, showReplies = false) => {
+        return <AnimatePresence>
+            {showReplies && comment.replies.length > 0 && comment.replies.map((reply, i) => (
+                    <motion.div
+                        initial={{y: -50, opacity: 0}}
+                        animate={{y: 0, opacity: 1}}
+                        exit={{y: -50, opacity: 0}}
+                        transition={{duration: 0.3, delay: i * 0.1}}
 
-                            <IconButton className='!h-fit !text-white'
-                                        onClick={() => {
-                                            setCurrentReplyTargetId(reply.id == currentReplyTargetId ? -1 : reply.id);
-                                        }}><ReplyIcon/></IconButton>
-                            {reply.user_id === auth.user.id && (
-                                <IconButton className='!h-fit !text-white'
-                                            onClick={() => handleCommentDelete(reply.id)}>
-                                    <Clear/>
-                                </IconButton>
-                            )}
-                        </ListItem>
-                        <Divider className='!bg-white'/>
+                        key={reply.id} className='mt-5'>
+                        <CommentSection comment={reply} setReplyId={setCurrentReplyTargetId}
+                                        handleCommentDelete={handleCommentDelete} renderReplyForm={replyForm}
+                                        renderReplies={renderReplies}
+                                        handleUpdate={handleUpdate}
+                                        canMarkAsBestAnswer={canMarkAsBestAnswer}
+                                        markAsBestAnswer={handleMarkAsBestAnswer}
+                        />
+                    </motion.div>
+                )
+            )}
 
-                        {reply.code && (
-                            <div className='p-3 overflow-auto'>
-                                <CodeBlock code={reply.code}/>
-                            </div>
-                        )}
-                        {renderReplies(reply)}
-                        {replyForm(reply)}
-                    </div>
-                ))}
-            </List>
-        );
+        </AnimatePresence>
+
     };
 
     return (
         <AuthenticatedLayout user={auth.user} title={pulse.title}
                              header={<h2 className="font-semibold text-xl text-white leading-tight">{pulse.title}</h2>}>
+            <ReportForm reportableId={pulse.id} setOpen={setOpenReportForm} open={openReportForm}
+                        reportableType='App\Models\Pulse'/>
 
             <Container
-                className="rounded-2xl p-5 shadow-md w-9/12 bg-black/30 backdrop-blur-[8px]  text-white max-h-screen overflow-auto">
+                className="rounded-2xl p-5 shadow-md w-9/12 bg-black/30  text-white max-h-screen overflow-auto">
 
-                <Card className='!bg-black/30 !text-white !rounded-2xl border-white border-2 '>
+                <Card className='!bg-black/30 !text-white !rounded-2xl'>
                     <CardHeader
                         avatar={<Avatar alt={pulse.user.name}
                                         src={pulse.user.profile_image && '/' + pulse.user.profile_image}/>}
@@ -292,19 +304,25 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
                         action={
                             <div className='flex items-center gap-2'>
                                 {
-                                    pulse.user_id == auth.user.id &&
-                                    <Link href={route('pulses.update', pulse.id)}
-                                          className='text-white bg-gray-800 p-2 rounded-full hover:text-gray-800 hover:bg-gray-200 hover:rotate-12 duration-300 ease-in-out'><Edit/></Link>
+                                    pulse.user_id == auth.user.id ?
+                                        <Link href={route('pulses.update', pulse.id)}
+                                              className='text-white bg-gray-800 p-2 rounded-full hover:text-gray-800 hover:bg-gray-200 hover:rotate-12 duration-300 ease-in-out'><Edit/></Link>
+                                        : <Tooltip title={'report this pulse'}>
+                                            <IconButton onClick={() => setOpenReportForm(true)}>
+                                                <Report className={iconStyle}/>
+                                            </IconButton>
+                                        </Tooltip>
                                 }
-                                <div className={`bg-gray-800 rounded-full`}>
-                                    <LikeButton likes={likes} pulseId={pulse.id} authId={auth.user.id}/>
-                                </div>
+
+                                <LikeButton likes={likes} pulseId={pulse.id} authId={auth.user.id}/>
                             </div>
 
                         }
                     />
-                    <CardContent>
-                        <Typography variant="body1">{pulse.text}</Typography>
+                    <CardContent className='markdown-body !bg-black/30'>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}
+                                       className='font-jetBrains'
+                        >{pulse.text}</ReactMarkdown>
                     </CardContent>
 
                     {
@@ -313,71 +331,39 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
 
 
                 </Card>
-                <Divider variant="middle" style={{margin: '20px 0'}}/>
+                <Divider className='bg-white !my-5'/>
                 <Typography variant="h6" gutterBottom>
-                    Comments
+                    Comments {comments.total > 0 && `(${comments.total})`}
                 </Typography>
-                {(comments.length > 0) ? (
+                {(comments.data?.length > 0) ? (
                     <List className='!flex-wrap'>
-                        {comments.map((comment: Comment, index: number) => (
-                            <ListItem key={index} alignItems="flex-start">
-                                <ListItemAvatar>
-                                    <Avatar alt={comment.user.name} src={'/' + comment.user.profile_image}/>
-                                </ListItemAvatar>
-                                <Stack>
-                                    <Stack direction='row' alignItems='center'>
-                                        <div className='grid'>
-                                            <div className='flex items-start'>
-                                                <ListItemText className='max-w-2xl'
-                                                              primary={<span
-                                                                  className=' break-words'> {comment.text}</span>
+                        {comments.data.map((comment: Comment, index: number) => (
+                            <ListItem key={index}>
+                                <CommentSection comment={comment}
+                                                handleCommentDelete={handleCommentDelete}
+                                                setReplyId={setCurrentReplyTargetId}
+                                                renderReplies={renderReplies}
+                                                renderReplyForm={replyForm}
+                                                handleUpdate={handleUpdate}
+                                                canMarkAsBestAnswer={canMarkAsBestAnswer}
+                                                markAsBestAnswer={handleMarkAsBestAnswer}
 
-                                                              }
-                                                              secondary={
-                                                                  <span>
-                                                                      <span
-                                                                          className='font-bold text-white'>by {comment.user.name}</span>
-                                                                      <span
-                                                                          className='ml-1 text-xs text-white'> <ReactTimeAgo
-                                                                          date={Date.parse(comment.created_at)}/></span>
-                                                                  </span>}
-                                                />
-                                            </div>
-
-
-                                            {comment.code &&
-                                                <div className='p-3 overflow-auto'><CodeBlock
-                                                    code={comment.code}/>
-                                                </div>}
-                                        </div>
-                                    </Stack>
-                                    <Divider className='!bg-white'/>
-
-
-                                    {renderReplies(comment)}
-                                    {replyForm(comment)}
-
-                                </Stack>
-                                <IconButton className='!h-fit !text-white'
-                                            onClick={() => {
-                                                setCurrentReplyTargetId(comment.id == currentReplyTargetId ? -1 : comment.id);
-
-                                            }}><ReplyIcon/></IconButton>
-                                {comment.user_id === auth.user.id ? <IconButton className='!h-fit !text-white'
-                                                                                onClick={() => handleCommentDelete(comment.id)}><Clear/></IconButton> : <></>
-                                }
-
-
+                                />
                             </ListItem>
                         ))}
+
+                        {comments.last_page != 1 && <Pagination currentPage={comments.current_page}
+                                                                lastPage={comments.last_page}
+                                                                paginatedDataName={'comments'}/>}
                     </List>
+
 
                 ) : (
                     <Typography variant="body2">Be the First One to Write a
                         Comments</Typography>
                 )}
                 <Box mt={2}>
-                    <div className='flex justify-between items-center py-2'>
+                    <div className='flex justify-between items-center py-2 '>
                         <Typography variant="h6" gutterBottom>
                             Write a Comment
                         </Typography>
@@ -408,14 +394,32 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: Comm
                             </motion.div>
                         </AnimatePresence>
                     }
-                    <TextInput
-                        isTextArea={true}
-                        ref={commentRef}
-                        className="w-full bg-gray-800 bg-opacity-50 border-none outline-none text-white py-5 px-4 rounded-xl text-base disabled:cursor-not-allowed"
-                        placeholder='comment ...'
-                        value={newComment}
-                        onChange={e => setNewComment(e.target.value)}
-                    />
+                    <div className="relative">
+
+                        <TextInput
+                            isTextArea={true}
+                            ref={commentRef}
+                            className="w-full bg-gray-800 bg-opacity-50 border-none outline-none text-white py-5 px-4 rounded-xl text-base disabled:cursor-not-allowed"
+                            placeholder="Comment... (Markdown supported)"
+                            value={newComment}
+                            onChange={(e: {
+                                target: { value: React.SetStateAction<string>; };
+                            }) => setNewComment(e.target.value)}
+                        />
+                        <Tooltip
+                            title={<span>Markdown is supported. You can use **bold**, *italic*, \`code\`, etc.
+                                <br/> you can learn more <a
+                                    title={'Markdown Getting Started'}
+                                    href='https://www.markdownguide.org/getting-started/'
+                                    target='_blank'>here</a> </span>}>
+                            <div className="absolute right-3 top-3 text-gray-400 hover:text-white cursor-help">
+                                <QuestionMark style={{fontSize: 20}}/>
+                            </div>
+                        </Tooltip>
+                        <div className="text-xs text-gray-400 mt-1">
+                            Tip: You can use Markdown syntax in your comment.
+                        </div>
+                    </div>
 
 
                     <InputError message={errors.text} className="mt-2"/>

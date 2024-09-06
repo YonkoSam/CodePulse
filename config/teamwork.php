@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Team;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -30,7 +32,7 @@ return [
     | the team if it is in a different namespace.
     |
     */
-    'team_model' => Mpociot\Teamwork\TeamworkTeam::class,
+    'team_model' => Team::class,
 
     /*
     |--------------------------------------------------------------------------

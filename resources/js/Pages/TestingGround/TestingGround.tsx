@@ -22,9 +22,10 @@ const TestingGround = ({language = "", sourceCode = ""}) => {
             <div className='px-2 md:px-16 flex gap-3 flex-col items-center flex-1 md:flex-row'>
                 {
                     isMobile && <IconButton className='!text-white' onClick={() => setRunCode(prevState => !prevState)}>
-                        {runCode ?
-                            <Terminal/> :
-                            <Code/>}
+                        <span className='font-bold text-sm p-1'>Switch</span> {runCode ?
+                        <Terminal/> :
+                        <Code/>}
+
                     </IconButton>
                 }
 
@@ -48,7 +49,7 @@ const TestingGround = ({language = "", sourceCode = ""}) => {
                     className={`w-full md:w-1/2 ${isMobile && (runCode ? 'block' : 'hidden')}`}
 
                 >
-                    <Output language={code.language} sourceCode={code.sourceCode}/>
+                    <Output language={code.language.toLowerCase()} sourceCode={code.sourceCode}/>
                 </motion.div>
 
 

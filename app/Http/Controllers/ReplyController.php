@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\NotificationSent;
 use App\Models\Comment;
 use App\Notifications\ReplyNotification;
 
@@ -31,7 +30,6 @@ class ReplyController extends Controller
             else {
                 $comment->user->notify(new ReplyNotification($reply));
             }
-            event(new NotificationSent($comment->user_id));
         }
 
         return back();

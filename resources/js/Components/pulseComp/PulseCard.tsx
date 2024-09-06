@@ -25,7 +25,7 @@ const PulseCard = ({pulse}: { pulse: Pulse }) => {
                 }
                 title={<Typography variant="h6" style={{color: '#fff'}}>{pulse.user.name}</Typography>}
                 subheader={
-                    <span className='flex items-center gap-2'>
+                    <span className='flex items-center gap-2 h-7'>
                         <Typography variant="body2"
                                     style={{color: '#fff'}}>{format(new Date(pulse.created_at), 'PPP')}</Typography>
                         {pulse.language &&
@@ -37,13 +37,13 @@ const PulseCard = ({pulse}: { pulse: Pulse }) => {
                     </span>
                 }
             />
-            <CardContent className='!flex !flex-col !justify-between !min-h-60 !max-h-60'>
+            <CardContent className='!flex !flex-col !justify-between min-h-60'>
 
                 <Link href={route('pulses.show', pulse.id)} style={{textDecoration: 'none'}}>
                     <Typography variant="h5" style={{color: '#fff', fontWeight: 'bold'}}
                                 className='line-clamp-1'>{pulse.title}</Typography>
                     <Typography variant="body1" style={{color: '#fff'}}
-                                className='line-clamp-5'>{pulse.text}</Typography>
+                                className='line-clamp-4'>{pulse.text}</Typography>
                 </Link>
 
                 <Box mt={2} display="flex" justifyContent="space-between">

@@ -27,7 +27,7 @@ const TeamsList = ({teams, auth}) => {
     const [editTeamId, setEditTeamId] = useState(null);
     const isOwnerOfTeam = (team) => auth.user.id == team.owner_id;
 
-    const handleDelete = (teamId: number) => {
+    const handleDelete = (team: number) => {
         Swal.fire({
             title: "You won't be able to revert this?",
             text: "all the team data will be removed including messages and pulses",
@@ -38,7 +38,7 @@ const TeamsList = ({teams, auth}) => {
             confirmButtonText: "Yes, delete it!"
         }).then((result: any) => {
             if (result.isConfirmed) {
-                destroy(route('teams.destroy', teamId), {
+                destroy(route('teams.destroy', team), {
                     onSuccess: () => {
                         Swal.fire({
                             title: "Deleted!",
@@ -65,7 +65,7 @@ const TeamsList = ({teams, auth}) => {
             confirmButtonText: "Yes, leave it!"
         }).then((result: any) => {
             if (result.isConfirmed) {
-                destroy(route('teams.members.destroy', {id: teamId, user_id: auth.user.id}), {
+                destroy(route('teams.members.destroy', {team: teamId, user: auth.user.id}), {
                     onSuccess: () => {
                         Swal.fire({
                             title: "you left the team!",
@@ -105,7 +105,7 @@ const TeamsList = ({teams, auth}) => {
                             </TableCell>
                             <TableCell className="space-x-1">
                                 {auth.currentTeam?.id !== team.id ? (
-                                    <Link href={route('teams.switch', team.id)} className="mr-2">
+                                    <Link href={route('teams.switch', {team: team.id})} className="mr-2">
                                         <Button variant="outlined" size="small" startIcon={<LogInIcon/>}
                                                 className="!text-white !border-white">
                                             Switch
@@ -114,15 +114,16 @@ const TeamsList = ({teams, auth}) => {
                                 ) : (
                                     <Chip label="Current team" className="!bg-indigo-700 !text-white"/>
                                 )}
-                                <Link href={route('teams.members.show', team.id)}>
-                                    <Button variant="outlined" size="small" startIcon={<PeopleAlt/>}
-                                            className="!text-white !border-white">
-                                        Members
-                                    </Button>
-                                </Link>
+
 
                                 {isOwnerOfTeam(team) ? (
                                     <>
+                                        <Link href={route('teams.members.show', team.id)}>
+                                            <Button variant="outlined" size="small" startIcon={<PeopleAlt/>}
+                                                    className="!text-white !border-white">
+                                                Members
+                                            </Button>
+                                        </Link>
                                         <Button
                                             variant="outlined"
                                             size="small"

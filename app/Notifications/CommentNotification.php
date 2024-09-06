@@ -11,14 +11,16 @@ class CommentNotification extends Notification
 {
     use Queueable;
 
-    protected $comment;
+    protected Comment $comment;
+    protected bool $isAiGenerated;
 
     /**
-     * CreateAndUpdate a new notification instance.
+     * Create a new notification instance.
      */
-    public function __construct(Comment $comment)
+    public function __construct(Comment $comment, $isAiGenerated = false)
     {
         $this->comment = $comment;
+        $this->isAiGenerated = $isAiGenerated;
     }
 
     /**
@@ -36,10 +38,29 @@ class CommentNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $subject = $this->isAiGenerated
+            ? 'AI-Generated Comment on Your Pulse'
+            : 'New Comment on Your Pulse';
+
         return (new MailMessage)
-            ->line($this->comment->user->name.' has comment on one of your pulses.')
-            ->action('View Request', url('/pots/'.$this->comment->pulse_id))
-            ->line('Thank you for using our application!');
+            ->subject($subject)
+            ->greeting('Hello ' . $notifiable->name . ',')
+            ->line($this->getNotificationMessage())
+            ->action('View Pulse', url('/pulses/' . $this->comment->pulse_id))
+            ->line('Thank you for being a part of our community!');
+    }
+
+    /**
+     * Get the notification message based on whether it's AI-generated or not.
+     */
+    private function getNotificationMessage(): string
+    {
+        if ($this->isAiGenerated) {
+            return 'Our AI assistant has provided a comment on your Pulse: "' . $this->comment->text . '"';
+        }
+
+        $pulseTitle = $this->comment->pulse->title ?? 'your Pulse';
+        return $this->comment->user->name . ' has commented on ' . $pulseTitle . ': "' . $this->comment->text . '"';
     }
 
     /**
@@ -49,10 +70,9 @@ class CommentNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
-
         return [
             'comment_id' => $this->comment->id,
-            'message' => $this->comment->user->name.' has commented on one of your Pulse "'.$this->comment->text.' "',
+            'message' => $this->getNotificationMessage(),
             'url' => route('pulses.show', ['pulse' => $this->comment->pulse_id]),
         ];
     }

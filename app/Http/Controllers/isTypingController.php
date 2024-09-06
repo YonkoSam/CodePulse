@@ -16,12 +16,12 @@ class isTypingController extends Controller
             'isTyping' => 'required',
         ]);
 
-        $receiver = $request->receiver;
+        $receiverId = $request->receiver;
         $team = $request->team;
         $isTyping = $request->isTyping;
 
-        if ($receiver) {
-            event(new isTypingEvent($receiver, auth()->id(), $isTyping));
+        if ($receiverId) {
+            event(new isTypingEvent($receiverId, auth()->id(), $isTyping));
         }
 
         if ($team) {

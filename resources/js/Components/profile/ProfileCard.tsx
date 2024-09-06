@@ -19,9 +19,10 @@ interface ProfileCardProps {
         thirdField: string;
     };
     object: any;
+    setOpen: Function;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({type, object}) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({type, object, setOpen}) => {
 
     const initialValues = useMemo(() => ({
         [type.firstField]: object?.[type.firstField] || "",
@@ -43,16 +44,18 @@ const ProfileCard: React.FC<ProfileCardProps> = ({type, object}) => {
                 onSuccess: () => {
                     Toast.fire({
                         icon: "success",
-                        title: `${type.title.toUpperCase()} Updated successfully`
+                        title: `${type.title} detail Updated successfully`
                     });
+                    setOpen(false);
                 }
             })
             : post(`/profiles/${type.title.toLowerCase()}`, {
                 onSuccess: () => {
                     Toast.fire({
                         icon: "success",
-                        title: `${type.title.toUpperCase()} Added successfully`
+                        title: `${type.title} detail Added successfully`
                     });
+                    setOpen(false);
                 }
             });
     };

@@ -27,5 +27,9 @@ class PulsePolicy
         return $pulse->user_id == $user->id;
     }
 
+    public function delete(User $user, Pulse $pulse): bool
+    {
 
+        return $pulse->user_id == $user->id;
+    }
 }

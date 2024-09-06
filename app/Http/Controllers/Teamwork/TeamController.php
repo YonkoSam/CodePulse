@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers\Teamwork;
 
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Mpociot\Teamwork\Exceptions\UserNotInTeamException;
 
 class TeamController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
 
     public function index()
     {
@@ -38,29 +35,14 @@ class TeamController extends Controller
         return back();
     }
 
-    public function switchTeamApi($id = null)
-    {
-        if ($id) {
-            $teamModel = config('teamwork.team_model');
-            $team = $teamModel::findOrFail($id);
-            try {
-                auth()->user()->switchTeam($team);
-            } catch (UserNotInTeamException $e) {
-                return back()->withErrors(['message' => $e->getMessage()]);
-            }
-        } else {
-            auth()->user()->switchTeam(null);
-        }
 
-        return back();
-    }
-
-    public function switchTeam($id)
+    public function switchTeam(Team $team=null)
     {
-        $teamModel = config('teamwork.team_model');
-        $team = $teamModel::findOrFail($id);
         try {
+            if($team)
             auth()->user()->switchTeam($team);
+            else
+          auth()->user()->switchTeam(null);
         } catch (UserNotInTeamException $e) {
             abort(403);
         }
@@ -68,11 +50,9 @@ class TeamController extends Controller
         return back();
     }
 
-    public function destroy($id)
+    public function destroy(Team $team)
     {
-        $teamModel = config('teamwork.team_model');
 
-        $team = $teamModel::findOrFail($id);
         if (! auth()->user()->isOwnerOfTeam($team)) {
             abort(403);
         }
@@ -80,13 +60,13 @@ class TeamController extends Controller
         $team->delete();
 
         $userModel = config('teamwork.user_model');
-        $userModel::where('current_team_id', $id)
+        $userModel::where('current_team_id', $team->id)
             ->update(['current_team_id' => null]);
 
         return back();
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Team $team)
     {
 
         $request->validate([
@@ -95,7 +75,6 @@ class TeamController extends Controller
 
         $teamModel = config('teamwork.team_model');
 
-        $team = $teamModel::findOrFail($id);
         if (! auth()->user()->isOwnerOfTeam($team)) {
             return back()->withErrors(['message' => 'You are not the team owner']);
         }

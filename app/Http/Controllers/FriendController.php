@@ -23,12 +23,10 @@ class FriendController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->friends()->where('friend_id', $friend->id)->exists() || $user->friendOf()->where('user_id', $friend->id)->exists()) {
-
+        if ($user->isFriend($friend)) {
             $user->friends()->detach($friend->id);
-
             $user->friendOf()->detach($friend->id);
-
+            $user->allMessagesWithFriend($friend->id)->delete();
             return back();
 
         } else {

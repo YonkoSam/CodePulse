@@ -2,9 +2,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "concurrently \"vite\" \"php artisan reverb:start\" \".\\redis-server\" \"php artisan schedule:work\"",
+        "dev": "concurrently \"vite\" \"php artisan reverb:start\" \".\\redis-server\" \"php artisan schedule:work\" \"php artisan queue:work\"",
         "build": "tsc && vite build",
-        "serve": "concurrently \"php artisan reverb:start\" \".\\redis-server\""
+        "serve": "concurrently \"php artisan reverb:start\" \".\\redis-server\" \"php artisan schedule:work\" \"php artisan queue:work\""
     },
     "devDependencies": {
         "@headlessui/react": "^1.4.2",
@@ -45,8 +45,10 @@
         "date-fns": "^3.6.0",
         "emoji-picker-react": "^4.11.1",
         "framer-motion": "^11.3.17",
+        "github-markdown-css": "^5.6.1",
         "javascript-time-ago": "^2.5.10",
         "lodash": "^4.17.21",
+        "lodash.debounce": "^4.0.8",
         "lottie-react": "^2.4.0",
         "lucide-react": "^0.383.0",
         "monaco-editor": "^0.50.0",
@@ -54,10 +56,14 @@
         "react-copy-to-clipboard": "^5.1.0",
         "react-day-picker": "^8.10.1",
         "react-full-screen": "^1.1.1",
+        "react-markdown": "^9.0.1",
+        "react-markdown-editor-lite": "^1.3.4",
         "react-slick": "^0.30.2",
         "react-syntax-highlighter": "^15.5.0",
         "react-time-ago": "^7.3.3",
+        "remark-gfm": "^4.0.0",
         "simple-peer": "^9.11.1",
+        "simplex-noise": "^4.0.3",
         "slick-carousel": "^1.8.1",
         "sweetalert2-react-content": "^5.0.7",
         "tailwind-merge": "^2.4.0",

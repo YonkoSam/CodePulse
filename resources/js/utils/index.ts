@@ -1,10 +1,14 @@
 import audioLocation from "../../assets/audio/notification.mp3"
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import Swal from "sweetalert2"; // Import SweetAlert for notifications
 import {router} from "@inertiajs/react";
 import {User} from "@/types";
 import {LANGUAGE_VERSIONS} from "@/exucuteCode/constants";
 
+
+export const getLevel = (xp: number) => {
+    return Math.min(100, Math.floor(xp / 1000));
+}
 
 export const BACKGROUND_GRADIENT = "bg-gradient-to-tr from-indigo-600  to-purple-500";
 export const buttonStyle = `p-0.5 rounded-3xl ${BACKGROUND_GRADIENT}`;
@@ -13,23 +17,8 @@ export const spanStyle = 'block text-black px-4 py-2 font-semibold rounded-3xl b
 
 export const audio = new Audio(audioLocation);
 
-export const useScrollToBottom = (dependency) => {
-    const chatBoxRef = useRef(null);
-    const observer = useRef(null);
-    useEffect(() => {
-        if (chatBoxRef.current) {
-            chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight - chatBoxRef.current.clientHeight;
+export const iconStyle = 'text-white hover:scale-105 transition-transform duration-200';
 
-            if (!observer.current) {
-                observer.current = new MutationObserver(() => {
-                    chatBoxRef.current.scrollBy(0, 10);
-                });
-                observer.current.observe(chatBoxRef.current, {childList: true});
-            }
-        }
-    }, [dependency]);
-    return chatBoxRef;
-};
 export const languages = [
     {name: "JavaScript", value: "const greet = () => console.log('Hello, world! JavaScript');\ngreet();"},
     {name: "TypeScript", value: "const greet = ():void => console.log('Hello, world! TypeScript');\ngreet();"},
@@ -90,7 +79,7 @@ export const languages = [
 ];
 
 
-export const isSupported = (language: string) => !!LANGUAGE_VERSIONS[language];
+export const isSupported = (language: string) => !!LANGUAGE_VERSIONS[language.toLowerCase()];
 export const Toast = Swal.mixin({
     toast: true,
     position: "top-end",

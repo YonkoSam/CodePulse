@@ -2,7 +2,6 @@
 
 namespace App\Listeners\Teamwork;
 
-use App\Events\NotificationSent;
 use App\Notifications\TeamInviteNotification;
 use Mpociot\Teamwork\Events\UserInvitedToTeam;
 
@@ -30,7 +29,6 @@ class UserInvitedToTeamListener
 
         if ($user) {
             $user->notify(new TeamInviteNotification($invite));
-            event(new NotificationSent($user->id));
         }
 
     }

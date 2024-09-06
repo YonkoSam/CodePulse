@@ -45,7 +45,6 @@ export default function Login({status, canResetPassword}: { status?: string, can
                         name="email"
                         value={data.email}
                         autoComplete="username"
-                        isFocused={true}
                         placeholder="name@company.com"
                         onChange={(e: any) => setData('email', e.target.value)}
                     />

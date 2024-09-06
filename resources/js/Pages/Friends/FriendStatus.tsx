@@ -42,9 +42,9 @@ const FriendStatus = ({friend, enableBadge = true}) => {
                         {friend.name}
                     </Typography>
 
-                    {!friend.online && friend.lastTimeOnline && (
+                    {!friend.online && friend.last_activity && (
                         <Typography variant="caption" color="white">
-                            Last seen <ReactTimeAgo date={new Date(friend.lastTimeOnline)}/>
+                            Last seen <ReactTimeAgo date={new Date(friend.last_activity)}/>
                         </Typography>
                     )}
                 </Stack>

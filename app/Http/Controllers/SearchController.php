@@ -19,13 +19,21 @@ class SearchController extends Controller
         $data = [];
         switch ($type) {
             case 'Friends':
-                $data = auth()->user()->allFriends()->where('name', 'like', '%'.$query.'%')->limit(10)->get();
+                $data = auth()->user()->allFriends()
+                    ->where('name', 'like', '%'.$query.'%')
+                    ->limit(10)->get();
                 break;
             case 'Users':
-                $data = User::has('profile')->whereNot('id', auth()->id())->visible(auth()->id())->where('name', 'LIKE', '%'.$query.'%')->with('profile:id,user_id')->limit(10)->get();
+                $data = User::whereNot('id', auth()->id())
+                    ->whereHas('profile')
+                    ->visible(auth()->id())->where('name', 'LIKE', '%'.$query.'%')
+                    ->with('profile:id,user_id')->limit(10)->get();
                 break;
             case 'pulses':
-                $data = Pulse::visibleToUser(auth()->id())->where('team_id', auth()->user()?->current_team_id)->where('title', 'LIKE', '%'.$query.'%')->limit(10)->get();
+                $data = Pulse::visibleToUser(auth()->id())
+                    ->where('team_id', auth()->user()?->current_team_id)
+                    ->where('title', 'LIKE', '%'.$query.'%')
+                    ->limit(10)->get();
                 break;
         }
 

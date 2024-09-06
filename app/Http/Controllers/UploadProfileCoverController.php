@@ -12,7 +12,7 @@ class UploadProfileCoverController extends Controller
     public function __invoke()
     {
         request()->validate([
-            'cover' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'cover' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
         $file = request()->file('cover');

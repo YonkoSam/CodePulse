@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Teamwork;
 
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Mpociot\Teamwork\Facades\Teamwork;
 
@@ -14,13 +13,12 @@ class AuthController extends Controller
         $invite = Teamwork::getInviteFromAcceptToken($token);
 
         if (! $invite) {
-            return back()->withErrors(['message' => 'Invite request was not found!']);
+            return response()->json(['message' => 'Invite request was not found!']);
         }
 
         if (auth()->check()) {
             Teamwork::acceptInvite($invite);
-
-            return redirect()->route('teams.index');
+            return response()->json(['message' => 'Invite accepted!']);
         } else {
             session(['invite_token' => $token]);
 
@@ -28,24 +26,18 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Accept the given invite.
-     *
-     * @return RedirectResponse
-     */
     public function denyInvite($token)
     {
 
         $invite = Teamwork::getInviteFromDenyToken($token);
 
         if (! $invite) {
-            return back()->withErrors(['message' => 'Invite request was not found!']);
+            return  response()->json(['message' => 'Invite request was not found!']);
         }
 
         if (auth()->check()) {
             Teamwork::denyInvite($invite);
-
-            return redirect()->route('teams.index');
+            return response()->json(['message' => 'Invite rejected!']);
         } else {
             session(['invite_token' => $token]);
 

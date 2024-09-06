@@ -5,7 +5,7 @@ import PulseEffect from "@/Components/animatedComp/PulseEffect";
 import React, {useState} from "react";
 import axios from "axios";
 
-function LikeButton({likes, pulseId, authId}) {
+function LikeButton({likes, pulseId, commentId = null, authId}) {
 
     const [like, setLike] = useState(likes.some(like => like.user_id === authId))
     const [likesCount, setLikesCount] = useState(likes.length);
@@ -13,21 +13,26 @@ function LikeButton({likes, pulseId, authId}) {
 
     const handleLike = () => {
         setLoading(true);
-        axios.post(route('like.store', {'pulse_id': pulseId}))
+        axios.post(route('like.store', {'pulse_id': pulseId, 'comment_id': commentId}))
             .then(response => {
-                const [action, like] = response.data;
+                const {like} = response.data;
                 setLike(like);
-                if (like)
-                    setLikesCount(prevState => ++prevState);
-                else {
-                    setLikesCount(prevState => --prevState);
+                if (like) {
+                    setLikesCount(prevState => prevState + 1);
+                } else {
+                    setLikesCount(prevState => prevState - 1);
                 }
-                setLoading(false);
             })
-            .catch(error => console.log(error.message));
+            .catch(error => {
+                console.log(error.message);
+            })
+            .finally(() =>
+                setLoading(false)
+            );
     }
 
-    return <div className={`relative ${loading && "pointer-events-none"}`}>
+
+    return <div className={`relative ${loading && "pointer-events-none"} `}>
         <Badge
             component={motion.div}
             whileTap={{scale: 0.5}}
@@ -35,13 +40,13 @@ function LikeButton({likes, pulseId, authId}) {
             color={"primary"}
             onClick={handleLike}
             className="!absolute !right-3 !top-3 z-50  cursor-pointer"
-            style={{color: like ? "#1976d2" : "#fff"}}
+            style={{color: like ? "#4f46e5" : "#fff"}}
             badgeContent={likesCount}
             overlap="circular">
             <FavoriteBorder className="!h-8 !w-8"/>
         </Badge>
         <PulseEffect
-            color={like ? "#1976d2" : "#fff"}/>
+            color={like ? "#4f46e5" : "#fff"}/>
     </div>;
 }
 

@@ -1,2 +1,10 @@
+# robots.txt for CodePulse
+
 User-agent: *
 Disallow:
+
+Disallow: /admin/
+
+
+# Sitemap location
+Sitemap: https://www.codepulse.com/sitemap.xml

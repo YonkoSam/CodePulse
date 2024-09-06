@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -16,12 +17,11 @@ class MessageSeenGroupChat implements ShouldBroadcast
      * CreateAndUpdate a new event instance.
      */
     protected int $teamId;
-    protected int $userId;
-
-    public function __construct($teamId,$userId)
+    protected  User $user;
+    public function __construct($teamId,$user)
     {
         $this->teamId = $teamId;
-        $this->userId = $userId;
+        $this->user = $user;
     }
 
     /**
@@ -29,7 +29,7 @@ class MessageSeenGroupChat implements ShouldBroadcast
      */
     public function broadcastOn(): string
     {
-        return new Channel('my-group-chat-'.$this->teamId);
+        return new Channel("my-group-chat-{$this->teamId}");
 
     }
 
@@ -42,7 +42,14 @@ class MessageSeenGroupChat implements ShouldBroadcast
     {
 
         return [
-            'userId' => $this->userId,
+            'userSeen'=>[
+                'id' => $this->user->id,
+                'name' => $this->user->name,
+                'profile_image' => $this->user->profile_image,
+                'pivot' => [
+                    'seen_at' => now(),
+            ]
+                ]
         ];
     }
 }

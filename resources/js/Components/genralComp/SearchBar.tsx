@@ -163,6 +163,7 @@ function SearchBar({placeholder, type, setSelectedObject}: {
                         whileHover="hover"
                     >
                         <IconButton
+                            aria-label='search button'
                             onClick={handleFilter}
                             className="!text-white hover:scale-105 duration-300"
                             disabled={!wordEntered}

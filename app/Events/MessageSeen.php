@@ -15,11 +15,15 @@ class MessageSeen implements ShouldBroadcast
     /**
      * CreateAndUpdate a new event instance.
      */
-    public int $id;
+    protected int $receiver_id;
 
-    public function __construct($id)
+    protected int $sender_id;
+
+
+    public function __construct($receiver_id, $sender_id)
     {
-        $this->id = $id;
+        $this->receiver_id = $receiver_id;
+        $this->sender_id = $sender_id;
     }
 
     /**
@@ -27,7 +31,7 @@ class MessageSeen implements ShouldBroadcast
      */
     public function broadcastOn(): string
     {
-        return new Channel('my-messages-'.$this->id);
+        return new Channel("my-messages-{$this->receiver_id}-{$this->sender_id}");
     }
 
     public function broadcastAs(): string

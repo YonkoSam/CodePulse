@@ -1,4 +1,4 @@
-import {PageProps, User} from "@/types";
+import {PageProps, Profile} from "@/types";
 import {Box, Stack} from "@mui/material";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import React from "react";
@@ -20,20 +20,21 @@ const Index = ({profiles}: any) => {
                 <div className='max-w-md mx-auto mb-6'>
                     <SearchBar type={dataType.Users} placeholder='Find a developer by name ...'/>
                 </div>
-                <div className='grid gap-4 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'>
-                    {profiles.data.map((profile: User, i: number) => (
+                <div
+                    className='grid gap-4 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6'>
+                    {profiles.data?.map((profile: Profile, i: number) => (
                         <motion.div key={profile.id}
                                     initial={{x: -50, y: -50, opacity: 0}}
                                     animate={{x: 0, y: 0, opacity: 1}}
                                     transition={{duration: 0.3, delay: i * 0.05}}>
-                            <UserCard friend={profile}/>
+                            <UserCard profile={profile}/>
                         </motion.div>
                     ))}
                 </div>
                 <Stack justifyContent='center' alignItems='center' mt={4}>
                     <Box maxWidth='fit-content'>
-                        <Pagination links={profiles.links} currentPage={profiles.current_page}
-                                    lastPage={profiles.last_page}/>
+                        <Pagination currentPage={profiles.current_page}
+                                    lastPage={profiles.last_page} paginatedDataName={'profiles'}/>
                     </Box>
                 </Stack>
             </div>

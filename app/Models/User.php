@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,6 +32,8 @@ class User extends Authenticatable
 
     ];
 
+    protected $appends = ['last_activity'];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -50,6 +53,7 @@ class User extends Authenticatable
 
     public function scopeVisible($query, int  $userId)
     {
+
         return $query->whereNotIn('id', function ($query) use ($userId) {
             $query->select('friend_id')
                 ->from('friendships')
@@ -60,8 +64,69 @@ class User extends Authenticatable
                         ->from('friendships')
                         ->where('friend_id', $userId)
                         ->where('blocked', true);
-                });
+                })
+            ;
         });
+    }
+
+
+
+
+    public function isFriend(User $user): bool
+    {
+
+        return $this->friends()->where('friend_id', $user->id)->exists() ||
+            $this->friendOf()->where('user_id', $user->id)->exists();
+
+    }
+
+    public function friends(): BelongsToMany
+    {
+
+        return $this->belongsToMany(User::class, 'friendships', 'user_id', 'friend_id')
+            ->wherePivot('blocked', false)
+            ->withTimestamps();
+    }
+
+    public function friendOf(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'friendships', 'friend_id', 'user_id')
+            ->wherePivot('blocked', false)
+            ->withTimestamps();
+    }
+
+    public function allFriends($sort = false): Builder
+    {
+        $userId = $this->id;
+
+        $query = User::query()->join('friendships', function ($join) use ($userId) {
+            $join->on('users.id', '=', 'friendships.friend_id')
+                ->where('friendships.user_id', '=', $userId)
+                ->orOn('users.id', '=', 'friendships.user_id')
+                ->where('friendships.friend_id', '=', $userId);
+        })
+            ->where('friendships.blocked', false)
+            ->select('users.*', 'friendships.last_message_timestamp');
+        if ($sort) {
+            $query->orderBy('friendships.last_message_timestamp', 'desc');
+        }
+
+        return $query;
+    }
+
+    public function isBlocked(int $userId): bool
+    {
+        $friendship = Friendship::where('user_id', $this->id)
+            ->where('friend_id', $userId)
+            ->orWhere('user_id', $userId)
+            ->where('friend_id', $this->id)
+            ->first();
+
+        if ($friendship) {
+            return $friendship->blocked;
+        }
+
+        return false;
     }
 
     public function isOnline(): bool|int|\Redis
@@ -71,14 +136,15 @@ class User extends Authenticatable
 
     }
 
-    public function lastTimeOnline(): ?string
+    public function getLastActivityAttribute(): ?string
     {
-        if (Redis::exists('user-last-time-online-'.$this->id)) {
-            return Redis::get('user-last-time-online-'.$this->id);
+        if (Redis::exists('user-last-time-online-' . $this->id)) {
+            return Redis::get('user-last-time-online-' . $this->id);
         }
 
         return $this->last_time_online;
     }
+
 
     public function unreadMessages(?User $friend = null): HasMany
     {
@@ -90,27 +156,6 @@ class User extends Authenticatable
 
         return $this->hasMany(Message::class, 'receiver_id')
             ->where('seen_at', null);
-    }
-
-    public function allFriends()
-    {
-        $friendIds = $this->friends()->pluck('users.id')->merge($this->friendOf()->pluck('users.id'));
-
-        return User::whereIn('id', $friendIds);
-    }
-
-    public function friends(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'friendships', 'user_id', 'friend_id')
-            ->wherePivot('blocked', false)
-            ->withTimestamps();
-    }
-
-    public function friendOf(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'friendships', 'friend_id', 'user_id')
-            ->wherePivot('blocked', false)
-            ->withTimestamps();
     }
 
     public function blockedUsers(): array
@@ -152,6 +197,26 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
+
+    public function allMessagesWithFriend(int $friendId): Builder
+    {
+        return Message::query()->where(function ($query) use ($friendId) {
+            $query->where('sender_id', $this->id)
+                ->where('receiver_id', $friendId);
+        })
+            ->orWhere(function ($query) use ( $friendId) {
+                $query->where('sender_id', $friendId)
+                    ->where('receiver_id', $this->id);
+            });
+    }
+
+    public function allMessagesWithTeam($teamId) : Builder
+    {
+        return Message::query()->where('team_id', $teamId)
+            ->visibleSinceJoined($teamId,$this->id)
+            ->visibleToUser($this->id);
+    }
+
 
     public function profile(): hasOne
     {

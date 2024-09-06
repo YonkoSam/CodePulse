@@ -23,8 +23,9 @@ import Swal from "sweetalert2";
 import {User} from "@/types";
 import TextInput from "@/Components/formComp/TextInput";
 import {AnimatedText} from "@/Components/animatedComp/AnimatedText";
+import Pagination from "@/Components/genralComp/Pagination";
 
-const TeamMembers = ({team, auth}) => {
+const TeamMembers = ({team, users, auth}) => {
     const {data, setData, post, reset, errors, delete: destroy} = useForm({
         email: '',
         id: '',
@@ -114,7 +115,7 @@ const TeamMembers = ({team, auth}) => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {team.users.map((user: User) => (
+                                    {users.data.map((user: User) => (
                                         <TableRow key={user.id} className="hover:bg-gray-700">
                                             <TableCell className="!text-white">{user.name}</TableCell>
                                             <TableCell>
@@ -134,6 +135,9 @@ const TeamMembers = ({team, auth}) => {
                                         </TableRow>
                                     ))}
                                 </TableBody>
+                                {users.last_page != 1 &&
+                                    <Pagination currentPage={users.current_page} lastPage={users.last_page}
+                                                paginatedDataName={'users'}/>}
                             </Table>
                         </TableContainer>
                     </div>

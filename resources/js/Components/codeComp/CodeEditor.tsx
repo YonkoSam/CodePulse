@@ -99,6 +99,9 @@ const CodeEditor = ({setValue, height, defaultLanguage = null, testingGroundMode
                 options={{
                     scrollBeyondLastLine: false,
                     minimap: {enabled: false},
+                    fontLigatures: true,
+                    fontFamily: `"JetBrains Mono", monospace`,
+
 
                 }}
             />

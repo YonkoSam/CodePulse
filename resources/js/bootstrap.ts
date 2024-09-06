@@ -19,9 +19,4 @@ window.Echo = new Echo({
 });
 
 
-declare global {
-    interface Window {
-        Pusher: typeof Pusher;
-        Echo: Echo;
-    }
-}
+

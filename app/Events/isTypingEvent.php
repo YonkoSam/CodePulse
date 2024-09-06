@@ -34,7 +34,7 @@ class isTypingEvent implements ShouldBroadcast
      */
     public function broadcastOn(): string
     {
-        return new Channel('my-messages-'.$this->receiver.'-'.$this->sender);
+        return new Channel("my-messages-{$this->receiver}-{$this->sender}");
 
     }
 

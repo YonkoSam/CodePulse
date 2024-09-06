@@ -1,50 +1,39 @@
-import React, {PropsWithChildren, ReactNode, useEffect} from 'react';
+import React, {PropsWithChildren, ReactNode, useState} from 'react';
 import {User} from '@/types';
-import Sidebar from "@/Components/genralComp/Sidebar";
 import {Box, Stack} from "@mui/material";
-import ChatContainer from "@/Components/chat/ChatContainer";
 import Notifications from "@/Components/notifications/Notifications";
-import {Head, router, usePage} from "@inertiajs/react";
+import {Head, usePage} from "@inertiajs/react";
 import Footer from "@/Components/ui/Footer";
-import {audio} from "@/utils";
 import StaggeredDropDown from "@/Components/ui/DropDownMenu";
+import UnreadMessageCountUpdater from "@/Components/UnreadMessageCountUpdater";
+import ChatContainer from '@/Components/chat/ChatContainer';
+import UserLevelUpNotification from "@/UserLevelUpNotification";
 
 export default function Authenticated({
                                           user,
                                           header,
                                           title,
                                           children,
-                                          callback,
+                                          chatToggle,
                                           renderChat = true,
                                           renderNotifications = true
                                       }: PropsWithChildren<{
     user: User,
     header?: ReactNode
     title?: string,
-    callback?: any
+    chatToggle?: number | null,
     renderChat?: boolean
     renderNotifications?: boolean
 }>) {
 
-
     const {notifications, unreadNotificationsCount}: any = usePage().props;
-    useEffect(() => {
-        window.Echo.channel(`my-messages-${user.id}`)
-            .listen('.message-sent', () => {
-                router.reload({only: ['messages', 'friends', 'teams']});
-                audio.play().catch();
-            })
-
-        return () => {
-            window.Echo.leaveChannel(`public:my-messages-${user.id}`);
-        };
-    }, [user.id]);
-
+    const [notificationCount, setNotificationCount] = useState(unreadNotificationsCount)
 
     return (
         <div className="grid  grid-rows-[auto,1fr] bg-opacity-45 bg-black ">
             <div className='flex min-h-[calc(100dvh_-_52px)]'>
-                <Sidebar/>
+                <UnreadMessageCountUpdater user={user}/>
+                <UserLevelUpNotification user={user}/>
                 <div className="flex-col flex-1">
                     <Stack direction='row' justifyContent='space-between' alignItems='center'>
                         {header && (
@@ -56,9 +45,10 @@ export default function Authenticated({
 
                         {renderNotifications ? <>
                                 <Head
-                                    title={` ${unreadNotificationsCount ? `(${unreadNotificationsCount})` : ''} ${title}`}/>
+                                    title={` ${notificationCount ? `(${notificationCount})` : ''} ${title}`}/>
                                 <Box className='!ml-auto'>
-                                    <Notifications notifications={notifications} count={unreadNotificationsCount}/>
+                                    <Notifications notifications={notifications} unreadCount={notificationCount}
+                                                   setUnreadCount={setNotificationCount}/>
                                 </Box>
                             </>
                             : <>
@@ -70,7 +60,7 @@ export default function Authenticated({
                     <main>
                         {children}
                     </main>
-                    {renderChat ? <ChatContainer id={callback}/> : <></>}
+                    {renderChat && <ChatContainer id={chatToggle}/>}
 
 
                 </div>

@@ -25,7 +25,7 @@ const FriendsMenu = ({handleRemove, handleBlock}: any) => {
                 onClick={handleClick}
 
             >
-                Friends
+                CodeMates
             </Button>
             <Menu
                 id="friends-menu"
@@ -38,12 +38,12 @@ const FriendsMenu = ({handleRemove, handleBlock}: any) => {
                 <MenuItem className='!text-xs !px-1 !flex gap-2'
                           onClick={handleRemove}>
                     <PersonRemove/>
-                    Remove Friend
+                    Remove CodeMate
                 </MenuItem>
                 <MenuItem className='!text-xs !px-1 !flex gap-2 '
                           onClick={handleBlock}>
                     <Block/>
-                    Block Friend
+                    Block CodeMate
                 </MenuItem>
 
             </Menu>

@@ -1,6 +1,5 @@
 import React from "react";
 import {PrismLight as SyntaxHighlighter} from 'react-syntax-highlighter';
-import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {isSupported, Toast} from "@/utils";
 import CopyButton from "@/Components/codeComp/CopyButton";
 import {Code} from "@mui/icons-material";
@@ -31,9 +30,11 @@ import ruby from 'react-syntax-highlighter/dist/esm/languages/prism/ruby';
 import sass from 'react-syntax-highlighter/dist/esm/languages/prism/sass';
 import r from 'react-syntax-highlighter/dist/esm/languages/prism/r';
 import objectivec from 'react-syntax-highlighter/dist/esm/languages/prism/objectivec';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 
 
 import {Link} from "@inertiajs/react";
+import vsDarkCustomTheme from "@/Components/codeComp/vsDarkCustomTheme";
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 SyntaxHighlighter.registerLanguage('typescript', ts);
@@ -47,6 +48,7 @@ SyntaxHighlighter.registerLanguage('php', php);
 SyntaxHighlighter.registerLanguage('csharp', csharp);
 SyntaxHighlighter.registerLanguage('cpp', cpp);
 SyntaxHighlighter.registerLanguage('razor', razor);
+SyntaxHighlighter.registerLanguage('bash', bash);
 SyntaxHighlighter.registerLanguage('markdown', markdown);
 SyntaxHighlighter.registerLanguage('java', java);
 SyntaxHighlighter.registerLanguage('vb', vb);
@@ -70,39 +72,36 @@ export default function CodeBlock({code}) {
             title: "Copied! Ready to paste."
         });
     }
-
-
     return (
         <div className="relative">
-            <CopyButton text={code.sourceCode} onCopy={onCopy}/>
+            <div className="absolute top-1 right-1 z-10 flex items-center space-x-2 sm:top-2 sm:right-2">
+                <CopyButton text={code.sourceCode} onCopy={onCopy}/>
+
+                {isSupported(code.language) && (
+                    <Tooltip title="run code">
+                        <Link
+                            method="post"
+                            href={route('testing-ground', {language: code.language, sourceCode: code.sourceCode})}
+                            as="button"
+                            className="bg-gray-700 hover:bg-gray-600 text-white p-1 rounded"
+                        >
+                            <Code fontSize="small"/>
+                        </Link>
+                    </Tooltip>
+                )}
+            </div>
 
             <SyntaxHighlighter
                 language={code.language.toLowerCase().replace('-', '')}
-                style={vscDarkPlus}
+                style={vsDarkCustomTheme}
                 wrapLines={true}
                 wrapLongLines={true}
-                customStyle={{
-                    background: '#1e1e1e',
-                    borderRadius: '15px',
-                    padding: '10px 70px 10px 15px',
-                }}
+                className="p-2 text-xs sm:p-3 sm:text-sm md:p-4 md:text-base"
             >
                 {code.sourceCode}
             </SyntaxHighlighter>
-
-            {
-                isSupported(code.language) && <Tooltip title={'run code'}>
-                    <Link method='post'
-                          href={route('testing-ground', {language: code.language, sourceCode: code.sourceCode})}
-                          as={'button'}
-                          className=" absolute top-[4px] right-[40px]  z-10 text-white hover:scale-110 duration-300">
-                        <Code/>
-                    </Link>
-                </Tooltip>
-            }
-
-
         </div>
-
     );
+
+
 }

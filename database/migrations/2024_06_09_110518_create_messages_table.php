@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\MessageType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +14,7 @@ class CreateMessagesTable extends Migration
             $table->unsignedBigInteger('sender_id');
             $table->unsignedBigInteger('receiver_id')->nullable();
             $table->text('message');
-            $table->tinyInteger('type')->nullable();
+            $table->tinyInteger('type')->default(MessageType::text);
             $table->dateTime('seen_at')->nullable();
             $table->foreignId('team_id')->nullable();
             $table->dateTime('deleted_at')->nullable();

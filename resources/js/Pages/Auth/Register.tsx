@@ -44,7 +44,6 @@ export default function Register() {
                         className="mt-1 block w-full"
                         autoComplete="name"
                         placeholder="Jhon Doe"
-                        isFocused={true}
                         onChange={(e: any) => setData('name', e.target.value)}
                         required
                     />

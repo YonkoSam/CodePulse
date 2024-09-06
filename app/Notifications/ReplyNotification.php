@@ -55,8 +55,8 @@ class ReplyNotification extends Notification
 
         return [
             'reply_id' => $this->reply->id,
-            'message' => $this->reply->user->name.$this->message.'" '.$this->reply->text.' "',
+            'message' => "{$this->reply->user->name} {$this->message} {$this->reply->text}",
             'url' => route('pulses.show', ['pulse' => $this->reply->pulse_id]),
-        ];
+        ]; 
     }
 }

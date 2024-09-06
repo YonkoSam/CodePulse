@@ -15,6 +15,7 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import {YouTube} from "@mui/icons-material";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import CountrySelector from "@/CountrySelector";
 
 
 export default function createAndUpdate({profile, hasProfile}: { profile: Profile, hasProfile: boolean }) {
@@ -185,7 +186,7 @@ export default function createAndUpdate({profile, hasProfile}: { profile: Profil
 
                                         <div className="w-full flex flex-col mb-3 ">
                                             <div className="mb-3 space-y-2 w-full text-xs">
-                                                <InputLabel>Skills</InputLabel>
+                                                <InputLabel>Skills <abbr title="required">*</abbr></InputLabel>
                                                 <SkillInput setSkills={setSkill} skills={skill}
                                                             onSkillsChange={(skills) => setData('skills', skills)}/>
                                                 <InputError message={errors.skills} className="mt-2"/>
@@ -264,12 +265,11 @@ export default function createAndUpdate({profile, hasProfile}: { profile: Profil
                                                        name="location"/>
                                         </div>
                                         <div className="w-full flex flex-col mb-3">
-                                            <InputLabel>Country</InputLabel>
-                                            <TextInput placeholder="Country"
-                                                       value={country}
-                                                       onChange={onChange}
-                                                       type="text"
-                                                       name="country"/>
+                                            <InputLabel>Country
+                                                <abbr title="required">*</abbr></InputLabel>
+                                            <CountrySelector onChange={(value: string) => setData('country', value)}
+                                                             defaultCountry={country}/>
+
                                         </div>
                                     </div>
                                     <div className="flex-auto w-full mb-1 text-xs space-y-2">

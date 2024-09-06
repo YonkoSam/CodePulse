@@ -8,9 +8,9 @@ import {User} from "@/types";
 
 const FriendsSection = ({friends}) => {
     return <List
-        className='  text-white min-h-[500px] !pb-5 min-w-72  '>
-        <h1 className='text-xl p-4 font-bold text-white mt-4'>CodeMates</h1>
-        <Divider className=' !bg-white'/>
+        className='text-white min-h-[500px] !pb-5 w-50'>
+        <h1 className='text-xl p-4 font-bold text-white mt-4'>CodeMates ({friends.total}) </h1>
+        <Divider className=' !bg-white '/>
         {friends.data.length > 0 ?
             <>
 

@@ -17,6 +17,10 @@ Broadcast::channel('my-notification-{id}', function (User $user, int $id) {
 
     return $user->id === $id;
 });
+Broadcast::channel('user-level-up-{userId}', function (User $user, int $userId) {
+
+    return $user->id === $userId;
+});
 Broadcast::channel('my-group-chat-{teamId}', function (User $user, int $teamId) {
     return TeamworkTeam::find($teamId)->hasUser($user);
 });
