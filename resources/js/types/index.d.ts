@@ -120,7 +120,6 @@ export interface Comment {
 }
 
 export interface Profile {
-    // columns
     id: number
     user_id: number
     cover: string | null
@@ -133,6 +132,7 @@ export interface Profile {
     bio: string | null
     created_at: string | null
     updated_at: string | null
+    rank: number | null;
     xp: number;
 
     // relations

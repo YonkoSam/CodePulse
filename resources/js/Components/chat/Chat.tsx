@@ -25,7 +25,6 @@ const Chat = forwardRef(({open, messages: initialMessages, receiverId, close, sh
 
 }, ref) => {
     const {auth} = usePage<PageProps>().props;
-    const [openChat, setOpenChat] = useState(false);
     const [minimized, setMinimized] = useState(true);
     const [imagePreview, setImagePreview] = useState(null);
     const [isTyping, setIsTyping] = useState(false);
@@ -77,7 +76,7 @@ const Chat = forwardRef(({open, messages: initialMessages, receiverId, close, sh
     useEffect(() => {
         if (isUserScrolling) return;
         scrollToBottom();
-    }, [openChat, minimized, messages]);
+    }, [open, minimized, messages]);
     const updateSeen = () => {
         setMessages(prevState => Array.isArray(prevState) &&
             prevState.map(msg =>
@@ -136,7 +135,7 @@ const Chat = forwardRef(({open, messages: initialMessages, receiverId, close, sh
         const {scrollTop, scrollHeight, clientHeight} = e.target;
         const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
         setShowScrollDownArrow(distanceFromBottom > 300);
-        setIsUserScrolling(distanceFromBottom > 500);
+        setIsUserScrolling(distanceFromBottom > 1000);
 
     }
     const loadOlderMessages = async () => {
@@ -161,7 +160,7 @@ const Chat = forwardRef(({open, messages: initialMessages, receiverId, close, sh
 
 
     return (
-        <Slide direction="up" in={open || openChat} mountOnEnter unmountOnExit>
+        <Slide direction="up" in={open} mountOnEnter unmountOnExit>
             <div
                 className={`rounded bg-gray-800 rounded-t-2xl max-w-2xl text-xs text-white ${showName && 'min-w-72'} mt-auto `}>
                 <Stack direction='row' alignItems='center'>

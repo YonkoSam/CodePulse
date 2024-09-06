@@ -30,7 +30,7 @@ export default function Authenticated({
     const [notificationCount, setNotificationCount] = useState(unreadNotificationsCount)
 
     return (
-        <div className="grid  grid-rows-[auto,1fr] bg-opacity-45 bg-black ">
+        <div className="grid  grid-rows-[auto,1fr] bg-opacity-45 bg-black">
             <div className='flex min-h-[calc(100dvh_-_52px)]'>
                 <UnreadMessageCountUpdater user={user}/>
                 <UserLevelUpNotification user={user}/>

@@ -7,19 +7,19 @@ import ReactTimeAgo from "react-time-ago";
 import Pagination from "@/Components/genralComp/Pagination";
 import {EmojiEvents, Star} from '@mui/icons-material';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import {Profile} from "@/types";
 
-const getRankIcon = (rank) => {
-    if (rank === 1) return <Star className='text-amber-300  text-4xl'/>;
-    if (rank === 2) return <EmojiEvents className='text-stone-300 text-3xl'/>;
-    if (rank === 3) return <WorkspacePremiumIcon className='text-amber-300 text-3xl'/>;
-    return null;
-};
-
-const getRankBackground = (rank) => {
-    if (rank === 1) return "bg-gradient-to-r from-amber-600 to-amber-400";
-    if (rank === 2) return "bg-gradient-to-r from-stone-800 to-stone-400";
-    if (rank === 3) return "bg-gradient-to-r from-amber-800 to-amber-600";
-    return "bg-black/30";
+const getRankIcon = (rank: number) => {
+    switch (rank) {
+        case 1:
+            return <Star className='text-amber-300  text-4xl'/>;
+        case 2:
+            return <EmojiEvents className='text-stone-300 text-3xl'/>;
+        case 3:
+            return <WorkspacePremiumIcon className='text-amber-300 text-3xl'/>;
+        default:
+            return null;
+    }
 };
 
 
@@ -46,14 +46,13 @@ const Leaderboard = ({profiles, auth}) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {profiles.data.map((profile, index) => (
+                            {profiles.data.map((profile: Profile, index: number) => (
                                 <motion.tr
                                     key={profile.id}
                                     initial={{opacity: 0, x: -50, scale: 0.5}}
                                     animate={{opacity: 1, x: 0, scale: 1}}
                                     transition={{duration: 0.3, delay: index * 0.1}}
-                                    className={`text-white transition-transform duration-300 hover:scale-105 ${
-                                        getRankBackground(profile.rank)} rounded-2xl`}
+                                    className='text-white transition-transform duration-300 hover:scale-105 rounded-2xl'
                                 >
                                     <TableCell className="text-center flex items-center justify-center text-white">
                                         {getRankIcon(profile.rank) ||
