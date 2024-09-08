@@ -31,6 +31,7 @@ console.log('It works!')``` . Since you only have one chance to reply, provide t
                     ]
                 ],
             ]);
+            
             return  $response['choices'][0]['message']['content'];
         } catch (GroqException $e) {
             Log::error('Error: ' . $e->getMessage());

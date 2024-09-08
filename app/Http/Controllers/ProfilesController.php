@@ -32,22 +32,6 @@ class ProfilesController extends Controller
         ]);
     }
 
-    public function leaderBoard()
-    {
-        $authUserId = auth()->id();
-        $profilesRanked = Profile::selectRaw('id, xp, status, country, user_id,
-        ROW_NUMBER() OVER(ORDER BY xp DESC) as rank')
-            ->with(['user' => function ($query) {
-                $query->select('id', 'name', 'profile_image');
-            }])
-            ->visible($authUserId)
-            ->orderBy('xp', 'desc')
-            ->paginate(10);
-
-        return Inertia::render('LeaderBoard', [
-            'profiles' => $profilesRanked,
-        ]);
-    }
 
 
     public function show(?Profile $profile = null)

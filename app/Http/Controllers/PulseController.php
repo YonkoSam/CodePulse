@@ -78,14 +78,11 @@ class PulseController extends Controller
             })
             ->orderBy('is_best_answer', 'desc')
             ->paginate(5);
-
         $likes = $pulse->likes;
-
-
         $pulse->unsetRelation('likes');
 
         return Inertia::render('Pulses/show',
-            ['pulse' => $pulse,
+            [   'pulse' => $pulse,
                 'comments' => $comments,
                 'likes' => $likes,
             ]
@@ -98,6 +95,7 @@ class PulseController extends Controller
             auth()->user()->notifications()->where('id', request()->markAsRead)->first()?->markAsRead();
             return redirect()->route('pulses.show', $pulse->id);
         }
+
 
         return null;
     }

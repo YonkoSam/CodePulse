@@ -16,6 +16,7 @@ export default function Notifications({notifications: initialNotifications, unre
     const [displayNotifications, setDisplayNotifications] = useState<boolean | undefined>(false);
     const [loading, setLoading] = useState<{ id: number | null; type: string | null }>({id: null, type: null});
 
+    const currentUnreadCount = notifications.filter(not => !not.read_at).length;
     const {auth} = usePage<PageProps>().props;
 
     useEffect(() => {
@@ -70,7 +71,7 @@ export default function Notifications({notifications: initialNotifications, unre
                         exit={{opacity: 0, scale: 0.5, y: -20}}
                         transition={{type: 'spring', stiffness: 300, damping: 20}}
 
-                        className='!absolute   right-0 left-0 sm:right-16 sm:left-auto  z-[1000] bg-black !px-2 !rounded max-w-xl'>
+                        className='!absolute   right-0 left-0 sm:right-16 sm:left-auto  z-[1000] bg-black/30 !px-2 !rounded max-w-xl'>
                         {notifications.length === 0 ?
                             <ListItemText className='bg-gray-200 rounded text-black p-2'
                                           primary='it seems you dont have any notification'/> : <></>
@@ -109,7 +110,7 @@ export default function Notifications({notifications: initialNotifications, unre
                                 >
                                     See previous
                                     notifications...
-                                    {unreadCount > 0 && notifications.filter(not => !not.read_at).length == 0 ? `(${unreadCount})` : null}
+                                    {unreadCount > 0 && currentUnreadCount < unreadCount ? `(${unreadCount - currentUnreadCount})` : null}
                                 </Button>
                             </Link>
                         )}

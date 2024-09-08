@@ -8,6 +8,7 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\FriendRequestController;
 use App\Http\Controllers\isTypingController;
 use App\Http\Controllers\isUserBlockedController;
+use App\Http\Controllers\LeaderBoardController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -56,7 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/education/{education}', [EducationController::class, 'destroy'])->name('education.destroy');
     });
 
-    // Home route
+// Home route
     Route::get('/my-profile', [ProfilesController::class, 'show'])->middleware(['auth', 'verified'])->name('home');
 
 // User profile routes
@@ -80,10 +81,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy')->can('delete','comment');
         Route::put('/{pulse}/best-answer/{comment}', [CommentController::class, 'markBestAnswer'])->name('pulses.best-answer')->can('edit','pulse');
         Route::get('/{pulse}', [PulseController::class, 'show'])->name('pulses.show')->middleware('can:view,pulse');
-    });
+        Route::get('/tags/{tag}', [PulseController::class, 'tags'])->name('pulses.tags');
 
-// Tag routes
-    Route::get('tags/{tag}', [PulseController::class, 'tags'])->name('pulses.tags');
+    });
 
 // Friend routes
     Route::get('/code-mates', [FriendController::class, 'index'])->name('friends.index');
@@ -107,7 +107,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [ChatController::class, 'index'])->name('chat.index');
         Route::get('/user/{receiver}', [ChatController::class, 'userChat'])->name('chat.user')->middleware(isFriendMiddleware::class);
         Route::get('/team/{team}', [ChatController::class, 'teamChat'])->name('chat.team');
-        Route::get('/my-chat/{receiver}', [ChatController::class, 'show'])->name('chat.show');
+        Route::get('/{receiver}', [ChatController::class, 'show'])->name('chat.show');
+        Route::post('/is-typing', isTypingController::class)->name('is-typing');
+
     });
 
 // Message routes
@@ -115,11 +117,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{message}', [ChatController::class, 'destroy'])->name('message.destroy');
         Route::post('/seen', UserSeenMessageController::class)->name('message.seen');
         Route::get('/users-seen/{message}', UserSeenListController::class)->name('message.users-seen');
+        Route::get('/unread-count', UnreadMessagesCountController::class)->name('message.unread-count');
+
     });
 
-// Chat-related routes
-    Route::post('/is-typing', isTypingController::class)->name('is-typing');
-    Route::get('/unread-count', UnreadMessagesCountController::class)->name('message.unread-count');
 
 // Notification routes
     Route::prefix('notifications')->group(function () {
@@ -146,7 +147,7 @@ Route::middleware('auth')->group(function () {
     });
 
 // Leaderboard route
-    Route::get('/leader-board', [ProfilesController::class, 'leaderBoard'])->name('leader-board');
+    Route::get('/leader-board', LeaderBoardController::class)->name('leader-board');
 
 // Testing ground routes
     Route::prefix('testing-ground')->group(function () {
