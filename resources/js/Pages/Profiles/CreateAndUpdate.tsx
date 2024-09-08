@@ -104,18 +104,16 @@ export default function createAndUpdate({profile, hasProfile}: { profile: Profil
     const initialValues: InitialValues = getInitialValues(auth);
 
 
-    const {data, setData, errors, post, progress} = useForm(initialValues);
+    const {data, setData, errors, post} = useForm(initialValues);
 
     const {
         company,
-        profile_image,
         website,
         location,
         country,
         status,
         bio,
         twitter,
-        skills,
         facebook,
         linkedin,
         youtube,
@@ -162,7 +160,7 @@ export default function createAndUpdate({profile, hasProfile}: { profile: Profil
                                                 <div
                                                     className="w-32 h-32 mr-4 flex-none rounded-xl object-cover overflow-hidden">
                                                     {auth.user.profile_image && !selectedFile ? (
-                                                            <img src={auth.user.profile_image}
+                                                            <img src={'/' + auth.user.profile_image}
                                                                  alt='preview'/>) :
                                                         <Avatar className='!w-32 !h-32' src={preview}/>}
                                                 </div>

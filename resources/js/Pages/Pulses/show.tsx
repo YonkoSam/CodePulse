@@ -229,11 +229,13 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: any,
                     <TextInput
                         ref={replyRef}
                         className="w-full bg-gray-800 bg-opacity-50 border-none outline-none text-white py-5 px-4 rounded-xl text-base disabled:cursor-not-allowed"
-                        placeholder='reply ...'
+                        placeholder='Reply... (Markdown supported)'
                         onChange={(e: {
                             target: { value: React.SetStateAction<string>; };
                         }) => setNewReply(e.target.value)}
                     />
+
+
                     <PrimaryButton className='text-xs mx-1' disabled={newReply.length <= 0}
                                    onClick={() => handleReplySubmit(comment.id)}>
                         Submit
@@ -385,7 +387,6 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: any,
                                 animate={{opacity: 1, scale: 1, y: 0}}
                                 exit={{opacity: 0, scale: 0.5, y: 50}}
                                 transition={{type: 'spring', stiffness: 300, damping: 20}}
-
                                 className='mb-4'>
                                 <CodeEditor setValue={setCommentCode} height="20vh" defaultLanguage={pulse.code && {
                                     name: pulse.code.language,
@@ -395,7 +396,6 @@ const Show = ({pulse, comments, likes}: PageProps<{ pulse: Pulse, comments: any,
                         </AnimatePresence>
                     }
                     <div className="relative">
-
                         <TextInput
                             isTextArea={true}
                             ref={commentRef}

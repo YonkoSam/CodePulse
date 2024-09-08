@@ -12,11 +12,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\HasApiTokens;
+use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
 use Mpociot\Teamwork\Traits\UserHasTeams;
 
 class User extends Authenticatable
 {
-    use HasApiTokens,HasFactory, Notifiable,UserHasTeams;
+    use HasApiTokens,HasFactory, Notifiable,UserHasTeams,HasSelfHealingUrls;
+    protected string $slug = 'name';
+
 
     /**
      * The attributes that are mass assignable.

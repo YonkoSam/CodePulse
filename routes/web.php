@@ -36,84 +36,99 @@ Route::get('/robots.txt', function () {
 });
 
 Route::middleware('auth')->group(function () {
-    //Search
-    Route::get('/search/{query}', SearchController::class)->name('search');
-    //Profiles
+// Search routes
+    Route::prefix('search')->group(function () {
+        Route::get('/{query}', SearchController::class)->name('search');
+    });
+// Profile routes
+    Route::prefix('profiles')->group(function () {
+        Route::get('/', [ProfilesController::class, 'index'])->name('profiles.index');
+        Route::get('/create', [ProfilesController::class, 'create'])->name('profiles.create');
+        Route::get('/update', [ProfilesController::class, 'edit'])->name('profiles.edit');
+        Route::get('/{profile}', [ProfilesController::class, 'show'])->middleware(['auth', 'verified'])->can('view', 'profile')->name('profiles.show');
+        Route::post('/', [ProfilesController::class, 'store'])->name('profiles.store');
+        Route::post('/cover', UploadProfileCoverController::class)->name('cover.upload');
+        Route::post('/experience', [ExperienceController::class, 'store'])->name('experience.store');
+        Route::post('/education', [EducationController::class, 'store'])->name('education.store');
+        Route::patch('/experience/{experience}', [ExperienceController::class, 'update'])->name('experience.update');
+        Route::patch('/education/{education}', [EducationController::class, 'update'])->name('education.update');
+        Route::delete('/experience/{experience}', [ExperienceController::class, 'destroy'])->name('experience.destroy');
+        Route::delete('/education/{education}', [EducationController::class, 'destroy'])->name('education.destroy');
+    });
 
-    Route::get('/profiles/{profile}', [ProfilesController::class, 'show'])
-        ->middleware(['auth', 'verified'])->can('view', 'profile')->name('profiles.show');
-    Route::get('/my-profile', [ProfilesController::class, 'show'])
-        ->middleware(['auth', 'verified'])->name('home');
-    Route::get('/create-profile', [ProfilesController::class, 'create'])->name('profiles.create');
-    Route::get('/update-profile', [ProfilesController::class, 'edit'])->name('profiles.edit');
-    Route::get('/profiles', [ProfilesController::class, 'index'])->name('profiles.index');
-    Route::Post('/profiles', [ProfilesController::class, 'store'])->name('profiles.store');
-    Route::Post('/profiles/cover', UploadProfileCoverController::class)->name('cover.upload');
-    Route::Post('/profiles/experience', [ExperienceController::class, 'store'])->name('experience.store');
-    Route::Post('/profiles/education', [EducationController::class, 'store'])->name('education.store');
-    Route::patch('/profiles/experience/{experience}', [ExperienceController::class, 'update'])->name('experience.update');
-    Route::patch('/profiles/education/{education}', [EducationController::class, 'update'])->name('education.update');
-    Route::delete('/profiles/experience/{experience}', [ExperienceController::class, 'destroy'])->name('experience.destroy');
-    Route::delete('/profiles/education/{education}', [EducationController::class, 'destroy'])->name('education.destroy');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/leader-board', [ProfilesController::class, 'leaderBoard'])->name('leader-board');
+    // Home route
+    Route::get('/my-profile', [ProfilesController::class, 'show'])->middleware(['auth', 'verified'])->name('home');
 
-    //Pulses
+// User profile routes
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
+// Pulse routes
+    Route::prefix('pulses')->group(function () {
+        Route::get('/', [PulseController::class, 'index'])->name('pulses.index');
+        Route::get('/create', [PulseController::class, 'create'])->name('pulses.create');
+        Route::post('/create', [PulseController::class, 'store'])->name('pulses.store');
+        Route::get('/edit/{pulse}', [PulseController::class, 'edit'])->name('pulses.edit')->middleware('can:edit,pulse');
+        Route::patch('/edit/{pulse}', [PulseController::class, 'update'])->name('pulses.update')->middleware('can:edit,pulse');
+        Route::delete('/{pulse}', [PulseController::class, 'destroy'])->name('pulses.destroy')->middleware('can:delete,pulse');
+        Route::post('/', [LikeController::class, 'store'])->name('like.store');
+        Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
+        Route::post('/comment/reply', ReplyController::class)->name('reply');
+        Route::patch('/comment/{comment}', [CommentController::class, 'update'])->name('comment.update')->can('update','comment');
+        Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy')->can('delete','comment');
+        Route::put('/{pulse}/best-answer/{comment}', [CommentController::class, 'markBestAnswer'])->name('pulses.best-answer')->can('edit','pulse');
+        Route::get('/{pulse}', [PulseController::class, 'show'])->name('pulses.show')->middleware('can:view,pulse');
+    });
 
-    Route::get('/pulses/', [PulseController::class, 'index'])->name('pulses.index');
+// Tag routes
     Route::get('tags/{tag}', [PulseController::class, 'tags'])->name('pulses.tags');
-    Route::get('/pulses/create', [PulseController::class, 'create'])->name('pulses.create');
-    Route::Post('/pulses/create', [PulseController::class, 'store'])->name('pulses.store');
-    Route::get('/pulses/edit/{pulse}', [PulseController::class, 'edit'])->name('pulses.edit')->middleware('can:edit,pulse');
-    Route::patch('/pulses/edit/{pulse}', [PulseController::class, 'update'])->name('pulses.update')->middleware('can:edit,pulse');
-    Route::delete('/pulses/{pulse}', [PulseController::class, 'destroy'])->name('pulses.destroy')->middleware('can:delete,pulse');
-    Route::Post('/pulses', [LikeController::class, 'store'])->name('like.store');
-    Route::Post('/pulses/comment', [CommentController::class, 'store'])->name('comment.store');
-    Route::Post('/pulses/comment/reply', ReplyController::class)->name('reply');
-    Route::patch('/pulses/comment/{comment}', [CommentController::class, 'update'])->name('comment.update')->can('update','comment');
-    Route::delete('/pulses/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy')->can('delete','comment');
-    Route::put('/pulses/{pulse}/best-answer/{comment}', [CommentController::class, 'markBestAnswer'])->name('pulses.best-answer')->can('edit','pulse');
-    Route::get('/pulses/{pulse}', [PulseController::class, 'show'])->name('pulses.show')->middleware('can:view,pulse');
 
-    //Friends
-
+// Friend routes
     Route::get('/code-mates', [FriendController::class, 'index'])->name('friends.index');
-    Route::Post('/friend-request/send', [FriendRequestController::class, 'sendRequest'])->name('friend.request.send');
-    Route::Post('/friend-request/accept', [FriendRequestController::class, 'acceptRequest'])->name('friend.request.accept');
-    Route::Post('/friend-request/reject', [FriendRequestController::class, 'rejectRequest'])->name('friend.request.reject');
-    Route::delete('/friend/delete/{friend}', [FriendController::class, 'destroy'])->name('friend.delete');
-    Route::delete('/friend/block/{friend}', [FriendController::class, 'block'])->name('friend.block');
-    Route::patch('/friend/unblock/{friend}', [FriendController::class, 'unblock'])->name('friend.unblock');
-    Route::get('/friend/is-blocked/{id}', isUserBlockedController::class)->name('friend.is-blocked');
+    Route::prefix('friend')->group(function () {
+        Route::delete('/delete/{friend}', [FriendController::class, 'destroy'])->name('friend.delete');
+        Route::delete('/block/{friend}', [FriendController::class, 'block'])->name('friend.block');
+        Route::patch('/unblock/{friend}', [FriendController::class, 'unblock'])->name('friend.unblock');
+        Route::get('/is-blocked/{id}', isUserBlockedController::class)->name('friend.is-blocked');
+    });
 
-    //Chat
+// Friend request routes
+    Route::prefix('friend-request')->group(function () {
+        Route::post('/send', [FriendRequestController::class, 'sendRequest'])->name('friend.request.send');
+        Route::post('/accept', [FriendRequestController::class, 'acceptRequest'])->name('friend.request.accept');
+        Route::post('/reject', [FriendRequestController::class, 'rejectRequest'])->name('friend.request.reject');
+    });
 
-    Route::Post('/chat', [ChatController::class, 'store'])->name('chat.store');
-    Route::get('/chat/', [ChatController::class, 'index'])->name('chat.index');
-    Route::get('/chat/user/{receiverId?}', [ChatController::class, 'userChat'])->name('chat.user')->middleware(isFriendMiddleware::class);
-    Route::get('/chat/team/{teamId}', [ChatController::class, 'teamChat'])->name('chat.team');
-    Route::Post('/is-typing', isTypingController::class)->name('is-typing');
-    Route::get('/my-chat/{receiverId}', [ChatController::class, 'show'])->name('chat.show');
-    Route::delete('/message/{message}', [ChatController::class, 'destroy'])->name('message.destroy');
+// Chat routes
+    Route::prefix('chat')->group(function () {
+        Route::post('/', [ChatController::class, 'store'])->name('chat.store');
+        Route::get('/', [ChatController::class, 'index'])->name('chat.index');
+        Route::get('/user/{receiver}', [ChatController::class, 'userChat'])->name('chat.user')->middleware(isFriendMiddleware::class);
+        Route::get('/team/{team}', [ChatController::class, 'teamChat'])->name('chat.team');
+        Route::get('/my-chat/{receiver}', [ChatController::class, 'show'])->name('chat.show');
+    });
+
+// Message routes
+    Route::prefix('message')->group(function () {
+        Route::delete('/{message}', [ChatController::class, 'destroy'])->name('message.destroy');
+        Route::post('/seen', UserSeenMessageController::class)->name('message.seen');
+        Route::get('/users-seen/{message}', UserSeenListController::class)->name('message.users-seen');
+    });
+
+// Chat-related routes
+    Route::post('/is-typing', isTypingController::class)->name('is-typing');
     Route::get('/unread-count', UnreadMessagesCountController::class)->name('message.unread-count');
-    Route::Post('/message-seen/', UserSeenMessageController::class)->name('message.seen');
-    Route::get('/users-seen/{message}', UserSeenListController::class)->name('message.users-seen');
 
-    //Notification
+// Notification routes
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', NotificationController::class)->name('my-notifications');
+        Route::patch('/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+        Route::delete('/delete', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    });
 
-    Route::get('/notifications', NotificationController::class)->name('my-notifications');
-    Route::patch('/notifications/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-    Route::delete('/notifications/delete', [NotificationController::class, 'destroy'])->name('notifications.destroy');
-
-    //TestingGround
-
-    Route::post('/testing-ground', TestingGroundController::class)->name('testing-ground');
-    Route::get('/testing-ground', TestingGroundController::class)->name('testing-ground-get');
-
-     //Teamwork routes
-
+// Team routes
     Route::prefix('teams')->namespace('Teamwork')->group(function () {
         Route::get('/', [TeamController::class, 'index'])->name('teams.index');
         Route::post('/', [TeamController::class, 'store'])->name('teams.store');
@@ -130,12 +145,17 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+// Leaderboard route
+    Route::get('/leader-board', [ProfilesController::class, 'leaderBoard'])->name('leader-board');
 
+// Testing ground routes
+    Route::prefix('testing-ground')->group(function () {
+        Route::post('/', TestingGroundController::class)->name('testing-ground');
+        Route::get('/', TestingGroundController::class)->name('testing-ground-get');
+    });
 
-
-    //Report
+// Report route
     Route::post('/report', ReportController::class)->name('report');
-
 
 });
 

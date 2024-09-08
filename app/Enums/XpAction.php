@@ -9,10 +9,10 @@ enum XpAction: int
     case BE_CHOSEN_BEST_ANSWER = 500;
     case RECEIVE_LIKE_ON_COMMENT = 25;
 
-
     public static function toArray(): array
     {
         return array_column(self::cases(), 'value', 'name');
     }
+
 
 }

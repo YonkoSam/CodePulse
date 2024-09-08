@@ -10,7 +10,7 @@ class isFriendMiddleware{
     {
 
         $user = $request->user();
-        $friend = User::findOrFail(last(explode('/',$request->getPathInfo())));
+        $friend = User::findOrFail(last(explode('-',$request->getPathInfo())));
         if (!$user->isFriend($friend) && !$user->isBlocked($friend->id)) {
             return to_route('profiles.show',$friend->profile?->id || null);
         }

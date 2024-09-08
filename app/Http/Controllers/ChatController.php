@@ -39,24 +39,25 @@ class ChatController extends Controller
     private function redirectBasedOnLatestMessage($latestMessage, $user)
     {
         if ($latestMessage->team_id) {
-            return redirect()->route('chat.team', ['teamId' => $latestMessage->team_id]);
+            return redirect()->route('chat.team', ['team' => $latestMessage->team]);
         }
 
-        $receiverId = $latestMessage->sender_id === $user->id ? $latestMessage->receiver_id : $latestMessage->sender_id;
+        $receiver = $latestMessage->sender_id === $user->id ? $latestMessage->receiver : $latestMessage->sender;
 
-        return redirect()->route('chat.user', ['receiverId' => $receiverId]);
+
+        return redirect()->route('chat.user', ['receiver' => $receiver]);
     }
 
     private function redirectToFirstFriendOrTeam($user)
     {
         $friend = $user->allFriends()->first();
         if ($friend) {
-            return redirect()->route('chat.user', ['receiverId' => $friend->id]);
+            return redirect()->route('chat.user', ['receiver' => $friend]);
         }
 
         $team = $user->teams()->first();
         if ($team) {
-            return redirect()->route('chat.team', ['teamId' => $team->id]);
+            return redirect()->route('chat.team', ['team' => $team]);
         }
 
         return $this->renderChat(null);
@@ -128,14 +129,9 @@ class ChatController extends Controller
         return null;
     }
 
-    public function userChat($receiverId = null)
+    public function userChat(User $receiver)
     {
         $user = Auth::user();
-        $receiver = User::find($receiverId);
-
-        if (! $receiver) {
-            return redirect()->route('chat.index')->withErrors(['Receiver not found']);
-        }
          $receiver->online = $receiver->isOnline();
         $receiver->load(['profile' => function ($query) {
             $query->select('user_id', 'profiles.id');
@@ -155,28 +151,24 @@ class ChatController extends Controller
             ->update(['seen_at' => now()]);
 
         if ($updatedRowsCount) {
-            event(new MessageSeen($receiverId,$user->id));
+            event(new MessageSeen($receiver->id,$user->id));
         }
 
         return $this->renderChat($messages, $receiver);
 
     }
 
-    public function teamChat($teamId = null)
+    public function teamChat(?Team $team)
     {
-        $team = Team::find($teamId);
         $user = Auth::user();
 
-        if (!$team) {
-            abort('404');
-        }
 
         if (!$team->hasUser($user)) {
             abort('404');
         }
 
 
-        $messages = $user->allMessagesWithTeam($teamId)
+        $messages = $user->allMessagesWithTeam($team->id)
             ->with([
                 'sender:id,name,profile_image',
                 'team:id,name',
@@ -204,24 +196,24 @@ class ChatController extends Controller
 
 
         if ($rowsAffected) {
-            event(new MessageSeenGroupChat($teamId,$user));
+            event(new MessageSeenGroupChat($team->id,$user));
         }
 
         return $this->renderChat($messages, null, $team);
     }
 
-    public function show($receiverId)
+    public function show(User $receiver)
     {
 
         $user = Auth::user();
 
-        $messages = $user->allMessagesWithFriend($receiverId)->with(['sender', 'receiver'])
+        $messages = $user->allMessagesWithFriend($receiver->id)->with(['sender', 'receiver'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         if ($messages->count() <= 0) {
             return response()->json([
-                'receiver' => User::find($receiverId),
+                'receiver' => $receiver,
             ]);
         }
 
@@ -235,7 +227,7 @@ class ChatController extends Controller
             ->update(['seen_at' => now()]);
 
         if ($updatedRowsCount) {
-            event(new MessageSeen($receiverId,$user->id));
+            event(new MessageSeen($receiver->id,$user->id));
         }
 
 

@@ -59,7 +59,7 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
     };
     useEffect(() => {
         scrollToBottom();
-    }, [reversedMessages]);
+    }, [reversedMessages, showScrollDownArrow]);
 
     const scrollToBottom = () => {
         endRef.current?.scrollIntoView({behavior: "smooth"});
@@ -99,7 +99,6 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
     }
 
     const updateMessages = (message?: Message): void => {
-
         setReversedMessages(
             prevState => [
                 ...prevState,
@@ -107,7 +106,7 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
         )
     };
     const updateUnreadCountForTeams = async (currentTeam: Team) => {
-        setTeams(prevState => {
+        setTeams((prevState: Team[]) => {
             const teamIndex = prevState.findIndex(team => team.id === currentTeam.id);
             let updatedTeams: Team[];
             if (teamIndex !== -1) {
@@ -221,7 +220,7 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
 
                 </div>}
                 <Grid container spacing={2} justifyContent='center'
-                      className=" bg-black/30  rounded-3xl  shadow-md max-h-[90vh]">
+                      className=" bg-black/30  rounded-3xl  shadow-md max-h-[85vh]">
                     <Grid item xs={isMobile ? 0 : 4}
                           className={`p-3  relative rounded-3xl  ${isMobile && (mobileNavigation ? '!hidden' : '!block')} h-[85vh]`}>
                         {blockedList.length > 0 && !switchChat && (
@@ -335,8 +334,9 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
 
                     <div className="flex-1 px-9 md-px-0">
                         <ChatHeader isBlockInitiator={isBlockInitiator} team={team} receiver={receiver}/>
-                        <Grid onScroll={handleScroll}
-                              className={`w-full h-[73vh] bg-black/10 p-8  ${isMobile && (mobileNavigation ? '!block' : '!hidden')} overflow-auto relative`}>
+                        <Grid
+                            onScroll={handleScroll}
+                            className={`w-full bg-black/10 p-8  ${isMobile && (mobileNavigation ? '!block' : '!hidden')}  relative h-[67vh] overflow-auto`}>
                             {showScrollDownArrow && (
                                 <motion.button
                                     className='fixed bottom-52 z-40 p-2 hover:bg-blue-500 rounded-full text-white'
@@ -352,16 +352,14 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
                                 {messages?.next_page_url ?
                                     <Tooltip title="Show older messages">
                                         <Link href={messages?.next_page_url}
-                                              className="p-5 !text-white hover:text-blue-500 duration-300"
+                                              className="p-1 !text-white hover:text-blue-500 duration-300"
                                               preserveScroll><ArrowUp/></Link>
                                     </Tooltip> : <></>}
                             </div>
-                            <div className="grid pb-5 pt-5 md:py-6">
+                            <div className="grid  md:py-6">
                                 {reversedMessages?.length ? (
                                     <>
                                         {renderMessages(auth, reversedMessages, imagePreview, setImagePreview, onDelete, false, team?.users_count, showUsersSeen, setShowUsersSeen)}
-                                        <div ref={endRef}></div>
-
                                     </>
                                 ) : blockInitiatorId ? (
                                     <Typography variant="body2" style={{color: '#999'}} className='text-center'>
@@ -379,16 +377,16 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
 
                                 {ChatChannelListener(updateMessages, updateSeen, team, receiver)}
                             </div>
-
                             <div className="flex items-center justify-center">
                                 {messages?.prev_page_url ?
                                     <Tooltip title="Show latest messages">
                                         <Link href={messages?.prev_page_url}
-                                              className="p-5 transform -translate-y-8 !text-white hover:text-blue-500 duration-300"
+                                              className="p-1 !text-white hover:text-blue-500 duration-300"
                                               preserveScroll><ArrowDown/></Link>
                                     </Tooltip> : <></>}
                             </div>
 
+                            <div ref={endRef}></div>
 
                         </Grid>
                         <>
@@ -419,8 +417,9 @@ const Messages = ({messages, friends, teams: initialTeams, receiver, team, block
                                 )
                                 :
                                 <div
-                                    className={`bg-black/30 p-3  rounded-b-3xl backdrop-blur-[5px]`}
+                                    className={`bg-black/30 p-3  backdrop-blur-[5px]`}
                                 >
+
                                     <MessageSubmitForm
                                         prev_page_url={messages?.prev_page_url}
                                         receiverId={receiver?.id}

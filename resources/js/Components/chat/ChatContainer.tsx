@@ -53,7 +53,7 @@ const ChatContainer = ({id}) => {
 
         const fetchMessagesAndUpdateState = async (id: number) => {
             try {
-                const response = await fetch(route('chat.show', {receiverId: id}));
+                const response = await fetch(route('chat.show', id));
                 if (!response.ok) {
                     throw new Error(`Error: ${response.statusText}`);
                 }
@@ -75,10 +75,10 @@ const ChatContainer = ({id}) => {
         };
         fetchDataForAllReceiverIds();
     }, [receiverIds]);
-    const fetchOlderMessages = async (receiverId, page) => {
+    const fetchOlderMessages = async (receiver: number, page: number) => {
 
         try {
-            const response = await fetch(route('chat.show', {receiverId, page}));
+            const response = await fetch(route('chat.show', {receiver, page}));
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
             }

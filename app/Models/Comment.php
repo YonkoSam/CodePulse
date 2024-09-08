@@ -65,6 +65,9 @@ class Comment extends Model
 
     public function replies(): hasMany
     {
-        return $this->hasMany(Comment::class, 'comment_id')->with('replies','user');
+        return $this->hasMany(Comment::class, 'comment_id')->with(['user','replies','user.profile'=>fn($query) => $query->select(['id', 'xp','user_id']),'likes'=>function($query){
+            $query->select(['id', 'user_id', 'comment_id'])
+                ->whereNotNull('comment_id');
+        }]);
     }
 }

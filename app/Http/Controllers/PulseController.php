@@ -55,7 +55,7 @@ class PulseController extends Controller
 
         $notificationResponse = $this->handleNotifications($pulse);
         if ($notificationResponse) {
-            return $notificationResponse;  
+            return $notificationResponse;
         }
         $pulse->load([
             'user',
@@ -115,8 +115,11 @@ class PulseController extends Controller
         if($pulse)
         AiAnswerPulseJob::dispatch($pulse);
         $xpService->assignPoints(auth()->user()?->profile, XpAction::CREATE_PULSE);
-        return to_route('pulses.index');
 
+
+
+
+        return to_route('pulses.index');
     }
 
     protected function handleCodeField($pulseData, $pulse = null)

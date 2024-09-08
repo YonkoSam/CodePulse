@@ -5,13 +5,16 @@ namespace App\Models;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\MorphMany;
     use Illuminate\Support\Facades\Config;
+    use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
     use Mpociot\Teamwork\Traits\TeamworkTeamTrait;
 
     class Team extends Model {
 
-        use TeamworkTeamTrait;
+        use TeamworkTeamTrait,HasSelfHealingUrls;
 
         public $timestamps = false;
+        protected string $slug = 'name';
+
         protected $table;
 
         /**

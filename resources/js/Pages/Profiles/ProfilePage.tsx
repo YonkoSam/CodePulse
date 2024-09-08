@@ -20,9 +20,9 @@ import FirstTimeCard from "@/Components/genralComp/FirstTimeCard";
 import AboutSection from "@/Components/profile/AboutSection";
 import ReactTimeAgo from "react-time-ago";
 import ReportForm from "@/Components/ReportForm";
-import {WavyBackground} from "@/Components/ui/wavy-background";
 import axios from "axios";
 import ProfileProgressLevel from "@/ProfileProgressLevel";
+import CoverImage from "@/Components/profile/Cover";
 
 export default function ProfilePage({
                                         profile,
@@ -57,7 +57,7 @@ export default function ProfilePage({
 
     const handleFriendRemove = () => {
         Swal.fire({
-            title: `Are you sure you want to remove ${profile.user.name} as your friend ?`,
+            title: `Are you sure you want to remove ${profile.user.name} as your CodeMates ?`,
             text: "You won't be able to revert this!",
             icon: "warning",
             showCancelButton: true,
@@ -189,22 +189,7 @@ export default function ProfilePage({
                                         <div className='relative  mb-2 bg-black/80 rounded-3xl'>
                                             <div className='relative  border-indigo-500 border-b-2 '>
 
-                                                {
-                                                    preview ?
-                                                        <img
-                                                            className='object-cover object-top h-72 w-full  rounded-t-3xl'
-                                                            src={preview}
-                                                            alt="cover"/> :
-                                                        profile.cover ?
-                                                            <img
-                                                                className='object-cover object-top h-72 w-full  rounded-t-3xl'
-                                                                src={'/' + profile.cover}
-                                                                alt="cover"/> :
-
-                                                            <WavyBackground backgroundFill={'#0c0a09'}
-                                                                            className='h-72 object-cover w-full rounded-t-3xl'/>
-                                                }
-
+                                                <CoverImage cover={profile.cover} preview={preview}/>
                                                 <form onSubmit={handleSubmit}>
                                                     <div className="cursor-pointer absolute top-0  right-0 m-5">
 

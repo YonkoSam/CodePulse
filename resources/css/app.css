@@ -6,7 +6,7 @@ body {
     box-sizing: border-box;
     background-image: url("../assets/images/background.webp");
     line-height: 1.5;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     --tw-text-opacity: 1;
     color: rgb(129 140 248 / var(--tw-text-opacity));
     background-size: cover;

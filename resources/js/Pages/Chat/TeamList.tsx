@@ -17,7 +17,7 @@ const TeamList = ({teams, userId}) => {
             className="flex flex-1  items-center rounded-3xl justify-between p-3 m-3 gap-2  bg-black/30 shadow-2xl hover:bg-gray-200  group duration-300 ease-in-out"
         >
             <Link
-                href={route('chat.team', {teamId: team.id})}
+                href={route('chat.team', team.id)}
                 except={['friends', 'blockedList']}
                 preserveScroll
                 className="flex items-center gap-2 w-full text-white  group-hover:text-gray-800"
