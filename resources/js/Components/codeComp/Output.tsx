@@ -5,7 +5,7 @@ import {BACKGROUND_GRADIENT, Toast} from "@/utils";
 import PrimaryButton from "@/Components/formComp/PrimaryButton";
 
 const Output = ({language, sourceCode}) => {
-    const [output, setOutput] = useState(null);
+    const [output, setOutput] = useState<string[]>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
 
@@ -52,16 +52,17 @@ const Output = ({language, sourceCode}) => {
             <Box
                 height="75vh"
                 p={2}
-                className={`mt-4 rounded-2xl overflow-auto bg-white text-black border-2 shadow-md  ${
+                className={`mt-4 rounded-2xl overflow-auto bg-[#1E1E1E] text-gray-200 der-2 shadow-md  ${
                     isError ? "border-red-500" : "border-gray-300"
                 }`}
             >
                 {output ? (
-                    output.map((line, i) => (
+                    output.map((line: string, i: number) => (
                         <Typography
                             key={i}
+                            component="pre"
                             variant="body2"
-                            className={`whitespace-pre-line ${
+                            className={`${
                                 isError ? "text-red-600" : ""
                             }`}
                         >
@@ -69,7 +70,7 @@ const Output = ({language, sourceCode}) => {
                         </Typography>
                     ))
                 ) : (
-                    <Typography variant="body2" className="text-gray-500">
+                    <Typography variant="body2" className="text-gray-200">
                         Click "Run Code" to see the output here
                     </Typography>
                 )}

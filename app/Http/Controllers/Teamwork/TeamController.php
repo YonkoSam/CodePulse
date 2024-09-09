@@ -73,7 +73,6 @@ class TeamController extends Controller
             'name' => 'required|string',
         ]);
 
-        $teamModel = config('teamwork.team_model');
 
         if (! auth()->user()->isOwnerOfTeam($team)) {
             return back()->withErrors(['message' => 'You are not the team owner']);
