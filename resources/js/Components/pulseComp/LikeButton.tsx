@@ -32,14 +32,14 @@ function LikeButton({likes, pulseId, commentId = null, authId}) {
     }
 
 
-    return <div className={`relative ${loading && "pointer-events-none"} `}>
+    return <div className='relative'>
         <Badge
             component={motion.div}
-            whileTap={{scale: 0.5}}
+            whileTap={{scale: loading ? 1 : 0.5}}
             transition={{duration: 1, type: "spring"}}
             color={"primary"}
-            onClick={handleLike}
-            className="!absolute !right-3 !top-3 z-50  cursor-pointer"
+            onClick={loading ? undefined : handleLike}
+            className={`!absolute !right-3 !top-3 z-50   ${loading ? "cursor-wait" : 'cursor-pointer'}`}
             style={{color: like ? "#4f46e5" : "#fff"}}
             badgeContent={likesCount}
             overlap="circular">

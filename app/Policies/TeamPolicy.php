@@ -14,6 +14,10 @@ class TeamPolicy{
     {
         return $user->isOwnerOfTeam($team);
     }
+    public function teamMember(User $user,Team $team): bool
+    {
+        return $team->hasUser($user);
+    }
 
 
 }

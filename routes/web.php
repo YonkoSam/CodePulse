@@ -25,16 +25,13 @@ use App\Http\Controllers\UnreadMessagesCountController;
 use App\Http\Controllers\UploadProfileCoverController;
 use App\Http\Controllers\UserSeenListController;
 use App\Http\Controllers\UserSeenMessageController;
-use App\Http\Middleware\isFriendMiddleware;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('welcome');
-Route::get('/robots.txt', function () {
-    return response()->file(public_path('robots.txt'));
-});
+
 
 Route::middleware('auth')->group(function () {
 // Search routes
@@ -105,8 +102,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('chat')->group(function () {
         Route::post('/', [ChatController::class, 'store'])->name('chat.store');
         Route::get('/', [ChatController::class, 'index'])->name('chat.index');
-        Route::get('/user/{receiver}', [ChatController::class, 'userChat'])->name('chat.user')->middleware(isFriendMiddleware::class);
-        Route::get('/team/{team}', [ChatController::class, 'teamChat'])->name('chat.team');
+        Route::get('/user/{receiver}', [ChatController::class, 'userChat'])->name('chat.user');
+        Route::get('/team/{team}', [ChatController::class, 'teamChat'])->name('chat.team')->can('teamMember','team');
         Route::get('/{receiver}', [ChatController::class, 'show'])->name('chat.show');
         Route::post('/is-typing', isTypingController::class)->name('is-typing');
 

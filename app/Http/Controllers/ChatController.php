@@ -14,6 +14,8 @@ use App\Services\ProfanityFilterService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -132,7 +134,12 @@ class ChatController extends Controller
     public function userChat(User $receiver)
     {
         $user = Auth::user();
-         $receiver->online = $receiver->isOnline();
+        $response = Gate::inspect('isFriend', $receiver);
+        if (!$response->allowed()) {
+            return Redirect::to(route('profiles.show', $receiver->profile?->id ?? null))
+                ->with('error', $response->message());
+        }
+        $receiver->online = $receiver->isOnline();
         $receiver->load(['profile' => function ($query) {
             $query->select('user_id', 'profiles.id');
         }]);
@@ -161,13 +168,6 @@ class ChatController extends Controller
     public function teamChat(?Team $team)
     {
         $user = Auth::user();
-
-
-        if (!$team->hasUser($user)) {
-            abort('404');
-        }
-
-
         $messages = $user->allMessagesWithTeam($team->id)
             ->with([
                 'sender:id,name,profile_image',

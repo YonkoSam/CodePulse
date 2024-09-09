@@ -37,7 +37,6 @@ const TestingGround = ({language = "", sourceCode = ""}) => {
         }
     }, [code]);
 
-    console.log(code);
     return (
         <AuthenticatedLayout user={auth.user} title='Testing Ground'
                              header={<h2 className="font-semibold text-xl text-white leading-tight">Testing
