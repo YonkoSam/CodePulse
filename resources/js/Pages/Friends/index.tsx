@@ -94,8 +94,8 @@ const Index = ({["code-mates"]: codeMates, blockedList, auth}) => {
                         </div>
                         <div>
                             <div
-                                className="grid gap-4 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6"
-                            >
+                                className='grid gap-4 p-4 grid-cols-2  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'>
+                                
                                 {codeMates.data.map((friend: User, i: number) => (
                                     <motion.div
                                         key={friend.id}

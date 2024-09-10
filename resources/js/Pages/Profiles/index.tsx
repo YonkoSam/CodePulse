@@ -21,7 +21,7 @@ const Index = ({profiles}: any) => {
                     <SearchBar type={dataType.Users} placeholder='Find a developer by name ...'/>
                 </div>
                 <div
-                    className='grid gap-4 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6'>
+                    className='grid gap-4 p-4 grid-cols-2  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'>
                     {profiles.data?.map((profile: Profile, i: number) => (
                         <motion.div key={profile.id}
                                     initial={{x: -50, y: -50, opacity: 0}}

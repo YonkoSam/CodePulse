@@ -32,7 +32,7 @@ const FriendCard = ({friend}) => {
                         }}
                     >
                         <Avatar
-                            className="!w-32 !h-32 xl:!w-36 xl:!h-36 2xl:!w-44 2xl:!h-44 !rounded-2xl  mx-auto !object-cover !object-top"
+                            className="!w-full !h-44 !rounded-2xl  mx-auto !object-cover !object-top"
                             src={friend.profile_image}
                             alt={friend.name}
                         />
