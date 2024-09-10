@@ -88,13 +88,13 @@ const Index = ({["code-mates"]: codeMates, blockedList, auth}) => {
                         </Link>
                     </FirstTimeCard>
                 ) : (
-                    <div className="w-full">
-                        <div className="max-w-md mx-auto">
+                    <div className="mx-auto px-4">
+                        <div className="max-w-md mx-auto mb-6">
                             <SearchBar type={dataType.Friends} placeholder={"Find a CodeMate by name ..."}/>
                         </div>
                         <div>
                             <div
-                                className="grid gap-2 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+                                className="grid gap-4 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6"
                             >
                                 {codeMates.data.map((friend: User, i: number) => (
                                     <motion.div
