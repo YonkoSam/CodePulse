@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
+use App\Services\XpService;
 
 class ProfilesController extends Controller
 {
@@ -68,7 +69,7 @@ class ProfilesController extends Controller
         ]);
     }
 
-    public function store(ProfanityFilterService $profanityFilterService)
+    public function store(ProfanityFilterService $profanityFilterService,XpService $xpService)
     {
         $profile = request()->validate([
             'company' => ['nullable', 'string', 'min:1'],
@@ -106,8 +107,6 @@ class ProfilesController extends Controller
 
         $social = $profanityFilterService->filter($social, ['facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'github']);
 
-
-
         Social::updateOrCreate(
             ['profile_id' => $profile->id],
             $social);
@@ -130,6 +129,13 @@ class ProfilesController extends Controller
                 Storage::delete($oldAvatar);
             }
 
+        }
+
+        $requiredFields = ['company', 'website', 'country', 'location', 'status', 'skills', 'bio'];
+        $allFieldsFilled = !in_array(null, array_intersect_key($profile->toArray(), array_flip($requiredFields)));
+        if ($allFieldsFilled && !$profile->has_completed_profile) {
+            $xpService->assignPoints($profile,XpAction::COMPLETE_PROFILE);
+            $profile->update(['has_completed_profile' => true]);
         }
 
         return Redirect::route('home');

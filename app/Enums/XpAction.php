@@ -3,11 +3,12 @@ namespace App\Enums;
 
 enum XpAction: int
 {
-    case CREATE_PULSE = 50;
-    case RECEIVE_LIKE_ON_PULSE = 15;
-    case RECEIVE_COMMENT = 20;
-    case BE_CHOSEN_BEST_ANSWER = 500;
-    case RECEIVE_LIKE_ON_COMMENT = 25;
+    case COMPLETE_PROFILE = 1000;
+    case CREATE_PULSE = 100;
+    case RECEIVE_LIKE_ON_PULSE = 25;
+    case RECEIVE_COMMENT = 50;
+    case BE_CHOSEN_BEST_ANSWER = 750;
+    case RECEIVE_LIKE_ON_COMMENT = 40;
 
     public static function toArray(): array
     {

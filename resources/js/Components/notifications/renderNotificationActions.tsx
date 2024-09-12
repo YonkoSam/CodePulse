@@ -46,7 +46,7 @@ const renderNotificationActions = (
             });
     };
 
-    const markAsReadLocal = (id: string, status: string) => {
+    const markAsReadFriendRequestLocal = (id: string, status: string) => {
         if (setNotifications) {
             setNotifications((prev) =>
                 prev.map((notf) => {
@@ -75,7 +75,7 @@ const renderNotificationActions = (
                     icon: "success",
                     title: "Friend request rejected successfully",
                 });
-                markAsReadLocal(id, "rejected");
+                markAsReadFriendRequestLocal(id, "rejected");
             })
             .catch(() => {
                 Toast.fire({
@@ -97,7 +97,7 @@ const renderNotificationActions = (
                     icon: "success",
                     title: "Friend request accepted!",
                 });
-                markAsReadLocal(id, "accepted");
+                markAsReadFriendRequestLocal(id, "accepted");
                 router.reload({ only: ["isFriend"] });
             })
             .catch((error) => {

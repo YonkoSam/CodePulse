@@ -25,6 +25,7 @@ class Profile extends Model
         'status',
         'skills',
         'bio',
+        'has_completed_profile',
     ];
 
 
