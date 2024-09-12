@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import debounce from 'lodash/debounce';
+import Swal from "sweetalert2";
 
 const useInfiniteScrollWithSearch = (route, searchTerm = '') => {
     const [data, setData] = useState([]);
@@ -66,6 +67,65 @@ const useInfiniteScrollWithSearch = (route, searchTerm = '') => {
     }, [hasMore, searchTerm, fetchData]);
 
     return {data, loading};
+};
+export const useWindowSize = () => {
+    const [windowSize, setWindowSize] = useState({width: window.innerWidth});
+
+    useEffect(() => {
+        const handleResize = () => setWindowSize({width: window.innerWidth});
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return windowSize;
+};
+
+export const usePreview = () => {
+    const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
+    const [preview, setPreview] = useState<string>('');
+
+    useEffect(() => {
+        if (!selectedFile) {
+            setPreview('');
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setPreview(objectUrl);
+
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [selectedFile]);
+
+    const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files && files.length === 1) {
+            const fileType = files[0].type;
+            if (!fileType.startsWith('image/')) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Selected file was not an image!",
+                });
+                setSelectedFile(undefined);
+                return;
+            } else {
+                setSelectedFile(files[0]);
+            }
+        }
+    };
+
+    const reset = () => {
+        setSelectedFile(undefined);
+        setPreview('');
+    };
+
+    return {
+        selectedFile,
+        preview,
+        onSelectFile,
+        reset,
+    };
 };
 
 export default useInfiniteScrollWithSearch;

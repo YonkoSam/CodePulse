@@ -5,8 +5,9 @@ import {Groups2, Leaderboard, MessageSharp, Person, Terminal} from "@mui/icons-m
 import Logo from "@/Components/genralComp/Logo";
 import {Activity} from "lucide-react";
 import {motion} from "framer-motion";
-import {BACKGROUND_GRADIENT, useWindowSize} from "@/utils";
+import {BACKGROUND_GRADIENT} from "@/utils";
 import AnimatedHamburgerButton from "@/Components/animatedComp/AnimatedHamburgerButton";
+import {useWindowSize} from "@/utils/customHooks";
 
 const Sidebar = ({unreadCount}: { unreadCount: number }) => {
     const {url} = usePage();

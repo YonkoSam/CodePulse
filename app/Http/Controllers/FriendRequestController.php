@@ -13,68 +13,105 @@ class FriendRequestController extends Controller
 {
     public function sendRequest(Request $request)
     {
+        $request->validate([
+            'sender_id' => 'required',
+            'receiver_id' => 'required',
+        ]);
+
         $sender = User::find($request->sender_id);
         $receiver = User::find($request->receiver_id);
 
+        if (!$sender || !$receiver || $sender->id === $receiver->id) {
+            return response()->json(['message' => 'Invalid users!'], 404);
+        }
+
         if ($sender->isFriend($receiver)) {
-            return back()->withErrors(['message' => 'You are already a friend with this user !']);
+            return response()->json(['message' => 'You are already friends with this user!'], 409);
         }
 
-        if ($receiver && $sender->id !== $receiver->id) {
-            if (! $sender->sentFriendRequests()->where('receiver_id', $receiver->id)->exists()) {
-                if($sender->allMessagesWithFriend($receiver->id)->withTrashed()->exists()){
-                    $sender->allMessagesWithFriend($receiver->id)->restore();
-                }
-                $friendRequest = FriendRequest::create([
-                    'sender_id' => $sender->id,
-                    'receiver_id' => $receiver->id,
-                ]);
-
-
-                $receiver->notify(new FriendRequestNotification($friendRequest));
-
-                return response()->json(['message' => 'Friend request sent!']);
-            } else {
-                return response()->json(['message' => 'You already sent a friend request to this user!'],401);
-            }
-
+        if ($sender->id === auth()->id() && $sender->sentFriendRequests()->where('receiver_id', $receiver->id)->exists()) {
+            return response()->json(['message' => 'You already sent a friend request to this user!'], 409);
         }
 
-        return response()->json(['message' => 'invalid User!'],401);
+        if ($receiver->id === auth()->id() && $receiver->receivedFriendRequests()->where('sender_id', $sender->id)->exists()) {
+            return response()->json(['message' => 'You already have a pending friend request from this user!'], 409);
+        }
+
+
+        $friendRequest = FriendRequest::create([
+            'sender_id' => $sender->id,
+            'receiver_id' => $receiver->id,
+        ]);
+
+        $receiver->notify(new FriendRequestNotification($friendRequest));
+
+        return response()->json(['message' => 'Friend request sent!','requestId'=>$friendRequest->id],);
     }
 
     public function acceptRequest(Request $request)
     {
+        return $this->handleRequest($request, 'accepted');
+    }
 
-        $friendRequest = FriendRequest::find($request->request_id);
+    private function handleRequest(Request $request, string $status)
+    {
+        $request->validate(['request_id' => 'required']);
+        $friendRequest = FriendRequest::findOrFail($request->request_id);
 
-        if ($friendRequest) {
-            Friendship::create(['user_id' => $friendRequest->sender_id, 'friend_id' => $friendRequest->receiver_id]);
-            $sender = $friendRequest->sender;
-            $receiver = $friendRequest->receiver;
-            $friendRequest->delete();
-            $sender->notify(new FriendRequestStatus($receiver->name, 'accepted'));
-            return response()->json(['message' => 'Friend request accepted!']);
+        $sender = $friendRequest->sender;
+        $receiver = $friendRequest->receiver;
+        $notification = $receiver->notifications()
+            ->where('type', FriendRequestNotification::class)
+            ->where('data->request_id', $friendRequest->id)
+            ->firstOrFail();
+
+        $notificationData = $notification->data;
+        $notificationData['message'] = "Friend request $status!";
+
+        switch ($status) {
+            case 'accepted':
+                Friendship::create([
+                    'user_id' => $friendRequest->sender_id,
+                    'friend_id' => $friendRequest->receiver_id
+                ]);
+                $sender->allMessagesWithFriend($receiver->id)->withTrashed()->restore();
+                $sender->notify(new FriendRequestStatus($receiver->name, $status));
+                break;
+            case 'rejected':
+                if (auth()->id() !== $friendRequest->receiver_id) {
+                    return response()->json(['message' => 'Unauthorized to reject this request'], 403);
+                }
+                break;
+            case 'cancelled':
+                if (auth()->id() !== $friendRequest->sender_id) {
+                    return response()->json(['message' => 'Unauthorized to cancel this request'], 403);
+                }
+                $notification->delete();
+                return response()->json(['message' => "Friend request $status!"]);
+            default:
+                return response()->json(['message' => 'Invalid status'], 400);
         }
 
-        return response()->json(['message' => 'Friend request was not found!'],401);
+        $notification->update([
+            'data' => $notificationData,
+            'read_at' => now()
+        ]);
+
+        $friendRequest->delete();
+
+        return response()->json(['message' => "Friend request $status!"]);
     }
 
     public function rejectRequest(Request $request)
     {
-
-        $friendRequest = FriendRequest::find($request->request_id);
-
-        if ($friendRequest) {
-            $sender = $friendRequest->sender;
-            $receiver = $friendRequest->receiver;
-            $friendRequest->delete();
-
-            $sender->notify(new FriendRequestStatus($receiver->name, 'rejected'));
-
-            return response()->json(['message' => 'Friend request rejected!']);
-        }
-
-        return response()->json(['message' => 'Friend request was not found!'],401);
+        return $this->handleRequest($request, 'rejected');
     }
+
+    public function cancelRequest(Request $request)
+    {
+        return $this->handleRequest($request, 'cancelled');
+    }
+
+
+
 }

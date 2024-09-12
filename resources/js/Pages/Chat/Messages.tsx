@@ -3,7 +3,7 @@ import {Container, Grid, IconButton, Switch, Tooltip, Typography} from "@mui/mat
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {Link, router, usePage} from "@inertiajs/react";
 import {Message, PageProps, Team, User, UserSeen} from "@/types";
-import {dataType, handleUnblock, useWindowSize} from "@/utils";
+import {dataType, handleUnblock} from "@/utils";
 import PrimaryButton from "@/Components/formComp/PrimaryButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -21,6 +21,7 @@ import TeamList from "@/Pages/Chat/TeamList";
 import BlockedList from "@/Pages/Chat/BlockedList";
 import {renderMessages} from "@/Components/chat/renderMessages";
 import MessageSubmitForm from "@/Components/chat/MessageSubmitForm";
+import {useWindowSize} from "@/utils/customHooks";
 
 const Messages = ({messages, friends, teams: initialTeams, receiver, team, blockInitiatorId, blockedList}) => {
     const {auth} = usePage<PageProps>().props;

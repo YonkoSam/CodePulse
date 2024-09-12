@@ -2,16 +2,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {Link, router, useForm, usePage} from '@inertiajs/react';
 import {PageProps, Profile, Pulse, User} from '@/types';
 import PrimaryButton from "@/Components/formComp/PrimaryButton";
-import {Avatar, CircularProgress, IconButton, Stack, Tooltip} from "@mui/material";
+import {Avatar, IconButton, Stack, Tooltip} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import {Block, Circle, PersonAdd, Report} from "@mui/icons-material";
+import {Block, Circle, Report} from "@mui/icons-material";
 import Swal from "sweetalert2";
 import {EditIcon, MessageCircleIcon} from "lucide-react";
 import FriendsMenu from "@/Pages/Friends/FriendsMenu";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import CreateProfilePrompt from "@/Components/profile/CreateProfilePrompt";
-import {buttonStyle, iconStyle, spanStyle, Toast, usePreview} from "@/utils";
+import {buttonStyle, iconStyle, spanStyle, Toast} from "@/utils";
 import FriendsSection from "@/Components/profile/FriendsSection";
 import {BackgroundGradient} from "@/Components/ui/BackgroundGradient";
 import PulsesSection from "@/Components/profile/PulsesSection";
@@ -20,14 +20,16 @@ import FirstTimeCard from "@/Components/genralComp/FirstTimeCard";
 import AboutSection from "@/Components/profile/AboutSection";
 import ReactTimeAgo from "react-time-ago";
 import ReportForm from "@/Components/ReportForm";
-import axios from "axios";
 import ProfileProgressLevel from "@/ProfileProgressLevel";
 import CoverImage from "@/Components/profile/Cover";
+import {usePreview} from "@/utils/customHooks";
+import FriendRequestStatus from "@/Components/FriendRequestStatus";
 
 export default function ProfilePage({
                                         profile,
                                         friends,
                                         pulses,
+                                        friendRequest,
                                         isFriend,
                                         isOnline,
                                         hasProfile,
@@ -35,7 +37,8 @@ export default function ProfilePage({
                                     }: PageProps<{
     profile: Profile,
     friends: User[],
-    pulses: Pulse[]
+    pulses: Pulse[],
+    friendRequest: { requestId: number, requestStatus: number },
     xpActions: []
 }> & {
     isFriend: boolean, isOnline: boolean, hasProfile: boolean
@@ -46,8 +49,8 @@ export default function ProfilePage({
     const [chatToggle, setChatToggle] = useState<number | null>(null);
     const {preview, selectedFile, onSelectFile, reset} = usePreview();
     const [openReportForm, setOpenReportForm] = useState(false);
-    const [loadingFriendRequest, setLoadingFriendRequest] = useState(false)
     const {setData, post} = useForm({cover: null});
+
 
     useEffect(() => {
         setData('cover', selectedFile)
@@ -134,21 +137,7 @@ export default function ProfilePage({
 
 
     };
-    const handleFriendRequest = () => {
-        setLoadingFriendRequest(true);
-        axios.post(route('friend.request.send'), {'sender_id': auth.user.id, 'receiver_id': profile.user_id}).then(() =>
-            Toast.fire({
-                icon: "success",
-                title: "Friend request Sent Successfully"
-            })
-        ).catch(
-            (errors) => {
-                Toast.fire({
-                    icon: "error",
-                    title: `${errors.response?.data?.message}`
-                })
-            }).finally(() => setLoadingFriendRequest(false));
-    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('cover.upload'), {
@@ -266,17 +255,8 @@ export default function ProfilePage({
 
                                                             {!isFriend ? (
                                                                 <>
-                                                                    <IconButton
-                                                                        className={iconStyle}
-                                                                        disabled={loadingFriendRequest}
-                                                                        onClick={handleFriendRequest}
-                                                                        aria-label="Add CodeMate"
-                                                                    >
-                                                                        {loadingFriendRequest ?
-                                                                            <CircularProgress
-                                                                                className='!text-white'/> :
-                                                                            <PersonAdd className={iconStyle}/>}
-                                                                    </IconButton>
+                                                                    <FriendRequestStatus friendRequest={friendRequest}
+                                                                                         userId={profile.user_id}/>
                                                                     <Tooltip title="Block this user">
                                                                         <IconButton
                                                                             className={iconStyle}

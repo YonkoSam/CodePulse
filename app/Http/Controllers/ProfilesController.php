@@ -39,11 +39,13 @@ class ProfilesController extends Controller
         $user = Auth::user();
         $isFriend = false;
         $isOnline = false;
+        $friendRequest = null;
         if (is_null($profile)) {
             $profile = $user->profile;
         } else {
             $isFriend = $profile->user->isFriend($user);
             $isOnline = $profile->user->isOnline();
+            $friendRequest = $profile->user->getFriendRequest();
         }
         $profile?->load('user', 'experiences', 'socials', 'educations');
 
@@ -52,9 +54,12 @@ class ProfilesController extends Controller
             ->withCount('comments')
             ->get();
 
+
+
         return Inertia::render('Profiles/ProfilePage', [
             'profile' => $profile,
             'isFriend' => Inertia::always($isFriend),
+            'friendRequest'=>$friendRequest,
             'isOnline' => Inertia::always($isOnline),
             'hasProfile' => $user?->profile()->exists(),
             'pulses' => $pulses,

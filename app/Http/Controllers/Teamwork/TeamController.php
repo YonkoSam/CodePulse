@@ -53,15 +53,13 @@ class TeamController extends Controller
     public function destroy(Team $team)
     {
 
-        if (! auth()->user()->isOwnerOfTeam($team)) {
-            abort(403);
-        }
-
         $team->delete();
 
         $userModel = config('teamwork.user_model');
         $userModel::where('current_team_id', $team->id)
             ->update(['current_team_id' => null]);
+
+
 
         return back();
     }
@@ -73,10 +71,6 @@ class TeamController extends Controller
             'name' => 'required|string',
         ]);
 
-
-        if (! auth()->user()->isOwnerOfTeam($team)) {
-            return back()->withErrors(['message' => 'You are not the team owner']);
-        }
         $team->name = $request->name;
         $team->save();
 

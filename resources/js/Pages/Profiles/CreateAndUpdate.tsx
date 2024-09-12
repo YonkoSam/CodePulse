@@ -1,6 +1,6 @@
 import React, {FormEventHandler, useEffect, useState} from 'react';
 import {Link, router, useForm, usePage} from "@inertiajs/react";
-import {buttonStyle, inputStyle, spanStyle, usePreview} from "@/utils";
+import {buttonStyle, inputStyle, spanStyle} from "@/utils";
 import PrimaryButton from "@/Components/formComp/PrimaryButton";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {PageProps, Profile} from "@/types";
@@ -16,6 +16,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import {YouTube} from "@mui/icons-material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import CountrySelector from "@/CountrySelector";
+import {usePreview} from "@/utils/customHooks";
 
 
 export default function createAndUpdate({profile, hasProfile}: { profile: Profile, hasProfile: boolean }) {

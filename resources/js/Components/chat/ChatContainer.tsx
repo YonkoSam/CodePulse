@@ -2,7 +2,9 @@ import {useEffect, useRef, useState} from 'react';
 import {usePage} from "@inertiajs/react";
 import Chat from "@/Components/chat/Chat";
 import {PageProps} from "@/types";
-import {audio, Toast, useWindowSize} from "@/utils";
+import {audio, Toast} from "@/utils";
+import {useWindowSize} from "@/utils/customHooks";
+
 
 const ChatContainer = ({id}) => {
     const [receiverIds, setReceiverIds] = useState(new Set<number>());

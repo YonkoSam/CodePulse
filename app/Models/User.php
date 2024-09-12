@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\FriendRequestStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -98,6 +99,23 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function getFriendRequest() : array | null
+    {
+        $request = FriendRequest::findRequest($this->id);
+
+        if(!$request) {
+            return null;
+        }
+
+        return ['requestId'=> $request->id ,
+            'requestStatus'=>$request->sender_id == $this->id ? FriendRequestStatus::received : FriendRequestStatus::sent ];
+    }
+
+    public function sentFriendRequests(): HasMany
+    {
+        return $this->hasMany(FriendRequest::class, 'sender_id');
+    }
+
     public function allFriends($sort = false): Builder
     {
         $userId = $this->id;
@@ -147,7 +165,6 @@ class User extends Authenticatable
 
         return $this->last_time_online;
     }
-
 
     public function unreadMessages(?User $friend = null): HasMany
     {
@@ -220,15 +237,9 @@ class User extends Authenticatable
             ->visibleToUser($this->id);
     }
 
-
     public function profile(): hasOne
     {
         return $this->hasOne(Profile::class);
-    }
-
-    public function sentFriendRequests(): HasMany
-    {
-        return $this->hasMany(FriendRequest::class, 'sender_id');
     }
 
     public function receivedFriendRequests(): HasMany

@@ -5,7 +5,7 @@ import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
 import {Clear} from "@mui/icons-material";
 import {LiveAudioVisualizer as LiveAudioVisualizerType} from "@/types";
-import {useWindowSize} from "@/utils";
+import {useWindowSize} from "@/utils/customHooks";
 
 const LiveAudioVisualizer = React.lazy<React.ComponentType<LiveAudioVisualizerType>>(async () => {
     const {LiveAudioVisualizer} = await import("react-audio-visualize");

@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/send', [FriendRequestController::class, 'sendRequest'])->name('friend.request.send');
         Route::post('/accept', [FriendRequestController::class, 'acceptRequest'])->name('friend.request.accept');
         Route::post('/reject', [FriendRequestController::class, 'rejectRequest'])->name('friend.request.reject');
+        Route::post('/cancel', [FriendRequestController::class, 'cancelRequest'])->name('friend.request.cancel');
     });
 
 // Chat routes
@@ -148,8 +149,8 @@ Route::middleware('auth')->group(function () {
 
 // Testing ground routes
     Route::prefix('testing-ground')->group(function () {
-        Route::post('/', TestingGroundController::class)->name('testing-ground');
-        Route::get('/', TestingGroundController::class)->name('testing-ground-get');
+        Route::post('/', TestingGroundController::class)->name('testing-ground-with-code');
+        Route::get('/', TestingGroundController::class)->name('testing-ground');
     });
 
 // Report route

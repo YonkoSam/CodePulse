@@ -81,7 +81,10 @@ export default function CodeBlock({code}) {
                     <Tooltip title="run code">
                         <Link
                             method="post"
-                            href={route('testing-ground', {language: code.language, sourceCode: code.sourceCode})}
+                            href={route('testing-ground-with-code', {
+                                language: code.language,
+                                sourceCode: code.sourceCode
+                            })}
                             as="button"
                             className="bg-gray-700 hover:bg-gray-600 text-white p-1 rounded"
                         >

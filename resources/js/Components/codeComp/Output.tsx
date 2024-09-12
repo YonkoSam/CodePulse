@@ -15,7 +15,6 @@ const Output = ({language, sourceCode}) => {
         try {
             setIsLoading(true);
             const {run: result} = await executeCode(language, sourceCode);
-
             setOutput(result.output.split("\n"));
             setIsError(!!result.stderr);
             if (result.signal == "SIGKILL") {

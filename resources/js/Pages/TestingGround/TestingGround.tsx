@@ -5,7 +5,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {usePage} from "@inertiajs/react";
 import {PageProps} from "@/types";
 import {motion} from "framer-motion";
-import {useWindowSize} from "@/utils";
+import {useWindowSize} from "@/utils/customHooks";
 import {IconButton, Skeleton} from "@mui/material";
 import {Code, Terminal} from "@mui/icons-material";
 

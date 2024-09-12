@@ -1,5 +1,4 @@
 import audioLocation from "../../assets/audio/notification.mp3"
-import {useEffect, useState} from "react";
 import Swal from "sweetalert2"; // Import SweetAlert for notifications
 import {router} from "@inertiajs/react";
 import {User} from "@/types";
@@ -137,62 +136,3 @@ export enum dataType {
 export const inputStyle = "shadow appearance-none  rounded w-full p-3 text-gray-700 leading-tight focus:ring  duration-300 ease-in-out";
 
 
-export const useWindowSize = () => {
-    const [windowSize, setWindowSize] = useState({width: window.innerWidth});
-
-    useEffect(() => {
-        const handleResize = () => setWindowSize({width: window.innerWidth});
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    return windowSize;
-};
-
-export const usePreview = () => {
-    const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
-    const [preview, setPreview] = useState<string>('');
-
-    useEffect(() => {
-        if (!selectedFile) {
-            setPreview('');
-            return;
-        }
-
-        const objectUrl = URL.createObjectURL(selectedFile);
-        setPreview(objectUrl);
-
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [selectedFile]);
-
-    const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (files && files.length === 1) {
-            const fileType = files[0].type;
-            if (!fileType.startsWith('image/')) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Selected file was not an image!",
-                });
-                setSelectedFile(undefined);
-                return;
-            } else {
-                setSelectedFile(files[0]);
-            }
-        }
-    };
-
-    const reset = () => {
-        setSelectedFile(undefined);
-        setPreview('');
-    };
-
-    return {
-        selectedFile,
-        preview,
-        onSelectFile,
-        reset,
-    };
-};
