@@ -39,12 +39,12 @@ const CreateAndUpdate = ({pulse, teams}: { pulse: Pulse, teams: Team[] }) => {
 
 
     const {data, setData, post, errors} = useForm(initialData);
+    const {title, text, code, team_id} = data;
 
     useEffect(() => {
         setData('code', codeData);
     }, [codeData]);
 
-    const {title, text, code, team_id} = data;
 
     const handleDelete = () => {
         Swal.fire({
@@ -166,7 +166,7 @@ const CreateAndUpdate = ({pulse, teams}: { pulse: Pulse, teams: Team[] }) => {
                                         name: pulse.code.language,
                                         value: pulse.code.sourceCode
                                     }}/>
-                        
+
                     </div>
                 </div>
 

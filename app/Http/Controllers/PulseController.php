@@ -13,13 +13,11 @@ use Inertia\Inertia;
 
 class PulseController extends Controller
 {
-
-
     public function index()
     {
         return Inertia::render('Pulses/index', [
             'pulses' => Pulse::where('team_id', auth()->user()->current_team_id)->select(['id', 'title', 'text', 'user_id', 'created_at', DB::raw("code->>'$.language' as language")])
-                ->with(['likes'=>function($query){
+                ->with(['likes' => function ($query) {
                     $query->select(['id', 'user_id', 'pulse_id'])
                         ->whereNotNull('pulse_id');
                 }, 'user'])
@@ -29,7 +27,6 @@ class PulseController extends Controller
                 ->paginate(6),
             'teams' => auth()->user()->teams()->get(), ]);
 
-
     }
 
     public function tags(string $tag)
@@ -38,7 +35,7 @@ class PulseController extends Controller
         return Inertia::render('Pulses/index', [
             'pulses' => Pulse::where('code->language', $tag)
                 ->select(['id', 'title', 'text', 'user_id', 'created_at', DB::raw("code->>'$.language' as language")])
-                ->with(['likes'=>function($query){
+                ->with(['likes' => function ($query) {
                     $query->select(['id', 'user_id', 'pulse_id'])
                         ->whereNotNull('pulse_id');
                 }, 'user'])
@@ -59,16 +56,15 @@ class PulseController extends Controller
         }
         $pulse->load([
             'user',
-            'likes'=>function($query){
-            $query->select(['id', 'user_id', 'pulse_id'])
-            ->whereNotNull('pulse_id');
+            'likes' => function ($query) {
+                $query->select(['id', 'user_id', 'pulse_id'])
+                    ->whereNotNull('pulse_id');
             },
         ]);
         $userId = auth()->id();
 
-
         $comments = $pulse->comments()
-            ->with(['user','replies','user.profile'=>fn($query) => $query->select(['id', 'xp','user_id']),'likes'=>function($query){
+            ->with(['user', 'replies', 'user.profile' => fn ($query) => $query->select(['id', 'xp', 'user_id']), 'likes' => function ($query) {
                 $query->select(['id', 'user_id', 'comment_id'])
                     ->whereNotNull('comment_id');
             }])
@@ -82,7 +78,7 @@ class PulseController extends Controller
         $pulse->unsetRelation('likes');
 
         return Inertia::render('Pulses/show',
-            [   'pulse' => $pulse,
+            ['pulse' => $pulse,
                 'comments' => $comments,
                 'likes' => $likes,
             ]
@@ -93,40 +89,40 @@ class PulseController extends Controller
     {
         if (request()->has('markAsRead')) {
             auth()->user()->notifications()->where('id', request()->markAsRead)->first()?->markAsRead();
+
             return redirect()->route('pulses.show', $pulse->id);
         }
-
 
         return null;
     }
 
-    public function store(PulseRequest $request,ProfanityFilterService $profanityFilterService,XPService $xpService)
+    public function store(PulseRequest $request, ProfanityFilterService $profanityFilterService, XPService $xpService)
     {
 
         $pulseData = $request->validated();
 
-        $pulseData =$this->handleCodeField($pulseData);
+        $pulseData = $this->handleCodeField($pulseData);
 
-        $pulseData = $profanityFilterService->filter($pulseData,['title','text']);
+        $pulseData = $profanityFilterService->filter($pulseData, ['title', 'text']);
         $pulse = auth()->user()->pulses()->create($pulseData);
 
-        if($pulse)
-        AiAnswerPulseJob::dispatch($pulse);
+        if ($pulse) {
+            AiAnswerPulseJob::dispatch($pulse);
+        }
         $xpService->assignPoints(auth()->user()?->profile, XpAction::CREATE_PULSE);
-
-
-
 
         return to_route('pulses.index');
     }
 
     protected function handleCodeField($pulseData, $pulse = null)
     {
-        if (!isset($pulseData['code']['sourceCode']) && $pulse) {
-            $pulseData['code'] = $pulse->code;
+
+        if (! isset($pulseData['code']['sourceCode'])) {
+            $pulseData['code'] = $pulse->code ?? null;
         }
 
         return $pulseData;
+
     }
 
     public function create()
@@ -142,14 +138,13 @@ class PulseController extends Controller
         ]);
     }
 
-    public function update(Pulse $pulse,PulseRequest $request,ProfanityFilterService $profanityFilterService)
+    public function update(Pulse $pulse, PulseRequest $request, ProfanityFilterService $profanityFilterService)
     {
 
-        $pulseData= $request->validated();
-        $pulseData =$this->handleCodeField($pulseData,$pulse);
+        $pulseData = $request->validated();
+        $pulseData = $this->handleCodeField($pulseData, $pulse);
 
-        $pulseData = $profanityFilterService->filter($pulseData,['title','text']);
-
+        $pulseData = $profanityFilterService->filter($pulseData, ['title', 'text']);
 
         $pulse->update($pulseData);
 
@@ -159,7 +154,7 @@ class PulseController extends Controller
     public function destroy(Pulse $pulse)
     {
         $pulse->delete();
+
         return to_route('pulses.index');
     }
-
 }

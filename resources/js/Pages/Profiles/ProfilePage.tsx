@@ -250,7 +250,7 @@ export default function ProfilePage({
                                                 </div>
 
                                                 <div className='flex gap-2 items-center px-5 ml-auto'>
-                                                    {!isAuthUser && (
+                                                    {!isAuthUser && hasProfile && (
                                                         <>
 
                                                             {!isFriend ? (
@@ -303,7 +303,8 @@ export default function ProfilePage({
 
                                         <BackgroundGradient>
 
-                                            <ProfileProgressLevel xp={profile.xp} xpActions={xpActions}/>
+                                            <ProfileProgressLevel xp={profile.xp} xpActions={xpActions}
+                                                                  isAuthUser={isAuthUser}/>
 
                                         </BackgroundGradient>
 

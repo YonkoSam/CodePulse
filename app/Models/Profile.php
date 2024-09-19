@@ -28,8 +28,6 @@ class Profile extends Model
         'has_completed_profile',
     ];
 
-
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -40,10 +38,10 @@ class Profile extends Model
         return $this->morphMany(Report::class, 'reportable');
     }
 
-    public function scopeVisible($query, int  $userId)
+    public function scopeVisible($query, int $userId)
     {
 
-        return $query->whereNotIn('id', function ($query) use ($userId) {
+        return $query->whereNotIn('user_id', function ($query) use ($userId) {
             $query->select('friend_id')
                 ->from('friendships')
                 ->where('user_id', $userId)
@@ -53,10 +51,10 @@ class Profile extends Model
                         ->from('friendships')
                         ->where('friend_id', $userId)
                         ->where('blocked', true);
-                })
-            ;
+                });
         });
     }
+
     public function experiences(): HasMany
     {
         return $this->hasMany(Experience::class);

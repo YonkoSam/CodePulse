@@ -35,7 +35,7 @@ class ChatController extends Controller
 
     private function getLatestMessageForUser($user)
     {
-        return $user->sentMessages()->latest()->first() ?? $user->receivedMessages()->latest()->first() ;
+        return $user->sentMessages()->latest()->first() ?? $user->receivedMessages()->latest()->first();
     }
 
     private function redirectBasedOnLatestMessage($latestMessage, $user)
@@ -45,7 +45,6 @@ class ChatController extends Controller
         }
 
         $receiver = $latestMessage->sender_id === $user->id ? $latestMessage->receiver : $latestMessage->sender;
-
 
         return redirect()->route('chat.user', ['receiver' => $receiver]);
     }
@@ -65,7 +64,6 @@ class ChatController extends Controller
         return $this->renderChat(null);
     }
 
-
     protected function renderChat($messages, $receiver = null, $team = null)
     {
         $user = Auth::user();
@@ -73,7 +71,7 @@ class ChatController extends Controller
         $friends = $this->getFriendsWithUnreadMessages($user);
         $teams = $this->getTeamsWithUnreadMessages($user);
 
-        $blockInitiatorId = $this->getBlockInitiatorId( $receiver);
+        $blockInitiatorId = $this->getBlockInitiatorId($receiver);
 
         return Inertia::render('Chat/Messages', [
             'messages' => $messages,
@@ -98,6 +96,7 @@ class ChatController extends Controller
             ->through(function ($friend) use ($user) {
                 $friend->online = $friend->isOnline();
                 $friend->unreadMessagesCount = $user->unreadMessages($friend)->count();
+
                 return $friend;
             });
     }
@@ -121,13 +120,15 @@ class ChatController extends Controller
 
     }
 
-    private function getBlockInitiatorId( $receiver)
+    private function getBlockInitiatorId($receiver)
     {
         if ($receiver) {
             $friedShip = Friendship::findFriendShip($receiver->id);
             if ($friedShip) {
                 return $friedShip->blocked ? $friedShip->blocked_initiator : null;
-            }}
+            }
+        }
+
         return null;
     }
 
@@ -135,7 +136,7 @@ class ChatController extends Controller
     {
         $user = Auth::user();
         $response = Gate::inspect('isFriend', $receiver);
-        if (!$response->allowed()) {
+        if (! $response->allowed()) {
             return Redirect::to(route('profiles.show', $receiver->profile?->id ?? null))
                 ->with('error', $response->message());
         }
@@ -144,13 +145,12 @@ class ChatController extends Controller
             $query->select('user_id', 'profiles.id');
         }]);
 
-        $messages =$user->allMessagesWithFriend($receiver->id)
+        $messages = $user->allMessagesWithFriend($receiver->id)
             ->latest()
             ->with(['sender', 'receiver'])
             ->simplePaginate(50, ['*'], 'messages');
 
         $messageIds = $messages->pluck('id')->toArray();
-
         $updatedRowsCount = DB::table('messages')
             ->whereIn('id', $messageIds)
             ->where('receiver_id', $user->id)
@@ -158,7 +158,7 @@ class ChatController extends Controller
             ->update(['seen_at' => now()]);
 
         if ($updatedRowsCount) {
-            event(new MessageSeen($receiver->id,$user->id));
+            event(new MessageSeen($receiver->id, $user->id));
         }
 
         return $this->renderChat($messages, $receiver);
@@ -173,13 +173,12 @@ class ChatController extends Controller
                 'sender:id,name,profile_image',
                 'team:id,name',
                 'usersSeen' => function ($query) {
-                    $query->select(['users.id','users.name','users.profile_image'])->latest()->take(10);
+                    $query->select(['users.id', 'users.name', 'users.profile_image'])->latest()->take(10);
                 },
             ])
             ->withCount('usersSeen')
             ->latest()
             ->simplePaginate(50, ['*'], 'messages');
-
 
         $team->loadCount('users');
         $rowsAffected = false;
@@ -187,16 +186,15 @@ class ChatController extends Controller
         foreach ($messages as $message) {
             if ($message->sender_id !== $user->id) {
                 $userSeen = $message->usersSeen()->where('user_id', $user->id)->exists();
-                if (!$userSeen) {
+                if (! $userSeen) {
                     $rowsAffected = true;
                     $message->markAsSeen($user->id);
                 }
             }
         }
 
-
         if ($rowsAffected) {
-            event(new MessageSeenGroupChat($team->id,$user));
+            event(new MessageSeenGroupChat($team->id, $user));
         }
 
         return $this->renderChat($messages, null, $team);
@@ -219,7 +217,6 @@ class ChatController extends Controller
 
         $messageIds = $messages->pluck('id')->toArray();
 
-
         $updatedRowsCount = DB::table('messages')
             ->whereIn('id', $messageIds)
             ->where('receiver_id', $user->id)
@@ -227,9 +224,8 @@ class ChatController extends Controller
             ->update(['seen_at' => now()]);
 
         if ($updatedRowsCount) {
-            event(new MessageSeen($receiver->id,$user->id));
+            event(new MessageSeen($receiver->id, $user->id));
         }
-
 
         return response()->json($messages);
 
@@ -250,7 +246,7 @@ class ChatController extends Controller
             $team = $validatedData['team_id'];
         }
 
-        $message = new Message();
+        $message = new Message;
         $message->sender_id = auth()->id();
         $message->receiver_id = $receiver;
         $message->team_id = $team;
@@ -269,7 +265,7 @@ class ChatController extends Controller
         $user = auth()->user();
         $receiver = User::findOrFail($receiverId);
 
-        if ($receiver->isBlocked($user->id) || !$user->isFriend($receiver)) {
+        if ($receiver->isBlocked($user->id) || ! $user->isFriend($receiver)) {
             throw ValidationException::withMessages([
                 'receiver_id' => ['Sorry, you are smart but not smart enough.'],
             ]);
@@ -280,14 +276,13 @@ class ChatController extends Controller
     {
         $team = Team::findOrFail($teamId);
 
-        if (!$team->hasUser(auth()->user())) {
+        if (! $team->hasUser(auth()->user())) {
             throw ValidationException::withMessages([
                 'team_id' => ['You are not a member of this team.'],
             ]);
         }
 
     }
-
 
     private function determineMessageType(MessageRequest $request)
     {
@@ -311,20 +306,19 @@ class ChatController extends Controller
         }
     }
 
-    public function destroy(Message $message) {
+    public function destroy(Message $message)
+    {
 
-        if($message->sender_id != auth()->id()){
-            return back()->withErrors(['message'=>'you cant delete this message you are not the owner of it.']);
+        if ($message->sender_id != auth()->id()) {
+            return back()->withErrors(['message' => 'you cant delete this message you are not the owner of it.']);
         }
 
-        if ( Carbon::parse($message->created_at)->lte(Carbon::now()->subHour())) {
-            return back()->withErrors(['message'=>'you cant delete this message time limit reached']);
+        if (Carbon::parse($message->created_at)->lte(Carbon::now()->subHour())) {
+            return back()->withErrors(['message' => 'you cant delete this message time limit reached']);
         }
 
         $message->delete();
+
         return back();
     }
-
-
-
 }

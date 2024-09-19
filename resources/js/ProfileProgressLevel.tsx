@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
-import { Tooltip, Typography, Box } from "@mui/material";
-import { getLevel } from "@/utils";
+import React, {useEffect, useState} from "react";
+import {motion, useAnimation} from "framer-motion";
+import {Box, Tooltip, Typography} from "@mui/material";
+import {getLevel} from "@/utils";
 import StarIcon from "@mui/icons-material/Star";
 
 const MAX_LEVEL = 100;
 
-const ProfileProgressLevel = ({ xp, xpActions }) => {
+const ProfileProgressLevel = ({xp, xpActions, isAuthUser}) => {
     const level = getLevel(xp);
     const progress = xp % 1000;
     const progressPercentage = (progress / 1000) * 100;
@@ -18,55 +18,60 @@ const ProfileProgressLevel = ({ xp, xpActions }) => {
     useEffect(() => {
         controls.start({
             width: isMaxLevel ? "100%" : `${progressPercentage}%`,
-            transition: { duration: 1.5, ease: "easeInOut" },
+            transition: {duration: 1.5, ease: "easeInOut"},
         }).then(() => {
             setShowParticles(true);
         });
     }, [isMaxLevel, progressPercentage, controls]);
 
     const xpExplanation = (
-        <Box sx={{ width: 300, p: 2, borderRadius: 2, boxShadow: 3 }}>
+        <Box sx={{width: 300, p: 2, borderRadius: 2, boxShadow: 3}}>
             <Typography
                 variant="body2"
                 sx={{
                     fontStyle: "italic",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
+                    whiteSpace: "wrap",
                     textOverflow: "ellipsis",
-                    fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.9rem" },
+                    fontSize: {xs: "0.7rem", sm: "0.8rem", md: "0.9rem"},
                 }}
             >
-                {!isMaxLevel ? (
-                    <>
-                        <strong style={{ color: "#4fc3f7" }}>
-                            {1000 - progress}
+
+                {
+                    isAuthUser && <>
+                        <strong style={{color: "#4fc3f7"}}>
+                            {isMaxLevel ? 0 : (1000 - progress)}
                         </strong>{" "}
                         XP to next level!
                     </>
-                ) : (
-                    "Congratulations! You've reached the maximum level!"
-                )}
+
+                }
+
+
             </Typography>
-            {!isMaxLevel && (
-                <Box sx={{ mt: 1 }}>
-                    {Object.entries(xpActions).map(
-                        ([action, points]: [string, number]) => (
-                            <Typography
-                                key={action}
-                                variant="body2"
-                                sx={{
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    fontSize: { xs: "0.6rem", sm: "0.7rem", md: "0.8rem" },
-                                }}
-                            >
-                                {action.replace(/_/g, " ").toLowerCase()}: <strong style={{ color: "#4fc3f7" }}>{points}pts</strong>
-                            </Typography>
-                        )
-                    )}
-                </Box>
-            )}
+
+            <Box sx={{mt: 1}}>
+                <p className="mb-2">
+                    <strong>In case you were wondering, you earn XP when you:</strong>
+                </p>
+                {Object.entries(xpActions).map(
+                    ([action, points]: [string, number]) => (
+                        <Typography
+                            key={action}
+                            variant="body2"
+                            sx={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                fontSize: {xs: "0.6rem", sm: "0.7rem", md: "0.8rem"},
+                            }}
+                        >
+
+                            {action.replace(/_/g, " ").toLowerCase()}: <strong
+                            style={{color: "#4fc3f7"}}>{points}pts</strong>
+                        </Typography>
+                    )
+                )}
+            </Box>
         </Box>
     );
 
@@ -85,7 +90,7 @@ const ProfileProgressLevel = ({ xp, xpActions }) => {
             <Typography
                 variant="h6"
                 align="center"
-                sx={{ mb: 1, color: "white" }}
+                sx={{mb: 1, color: "white"}}
             >
                 {isMaxLevel ? `Level ${MAX_LEVEL}` : `Level ${level}`}
             </Typography>
@@ -104,7 +109,7 @@ const ProfileProgressLevel = ({ xp, xpActions }) => {
                     }}
                 >
                     <motion.div
-                        initial={{ width: 0 }}
+                        initial={{width: 0}}
                         animate={controls}
                         style={{
                             height: "100%",
@@ -161,11 +166,11 @@ const ProfileProgressLevel = ({ xp, xpActions }) => {
             <Typography
                 variant="body2"
                 align="center"
-                sx={{ mt: 2, color: "white" }}
+                sx={{mt: 2, color: "white"}}
             >
                 {isMaxLevel
                     ? "Max level reached!"
-                    : `${Math.round(progressPercentage)}% completed`}
+                    : `${Math.floor(progressPercentage)}% completed`}
             </Typography>
             {isMaxLevel && (
                 <motion.div
@@ -183,7 +188,7 @@ const ProfileProgressLevel = ({ xp, xpActions }) => {
                         ease: "linear",
                     }}
                 >
-                    <StarIcon sx={{ fontSize: 60, color: "#ffd700" }} />
+                    <StarIcon sx={{fontSize: 60, color: "#ffd700"}}/>
                 </motion.div>
             )}
         </Box>

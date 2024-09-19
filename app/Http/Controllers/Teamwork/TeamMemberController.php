@@ -8,22 +8,20 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
-use Mpociot\Teamwork\Facades\Teamwork;
 use Mpociot\Teamwork\TeamInvite;
+use Teamwork;
 
 class TeamMemberController extends Controller
 {
-
-
     public function show(Team $team)
     {
 
-        $team->load( 'invites');
+        $team->load('invites');
 
         $users = $team->users()->paginate(10);
 
         foreach ($team->invites as $invite) {
-            $invite->email =  substr($invite->email, 0, 3) . str_repeat('*', 20) . substr($invite->email, -1);
+            $invite->email = substr($invite->email, 0, 3).str_repeat('*', 20).substr($invite->email, -1);
         }
 
         return Inertia::render('TeamWork/Members/list', [
@@ -35,9 +33,9 @@ class TeamMemberController extends Controller
     public function destroy(Team $team, User $user)
     {
         $auth = auth()->user();
-      if($auth->isOwnerOfTeam($team)|| $user->id == auth()->id()) {
-          $user->detachTeam($team);
-      }
+        if ($auth->isOwnerOfTeam($team) || $user->id == auth()->id()) {
+            $user->detachTeam($team);
+        }
 
         return redirect(route('teams.index'));
     }
@@ -51,7 +49,7 @@ class TeamMemberController extends Controller
         ]);
 
         if (request('email')) {
-            if(auth()->user()->email == request('email')) {
+            if (auth()->user()->email == request('email')) {
                 return back()->withErrors([
                     'email' => 'you cant invite yourself.',
                 ]);
@@ -86,9 +84,9 @@ class TeamMemberController extends Controller
     {
         $invite = TeamInvite::findOrFail($invite_id);
 
-        Mail::send('teamwork.emails.invite', ['team' => $invite->team, 'invite' => $invite], function ($m) use ($invite) {
+        defer(fn () => Mail::send('teamwork.emails.invite', ['team' => $invite->team, 'invite' => $invite], function ($m) use ($invite) {
             $m->to($invite->email)->subject('Invitation to join team '.$invite->team->name);
-        });
+        }));
 
         return redirect(route('teams.members.show', $invite->team));
     }

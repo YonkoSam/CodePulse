@@ -62,7 +62,8 @@ const ChatContainer = ({id}) => {
                 const result = await response.json();
                 setFriendsChat(prevState => {
                     const newState = new Map(prevState);
-                    newState.set(id, result.data.reverse());
+                    console.log(result);
+                    newState.set(id, result.data ?? result);
                     return newState;
                 });
 

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Comment extends Model
 {
-    protected $fillable = ['user_id', 'pulse_id', 'text', 'comment_id', 'code','is_best_answer'];
+    protected $fillable = ['user_id', 'pulse_id', 'text', 'comment_id', 'code', 'is_best_answer'];
 
     protected $casts = [
         'code' => 'array',
@@ -17,6 +17,7 @@ class Comment extends Model
 
     public function scopeVisibleToUser($query, int $userId)
     {
+
         return $query->whereNotIn('user_id', function ($query) use ($userId) {
             $query->select('friend_id')
                 ->from('friendships')
@@ -29,7 +30,9 @@ class Comment extends Model
                         ->where('blocked', true);
                 });
         });
+
     }
+
     public function markAsBestAnswer(): void
     {
         $this->is_best_answer = true;
@@ -41,7 +44,6 @@ class Comment extends Model
         $this->is_best_answer = false;
         $this->save();
     }
-
 
     public function user(): BelongsTo
     {
@@ -65,7 +67,7 @@ class Comment extends Model
 
     public function replies(): hasMany
     {
-        return $this->hasMany(Comment::class, 'comment_id')->with(['user','replies','user.profile'=>fn($query) => $query->select(['id', 'xp','user_id']),'likes'=>function($query){
+        return $this->hasMany(Comment::class, 'comment_id')->with(['user', 'replies', 'user.profile' => fn ($query) => $query->select(['id', 'xp', 'user_id']), 'likes' => function ($query) {
             $query->select(['id', 'user_id', 'comment_id'])
                 ->whereNotNull('comment_id');
         }]);

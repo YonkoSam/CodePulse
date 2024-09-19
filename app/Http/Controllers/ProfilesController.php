@@ -7,13 +7,13 @@ use App\Models\Profile;
 use App\Models\Pulse;
 use App\Models\Social;
 use App\Services\ProfanityFilterService;
+use App\Services\XpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
-use App\Services\XpService;
 
 class ProfilesController extends Controller
 {
@@ -21,19 +21,16 @@ class ProfilesController extends Controller
     {
         $authUserId = auth()->id();
 
-        $profiles = Profile::select(['id','xp','status','user_id'])->with(['user' => function ($query) {
-            $query->select('id','name', 'profile_image');
+        $profiles = Profile::select(['id', 'xp', 'status', 'user_id'])->with(['user' => function ($query) {
+            $query->select('id', 'name', 'profile_image');
         }])
             ->visible($authUserId)
             ->paginate(12);
-
 
         return Inertia::render('Profiles/index', [
             'profiles' => $profiles,
         ]);
     }
-
-
 
     public function show(?Profile $profile = null)
     {
@@ -41,41 +38,47 @@ class ProfilesController extends Controller
         $isFriend = false;
         $isOnline = false;
         $friendRequest = null;
+
         if (is_null($profile)) {
             $profile = $user->profile;
+            if (! $profile) {
+                return Inertia::render('Profiles/ProfilePage', [
+                    'hasProfile' => false,
+                ]);
+            }
         } else {
             $isFriend = $profile->user->isFriend($user);
             $isOnline = $profile->user->isOnline();
             $friendRequest = $profile->user->getFriendRequest();
         }
+
         $profile?->load('user', 'experiences', 'socials', 'educations');
 
-        $pulses = Pulse::where('user_id', $profile?->user_id)->whereNull('team_id')
-            ->with('likes:id,user_id,pulse_id','user')
+        $pulses = Pulse::where('user_id', $profile?->user_id)
+            ->whereNull('team_id')
+            ->with(['likes:id,user_id,pulse_id', 'user'])
             ->withCount('comments')
             ->get();
-
-
 
         return Inertia::render('Profiles/ProfilePage', [
             'profile' => $profile,
             'isFriend' => Inertia::always($isFriend),
-            'friendRequest'=>$friendRequest,
+            'friendRequest' => $friendRequest,
             'isOnline' => Inertia::always($isOnline),
-            'hasProfile' => $user?->profile()->exists(),
+            'hasProfile' => $user->profile()->exists(),
             'pulses' => $pulses,
-            'xpActions'=>XpAction::toArray(),
+            'xpActions' => $user->profile->has_completed_profile ? array_filter(XpAction::toArray(), fn ($name) => $name != 'COMPLETE_PROFILE', ARRAY_FILTER_USE_KEY) : XpAction::toArray(),
             'friends' => $profile?->user->allFriends()->with('profile:id,status,user_id')->paginate(6),
         ]);
     }
 
-    public function store(ProfanityFilterService $profanityFilterService,XpService $xpService)
+    public function store(ProfanityFilterService $profanityFilterService, XpService $xpService)
     {
         $profile = request()->validate([
             'company' => ['nullable', 'string', 'min:1'],
             'website' => ['nullable', 'string', 'min:1'],
-            'country' => ['nullable', 'string', 'min:1'],
-            'location' => ['required', 'string', 'min:1'],
+            'country' => ['required', 'string', 'min:1'],
+            'location' => ['nullable', 'string', 'min:1'],
             'status' => ['required', 'string', 'min:1'],
             'skills' => ['required', 'string', 'min:1'],
             'bio' => ['nullable', 'string', 'max:255'],
@@ -113,28 +116,25 @@ class ProfilesController extends Controller
 
         if (request()->hasFile('profile_image')) {
             $file = request()->file('profile_image');
-            $imageName= hexdec(uniqid()).'.'.$file->getClientOriginalExtension();
-            $manager = new ImageManager(new Driver());
+            $imageName = hexdec(uniqid()).'.'.$file->getClientOriginalExtension();
+            $manager = new ImageManager(new Driver);
             $image = $manager->read(file_get_contents($file));
             $image = $image->scale(width: 300);
-            Storage::put('profile_images/' . $imageName, (string) $image->encode());
-            $filePath = 'profile_images/' . $imageName;
-            $oldAvatar = auth()->user()->profile_image;
-            $user->update(
-                [
-                    'profile_image' => $filePath,
-                ]
-            );
+            Storage::put('profile_images/'.$imageName, (string) $image->encode());
+            $filePath = 'profile_images/'.$imageName;
+            $oldAvatar = $user->profile_image;
+            $user->profile_image = $filePath;
+            $user->save();
+
             if ($oldAvatar) {
                 Storage::delete($oldAvatar);
             }
-
         }
 
         $requiredFields = ['company', 'website', 'country', 'location', 'status', 'skills', 'bio'];
-        $allFieldsFilled = !in_array(null, array_intersect_key($profile->toArray(), array_flip($requiredFields)));
-        if ($allFieldsFilled && !$profile->has_completed_profile) {
-            $xpService->assignPoints($profile,XpAction::COMPLETE_PROFILE);
+        $allFieldsFilled = ! in_array(null, array_intersect_key($profile->toArray(), array_flip($requiredFields)));
+        if ($allFieldsFilled && ! $profile->has_completed_profile) {
+            $xpService->assignPoints($profile, XpAction::COMPLETE_PROFILE);
             $profile->update(['has_completed_profile' => true]);
         }
 
@@ -144,13 +144,13 @@ class ProfilesController extends Controller
 
     public function create()
     {
-
-        return Inertia::render('Profiles/CreateAndUpdate', ['hasProfile' => auth()->user()->profile()->exists()]);
+        return Inertia::render('Profiles/CreateAndUpdate', [
+            'hasProfile' => Auth::user()->profile()->exists(),
+        ]);
     }
 
     public function edit()
     {
-
         $profile = Profile::with('user', 'socials')
             ->where('user_id', Auth::user()->id)->first();
 

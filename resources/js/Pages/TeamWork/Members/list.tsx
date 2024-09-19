@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {Link, useForm} from '@inertiajs/react';
+import React, {useEffect, useState} from "react";
+import {Link, useForm} from "@inertiajs/react";
 import {
     Button,
     IconButton,
@@ -9,52 +9,65 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Typography
-} from '@mui/material';
-import {motion} from 'framer-motion';
+    Typography,
+} from "@mui/material";
+import {motion} from "framer-motion";
 import SearchBar from "@/Components/genralComp/SearchBar";
 import {dataType, Toast} from "@/utils";
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import FriendStatus from "@/Pages/Friends/FriendStatus";
 import InputError from "@/Components/formComp/InputError";
 import {Delete, Email} from "@mui/icons-material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Swal from "sweetalert2";
-import {User} from "@/types";
+import {Team, User} from "@/types";
 import TextInput from "@/Components/formComp/TextInput";
 import {AnimatedText} from "@/Components/animatedComp/AnimatedText";
 import Pagination from "@/Components/genralComp/Pagination";
 
 const TeamMembers = ({team, users, auth}) => {
-    const {data, setData, post, reset, errors, delete: destroy} = useForm({
-        email: '',
-        id: '',
+    const {
+        data,
+        setData,
+        post,
+        reset,
+        errors,
+        delete: destroy,
+    } = useForm({
+        email: "",
+        id: "",
     });
 
     const [selectedUser, setSelectedUser] = useState(null);
-    const isOwnerOfTeam = (team) => team.owner_id == auth.user.id;
+    const isOwnerOfTeam = (team: Team) => team.owner_id == auth.user.id;
 
     useEffect(() => {
-        setData('id', selectedUser?.id)
-    }, [selectedUser])
+        setData("id", selectedUser?.id);
+    }, [selectedUser]);
+
     const handleInvite = (e) => {
         e.preventDefault();
 
-        post(route('teams.members.invite', team.id), {
+        post(route("teams.members.invite", team), {
+            preserveScroll: true,
             onSuccess: () => {
                 Toast.fire({
-                    icon: 'success',
-                    title: 'invitation send successfully'
-                })
-                setSelectedUser(null)
+                    icon: "success",
+                    title: "invitation send successfully",
+                });
+                setSelectedUser(null);
                 reset();
-
-            }
+            },
+            onError: () => {
+                Toast.fire({
+                    icon: "error",
+                    title: "invitation send failed",
+                });
+            },
         });
     };
 
     const handleDeleteMember = (userId: number, userName: string) => {
-
         Swal.fire({
             title: "Are you sure?",
             text: `You are about to delete ${userName} from ${team.name}!`,
@@ -62,15 +75,15 @@ const TeamMembers = ({team, users, auth}) => {
             showCancelButton: true,
             confirmButtonColor: "#ff0000",
             cancelButtonColor: "#57534e",
-            confirmButtonText: "Yes, delete him!"
+            confirmButtonText: "Yes, delete him!",
         }).then((result: any) => {
             if (result.isConfirmed) {
-                destroy(route('teams.members.destroy', [team.id, userId]), {
+                destroy(route("teams.members.destroy", [team.id, userId]), {
                     onSuccess: () => {
                         Swal.fire({
                             title: "Deleted!",
                             text: ` ${userName} has been deleted successfully .`,
-                            icon: "success"
+                            icon: "success",
                         });
                     },
                     onError: (errors: any) => {
@@ -85,7 +98,11 @@ const TeamMembers = ({team, users, auth}) => {
         <AuthenticatedLayout
             user={auth.user}
             title="Team Members"
-            header={<Typography variant="h4" className="text-white font-semibold">Team Members</Typography>}
+            header={
+                <Typography variant="h4" className="text-white font-semibold">
+                    Team Members
+                </Typography>
+            }
         >
             <div className="p-4">
                 <motion.div
@@ -96,7 +113,7 @@ const TeamMembers = ({team, users, auth}) => {
                 >
                     <div className="p-6 mb-6 bg-black/30 text-white rounded-2xl">
                         <div className="flex justify-start items-center mb-4 gap-2">
-                            <Link href={route('teams.index')}>
+                            <Link href={route("teams.index")}>
                                 <IconButton
                                     size="small"
                                     className="!border-gray-400 !text-gray-400"
@@ -104,100 +121,156 @@ const TeamMembers = ({team, users, auth}) => {
                                     <ArrowBackIcon/>
                                 </IconButton>
                             </Link>
-                            <Typography variant="h6" className="!text-white">Members of team "{team.name}"</Typography>
+                            <Typography variant="h6" className="!text-white">
+                                Members of team "{team.name}"
+                            </Typography>
                         </div>
                         <TableContainer>
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell className="!text-white">Name</TableCell>
-                                        <TableCell className="!text-white">Action</TableCell>
+                                        <TableCell className="!text-white">
+                                            Name
+                                        </TableCell>
+                                        <TableCell className="!text-white">
+                                            Action
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {users.data.map((user: User) => (
-                                        <TableRow key={user.id} className="hover:bg-gray-700">
-                                            <TableCell className="!text-white">{user.name}</TableCell>
+                                        <TableRow
+                                            key={user.id}
+                                            className="hover:bg-gray-700"
+                                        >
+                                            <TableCell className="!text-white">
+                                                {user.name}
+                                            </TableCell>
                                             <TableCell>
-                                                {isOwnerOfTeam(team) && auth.user.id !== user.id && (
-                                                    <Button
-                                                        variant="outlined"
-                                                        color="error"
-                                                        size="small"
-                                                        className="!text-red-400 !border-red-800 hover:text-white"
-                                                        startIcon={<Delete/>}
-                                                        onClick={() => handleDeleteMember(user.id, user.name)}
-                                                    >
-                                                        Delete
-                                                    </Button>
-                                                )}
+                                                {isOwnerOfTeam(team) &&
+                                                    auth.user.id !==
+                                                    user.id && (
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="error"
+                                                            size="small"
+                                                            className="!text-red-400 !border-red-800 hover:text-white"
+                                                            startIcon={
+                                                                <Delete/>
+                                                            }
+                                                            onClick={() =>
+                                                                handleDeleteMember(
+                                                                    user.id,
+                                                                    user.name
+                                                                )
+                                                            }
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    )}
                                             </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
-                                {users.last_page != 1 &&
-                                    <Pagination currentPage={users.current_page} lastPage={users.last_page}
-                                                paginatedDataName={'users'}/>}
+                                {users.last_page != 1 && (
+                                    <Pagination
+                                        currentPage={users.current_page}
+                                        lastPage={users.last_page}
+                                        paginatedDataName={"users"}
+                                    />
+                                )}
                             </Table>
                         </TableContainer>
                     </div>
 
                     <div className="p-6 mb-6 bg-black/30 text-white rounded-2xl">
-                        <Typography variant="h6" className="mb-4 !text-white">Pending Invitations</Typography>
+                        <Typography variant="h6" className="mb-4 !text-white">
+                            Pending Invitations
+                        </Typography>
                         <TableContainer>
                             <Table>
                                 <TableHead className="bg-gray-700 !important">
                                     <TableRow>
-                                        <TableCell className="!text-white">E-Mail</TableCell>
-                                        <TableCell className="!text-white">Action</TableCell>
+                                        <TableCell className="!text-white">
+                                            E-Mail
+                                        </TableCell>
+                                        <TableCell className="!text-white">
+                                            Action
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {team.invites.length ? team.invites.map((invite) => (
-                                            <TableRow key={invite.id} className="hover:bg-gray-700">
+                                    {team.invites.length ? (
+                                        team.invites.map((invite) => (
+                                            <TableRow
+                                                key={invite.id}
+                                                className="hover:bg-gray-700"
+                                            >
                                                 <TableCell className="!text-white">
                                                     {invite.email}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Link href={route('teams.members.resend_invite', invite.id)}>
+                                                    <Link
+                                                        href={route(
+                                                            "teams.members.resend_invite",
+                                                            invite.id
+                                                        )}
+                                                    >
                                                         <Button
                                                             variant="outlined"
                                                             size="small"
                                                             className="!border-gray-400 !text-gray-400 "
-                                                            startIcon={<Email/>}
+                                                            startIcon={
+                                                                <Email/>
+                                                            }
                                                         >
                                                             Resend invite
                                                         </Button>
                                                     </Link>
                                                 </TableCell>
                                             </TableRow>
-                                        )) :
+                                        ))
+                                    ) : (
                                         <TableRow>
                                             <TableCell>
-                                                <AnimatedText text={'no pending invites found'}
-                                                              className='text-white '/>
+                                                <AnimatedText
+                                                    text={
+                                                        "no pending invites found"
+                                                    }
+                                                    className="text-white "
+                                                />
                                             </TableCell>
                                         </TableRow>
-                                    }
+                                    )}
                                 </TableBody>
                             </Table>
                         </TableContainer>
                     </div>
 
                     <div className="p-6 bg-black/30 text-white rounded-2xl">
-                        <Typography variant="h6" className="mb-4 !text-white">Invite to team "{team.name}"</Typography>
-                        <SearchBar type={dataType.Users} placeholder="type the name of the user You want to invite"
-                                   setSelectedObject={setSelectedUser}/>
+                        <Typography variant="h6" className="mb-4 !text-white">
+                            Invite to team "{team.name}"
+                        </Typography>
+                        <SearchBar
+                            type={dataType.Users}
+                            placeholder="type the name of the user You want to invite"
+                            setSelectedObject={setSelectedUser}
+                        />
                         <form onSubmit={handleInvite}>
                             <div className="mb-4">
                                 {selectedUser ? (
-                                    <FriendStatus friend={selectedUser} enableBadge={false}/>
+                                    <FriendStatus
+                                        friend={selectedUser}
+                                        enableBadge={false}
+                                    />
                                 ) : (
                                     <TextInput
-                                        type='email'
+                                        type="email"
                                         value={data.email}
-                                        placeholder='or invite by Email'
-                                        onChange={(e) => setData('email', e.target.value)}
+                                        placeholder="or invite by Email"
+                                        onChange={(e) =>
+                                            setData("email", e.target.value)
+                                        }
                                     />
                                 )}
                             </div>
@@ -218,8 +291,6 @@ const TeamMembers = ({team, users, auth}) => {
                 </motion.div>
             </div>
         </AuthenticatedLayout>
-
-
     );
 };
 

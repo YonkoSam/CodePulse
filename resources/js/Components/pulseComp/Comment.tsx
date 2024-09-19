@@ -74,30 +74,25 @@ const CommentSection = ({
 
             <footer className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
-                    <div className="inline-flex items-center mr-2 text-sm text-white font-semibold">
-                        {
-                            profile_id ? <Link className={'text-white'} href={route('profiles.show', profile_id)}>
-                                    <Avatar
-                                        className="mr-2 w-6 h-6 rounded-full"
-                                        src={'/' + profile_image}
-                                        alt={name}
-                                    />
-                                </Link> :
-                                <Avatar
-                                    className="mr-2 w-6 h-6 rounded-full"
-                                    src={'/' + profile_image}
-                                    alt={name}
-                                />
-                        }
-                        <div className="flex flex-col">
-                            <span>{name}</span>
+                    <div className=" mr-2 text-sm text-white font-semibold">
 
-                            {
-                                xp && <span className='text-xs font-light font-jetBrains'>
+                        <Link className={`inline-flex items-center text-white ${!profile_id && 'pointer-events-none'}`}
+                              href={profile_id ? route('profiles.show', profile_id) : '#'}>
+                            <Avatar
+                                className="mr-2 w-6 h-6 rounded-full"
+                                src={'/' + profile_image}
+                                alt={name}
+                            />
+                            <div className="flex flex-col">
+                                <span>{name}</span>
+
+                                {
+                                    xp && <span className='text-xs font-light font-jetBrains'>
                         Level {getLevel(xp)}
                     </span>
-                            }
-                        </div>
+                                }
+                            </div>
+                        </Link>
 
 
                     </div>

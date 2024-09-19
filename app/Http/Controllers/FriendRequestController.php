@@ -21,7 +21,7 @@ class FriendRequestController extends Controller
         $sender = User::find($request->sender_id);
         $receiver = User::find($request->receiver_id);
 
-        if (!$sender || !$receiver || $sender->id === $receiver->id) {
+        if (! $sender || ! $receiver || $sender->id === $receiver->id) {
             return response()->json(['message' => 'Invalid users!'], 404);
         }
 
@@ -37,7 +37,6 @@ class FriendRequestController extends Controller
             return response()->json(['message' => 'You already have a pending friend request from this user!'], 409);
         }
 
-
         $friendRequest = FriendRequest::create([
             'sender_id' => $sender->id,
             'receiver_id' => $receiver->id,
@@ -45,7 +44,7 @@ class FriendRequestController extends Controller
 
         $receiver->notify(new FriendRequestNotification($friendRequest));
 
-        return response()->json(['message' => 'Friend request sent!','requestId'=>$friendRequest->id],);
+        return response()->json(['message' => 'Friend request sent!', 'requestId' => $friendRequest->id]);
     }
 
     public function acceptRequest(Request $request)
@@ -72,7 +71,7 @@ class FriendRequestController extends Controller
             case 'accepted':
                 Friendship::create([
                     'user_id' => $friendRequest->sender_id,
-                    'friend_id' => $friendRequest->receiver_id
+                    'friend_id' => $friendRequest->receiver_id,
                 ]);
                 $sender->allMessagesWithFriend($receiver->id)->withTrashed()->restore();
                 $sender->notify(new FriendRequestStatus($receiver->name, $status));
@@ -87,15 +86,17 @@ class FriendRequestController extends Controller
                     return response()->json(['message' => 'Unauthorized to cancel this request'], 403);
                 }
                 $notification->delete();
-                return response()->json(['message' => "Friend request $status!"]);
+                break;
             default:
                 return response()->json(['message' => 'Invalid status'], 400);
         }
 
-        $notification->update([
-            'data' => $notificationData,
-            'read_at' => now()
-        ]);
+        if ($status !== 'cancelled') {
+            $notification->update([
+                'data' => $notificationData,
+                'read_at' => now(),
+            ]);
+        }
 
         $friendRequest->delete();
 
@@ -111,7 +112,4 @@ class FriendRequestController extends Controller
     {
         return $this->handleRequest($request, 'cancelled');
     }
-
-
-
 }
