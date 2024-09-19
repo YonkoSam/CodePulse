@@ -63,7 +63,7 @@ const TestingGround = ({language = "", sourceCode = ""}) => {
                             initial={{x: -50, opacity: 0}}
                             animate={{x: 0, opacity: 1}}
                             transition={{duration: 0.3, delay: 0.2}}
-                            className={`w-full md:w-1/2 bg-black/30 rounded-xl shadow-lg p-4 ${isMobile && (runCode ? 'hidden' : 'block')}`}
+                            className={`w-full md:max-w-1/2 bg-black/30 rounded-xl shadow-lg p-4 ${isMobile && (runCode ? 'hidden' : 'block')}`}
                         >
                             <CodeEditor
                                 setValue={setCode}
@@ -77,7 +77,7 @@ const TestingGround = ({language = "", sourceCode = ""}) => {
                             initial={{x: 50, opacity: 0}}
                             animate={{x: 0, opacity: 1}}
                             transition={{duration: 0.3, delay: 0.2}}
-                            className={`w-full md:w-1/2 ${isMobile && (runCode ? 'block' : 'hidden')}`}
+                            className={`w-full md:max-w-1/2 ${isMobile && (runCode ? 'block' : 'hidden')}`}
                         >
                             <Output language={code.language.toLowerCase()} sourceCode={code.sourceCode}/>
                         </motion.div>

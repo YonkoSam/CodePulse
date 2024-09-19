@@ -1,25 +1,27 @@
-import {useState} from "react";
-import {Box, CircularProgress, Typography} from "@mui/material";
-import {executeCode} from "@/exucuteCode/exucuteCodeApi";
-import {BACKGROUND_GRADIENT, Toast} from "@/utils";
+import { useState } from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { executeCode } from "@/exucuteCode/exucuteCodeApi";
+import { BACKGROUND_GRADIENT, Toast } from "@/utils";
 import PrimaryButton from "@/Components/formComp/PrimaryButton";
 
-const Output = ({language, sourceCode}) => {
+const Output = ({ language, sourceCode }) => {
     const [output, setOutput] = useState<string[]>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
-
 
     const runCode = async () => {
         if (!sourceCode) return;
         try {
             setIsLoading(true);
-            const {run: result} = await executeCode(language, sourceCode);
+            const { run: result } = await executeCode(language, sourceCode);
             setOutput(result.output.split("\n"));
             setIsError(!!result.stderr);
             if (result.signal == "SIGKILL") {
                 setIsError(true);
-                setOutput(["Execution Timed Out", "Our servers are configured to only allow a certain amount of time for your code to execute. In rare cases the server may be taking on too much work and simply wasn't able to run your code efficiently enough. Most of the time though this issue is caused by inefficient algorithms. If you see this error multiple times you should try to optimize your code further."]);
+                setOutput([
+                    "Execution Timed Out",
+                    "Our servers are configured to only allow a certain amount of time for your code to execute. In rare cases the server may be taking on too much work and simply wasn't able to run your code efficiently enough. Most of the time though this issue is caused by inefficient algorithms. If you see this error multiple times you should try to optimize your code further.",
+                ]);
             }
         } catch (error) {
             Toast.fire({
@@ -46,32 +48,27 @@ const Output = ({language, sourceCode}) => {
                 onClick={runCode}
                 className="bg-blue-600 hover:bg-blue-700 transition duration-200"
             >
-                Run Code {isLoading && <CircularProgress size={12}/>}
+                Run Code {isLoading && <CircularProgress size={12} />}
             </PrimaryButton>
             <Box
                 height="75vh"
                 p={2}
-                className={`mt-4 rounded-2xl overflow-auto bg-[#1E1E1E] text-gray-200 der-2 shadow-md  ${
+                className={`mt-4 rounded-2xl overflow-auto  bg-[#1E1E1E] text-gray-200 der-2 shadow-md  ${
                     isError ? "border-red-500" : "border-gray-300"
                 }`}
             >
                 {output ? (
-                    output.map((line: string, i: number) => (
-                        <Typography
-                            key={i}
-                            component="pre"
-                            variant="body2"
-                            className={`${
-                                isError ? "text-red-600" : ""
-                            }`}
-                        >
-                            {line}
-                        </Typography>
-                    ))
+                    <pre
+                        className={`whitespace-pre-wrap font-jetBrains text-sm ${
+                            isError ? "text-red-600" : "text-gray-200"
+                        }`}
+                    >
+                        {output.join("\n")}
+                    </pre>
                 ) : (
-                    <Typography variant="body2" className="text-gray-200">
+                    <pre className="text-gray-200 whitespace-pre-wrap">
                         Click "Run Code" to see the output here
-                    </Typography>
+                    </pre>
                 )}
             </Box>
         </Box>
