@@ -15,6 +15,12 @@ class Profile extends Model
     use HasFactory;
     use HasSelfHealingUrls;
 
+    protected string $slug = 'userName';
+
+    public function getUserNameAttribute(): string
+    {
+        return $this->user->name;
+    }
     protected $fillable = [
         'user_id',
         'cover',

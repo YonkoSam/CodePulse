@@ -21,7 +21,7 @@
         "laravel/socialite": "^5.15",
         "laravel/tinker": "^2.9",
         "lucianotonet/groq-php": "^0.0.8",
-        "lukeraymonddowning/self-healing-urls": "^0.5.1",
+        "lukeraymonddowning/self-healing-urls": "^0.6.0",
         "mpociot/teamwork": "^9.0",
         "predis/predis": "^2.2",
         "pusher/pusher-php-server": "^7.2",

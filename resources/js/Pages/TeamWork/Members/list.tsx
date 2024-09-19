@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {Link, useForm} from "@inertiajs/react";
+import React, { useEffect, useState } from "react";
+import { Link, useForm } from "@inertiajs/react";
 import {
     Button,
     IconButton,
@@ -11,21 +11,21 @@ import {
     TableRow,
     Typography,
 } from "@mui/material";
-import {motion} from "framer-motion";
+import { motion } from "framer-motion";
 import SearchBar from "@/Components/genralComp/SearchBar";
-import {dataType, Toast} from "@/utils";
+import { dataType, Toast } from "@/utils";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import FriendStatus from "@/Pages/Friends/FriendStatus";
 import InputError from "@/Components/formComp/InputError";
-import {Delete, Email} from "@mui/icons-material";
+import { Delete, Email } from "@mui/icons-material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Swal from "sweetalert2";
-import {Team, User} from "@/types";
+import { Team, User } from "@/types";
 import TextInput from "@/Components/formComp/TextInput";
-import {AnimatedText} from "@/Components/animatedComp/AnimatedText";
+import { AnimatedText } from "@/Components/animatedComp/AnimatedText";
 import Pagination from "@/Components/genralComp/Pagination";
 
-const TeamMembers = ({team, users, auth}) => {
+const TeamMembers = ({ team, users, auth }) => {
     const {
         data,
         setData,
@@ -47,7 +47,6 @@ const TeamMembers = ({team, users, auth}) => {
 
     const handleInvite = (e) => {
         e.preventDefault();
-
         post(route("teams.members.invite", team), {
             preserveScroll: true,
             onSuccess: () => {
@@ -107,9 +106,9 @@ const TeamMembers = ({team, users, auth}) => {
             <div className="p-4">
                 <motion.div
                     className="max-w-2xl mx-auto"
-                    initial={{opacity: 0, y: 20}}
-                    animate={{opacity: 1, y: 0}}
-                    transition={{duration: 0.5}}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
                 >
                     <div className="p-6 mb-6 bg-black/30 text-white rounded-2xl">
                         <div className="flex justify-start items-center mb-4 gap-2">
@@ -118,7 +117,7 @@ const TeamMembers = ({team, users, auth}) => {
                                     size="small"
                                     className="!border-gray-400 !text-gray-400"
                                 >
-                                    <ArrowBackIcon/>
+                                    <ArrowBackIcon />
                                 </IconButton>
                             </Link>
                             <Typography variant="h6" className="!text-white">
@@ -149,14 +148,14 @@ const TeamMembers = ({team, users, auth}) => {
                                             <TableCell>
                                                 {isOwnerOfTeam(team) &&
                                                     auth.user.id !==
-                                                    user.id && (
+                                                        user.id && (
                                                         <Button
                                                             variant="outlined"
                                                             color="error"
                                                             size="small"
                                                             className="!text-red-400 !border-red-800 hover:text-white"
                                                             startIcon={
-                                                                <Delete/>
+                                                                <Delete />
                                                             }
                                                             onClick={() =>
                                                                 handleDeleteMember(
@@ -221,7 +220,7 @@ const TeamMembers = ({team, users, auth}) => {
                                                             size="small"
                                                             className="!border-gray-400 !text-gray-400 "
                                                             startIcon={
-                                                                <Email/>
+                                                                <Email />
                                                             }
                                                         >
                                                             Resend invite
@@ -274,14 +273,14 @@ const TeamMembers = ({team, users, auth}) => {
                                     />
                                 )}
                             </div>
-                            <InputError message={errors.email}/>
+                            <InputError message={errors.email} />
                             <div className="flex justify-end">
                                 <Button
                                     type="submit"
                                     variant="contained"
                                     color="primary"
                                     className="!bg-blue-500 hover:bg-blue-600 !text-white"
-                                    startIcon={<Email/>}
+                                    startIcon={<Email />}
                                 >
                                     Invite to Team
                                 </Button>
