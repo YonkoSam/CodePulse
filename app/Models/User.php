@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\FriendRequestStatus;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,16 +13,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\HasApiTokens;
 use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
 use Mpociot\Teamwork\Traits\UserHasTeams;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
-    use HasApiTokens,HasFactory, Notifiable,UserHasTeams,HasSelfHealingUrls;
-    protected string $slug = 'name';
+    use HasApiTokens,HasFactory, HasSelfHealingUrls,Notifiable,UserHasTeams;
 
+    protected string $slug = 'name';
 
     /**
      * The attributes that are mass assignable.
@@ -33,6 +36,7 @@ class User extends Authenticatable
         'password',
         'profile_image',
         'last_time_online',
+        'is_suspended',
 
     ];
 
@@ -52,29 +56,62 @@ class User extends Authenticatable
         'updated_at',
         'current_team_id',
         'last_time_online',
+        'is_suspended',
+        'is_admin',
     ];
 
-
-    public function scopeVisible($query, int  $userId)
+    public function canAccessPanel(Panel $panel): bool
     {
-
-        return $query->whereNotIn('id', function ($query) use ($userId) {
-            $query->select('friend_id')
-                ->from('friendships')
-                ->where('user_id', $userId)
-                ->where('blocked', true)
-                ->union(function ($query) use ($userId) {
-                    $query->select('user_id')
-                        ->from('friendships')
-                        ->where('friend_id', $userId)
-                        ->where('blocked', true);
-                })
-            ;
-        });
+        return $this->is_admin;
     }
 
+    /**
+     * Get the suspension reason for the user.
+     */
+    public function suspensionReason(): string
+    {
+        if (! $this->is_suspended) {
+            return '';
+        }
 
+        $suspensionReason = DB::table('suspension_reasons')
+            ->where('user_id', $this->id)
+            ->value('reason');
 
+        return $suspensionReason ?? '';
+    }
+
+    /**
+     * Add suspension reasons for the user.
+     */
+    public function addSuspensionReason(string $reason): void
+    {
+        DB::table('suspension_reasons')->insert([
+            'user_id' => $this->id,
+            'reason' => $reason,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function scopeVisible($query, int $userId)
+    {
+        return $query->where('id', '!=', $userId)
+            ->where('is_suspended', false)
+            ->whereNotIn('id', function ($subQuery) use ($userId) {
+                $subQuery->select('friend_id')
+                    ->from('friendships')
+                    ->where('user_id', $userId)
+                    ->where('blocked', true)
+                    ->union(
+                        $subQuery->newQuery()
+                            ->select('user_id')
+                            ->from('friendships')
+                            ->where('friend_id', $userId)
+                            ->where('blocked', true)
+                    );
+            });
+    }
 
     public function isFriend(User $user): bool
     {
@@ -99,16 +136,16 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function getFriendRequest() : array | null
+    public function getFriendRequest(): ?array
     {
         $request = FriendRequest::findRequest($this->id);
 
-        if(!$request) {
+        if (! $request) {
             return null;
         }
 
-        return ['requestId'=> $request->id ,
-            'requestStatus'=>$request->sender_id == $this->id ? FriendRequestStatus::received : FriendRequestStatus::sent ];
+        return ['requestId' => $request->id,
+            'requestStatus' => $request->sender_id == $this->id ? FriendRequestStatus::received : FriendRequestStatus::sent];
     }
 
     public function sentFriendRequests(): HasMany
@@ -120,12 +157,13 @@ class User extends Authenticatable
     {
         $userId = $this->id;
 
-        $query = User::query()->join('friendships', function ($join) use ($userId) {
+        $query = User::query()->where('is_suspended', false)->join('friendships', function ($join) use ($userId) {
             $join->on('users.id', '=', 'friendships.friend_id')
                 ->where('friendships.user_id', '=', $userId)
                 ->orOn('users.id', '=', 'friendships.user_id')
                 ->where('friendships.friend_id', '=', $userId);
-        })
+        }
+        )
             ->where('friendships.blocked', false)
             ->select('users.*', 'friendships.last_message_timestamp');
         if ($sort) {
@@ -159,8 +197,8 @@ class User extends Authenticatable
 
     public function getLastActivityAttribute(): ?string
     {
-        if (Redis::exists('user-last-time-online-' . $this->id)) {
-            return Redis::get('user-last-time-online-' . $this->id);
+        if (Redis::exists('user-last-time-online-'.$this->id)) {
+            return Redis::get('user-last-time-online-'.$this->id);
         }
 
         return $this->last_time_online;
@@ -224,16 +262,16 @@ class User extends Authenticatable
             $query->where('sender_id', $this->id)
                 ->where('receiver_id', $friendId);
         })
-            ->orWhere(function ($query) use ( $friendId) {
+            ->orWhere(function ($query) use ($friendId) {
                 $query->where('sender_id', $friendId)
                     ->where('receiver_id', $this->id);
             });
     }
 
-    public function allMessagesWithTeam($teamId) : Builder
+    public function allMessagesWithTeam($teamId): Builder
     {
         return Message::query()->where('team_id', $teamId)
-            ->visibleSinceJoined($teamId,$this->id)
+            ->visibleSinceJoined($teamId, $this->id)
             ->visibleToUser($this->id);
     }
 

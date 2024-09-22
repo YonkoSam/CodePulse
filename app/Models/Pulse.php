@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\VisibleToUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,11 +13,11 @@ use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
 
 class Pulse extends Model
 {
-    use HasFactory, HasSelfHealingUrls;
+    use HasFactory, HasSelfHealingUrls,VisibleToUser;
 
     protected string $slug = 'title';
 
-    protected $fillable = ['user_id', 'text', 'title', 'code', 'team_id','is_answered'];
+    protected $fillable = ['user_id', 'text', 'title', 'code', 'team_id', 'is_answered'];
 
     protected $casts = [
         'code' => 'array',
@@ -26,6 +27,7 @@ class Pulse extends Model
     {
         return $this->hasOne(Comment::class)->where('is_best_answer', true);
     }
+
     public function markAsAnswered(): void
     {
         $this->is_answered = true;
@@ -45,23 +47,6 @@ class Pulse extends Model
     public function reports(): MorphMany
     {
         return $this->morphMany(Report::class, 'reportable');
-    }
-
-    public function scopeVisibleToUser($query, $userId)
-    {
-
-        return $query->whereNotIn('user_id', function ($query) use ($userId) {
-            $query->select('friend_id')
-                ->from('friendships')
-                ->where('user_id', $userId)
-                ->where('blocked', true)
-                ->union(function ($query) use ($userId) {
-                    $query->select('user_id')
-                        ->from('friendships')
-                        ->where('friend_id', $userId)
-                        ->where('blocked', true);
-                });
-        });
     }
 
     public function likes(): HasMany

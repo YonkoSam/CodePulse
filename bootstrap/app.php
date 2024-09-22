@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckUserSuspension;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\UpdateUserActivity;
 use Illuminate\Foundation\Application;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             UpdateUserActivity::class,
+            CheckUserSuspension::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

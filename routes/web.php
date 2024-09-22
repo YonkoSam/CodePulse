@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\FriendController;
@@ -165,5 +166,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/report', ReportController::class)->name('report');
 
 });
+
+Route::post('/contact-admin', [ContactController::class, 'contactAdmin']);
 
 require __DIR__.'/auth.php';

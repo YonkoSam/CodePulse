@@ -24,7 +24,7 @@ class ProfilesController extends Controller
         $profiles = Profile::select(['id', 'xp', 'status', 'user_id'])->with(['user' => function ($query) {
             $query->select('id', 'name', 'profile_image');
         }])
-            ->visible($authUserId)
+            ->visibleToUser($authUserId)
             ->paginate(12);
 
         return Inertia::render('Profiles/index', [

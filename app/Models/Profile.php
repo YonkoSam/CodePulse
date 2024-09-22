@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\VisibleToUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,15 +13,10 @@ use Lukeraymonddowning\SelfHealingUrls\Concerns\HasSelfHealingUrls;
 
 class Profile extends Model
 {
-    use HasFactory;
-    use HasSelfHealingUrls;
+    use HasFactory,HasSelfHealingUrls,VisibleToUser;
 
     protected string $slug = 'userName';
 
-    public function getUserNameAttribute(): string
-    {
-        return $this->user->name;
-    }
     protected $fillable = [
         'user_id',
         'cover',
@@ -34,6 +30,11 @@ class Profile extends Model
         'has_completed_profile',
     ];
 
+    public function getUserNameAttribute(): string
+    {
+        return $this->user->name;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -42,23 +43,6 @@ class Profile extends Model
     public function reports(): MorphMany
     {
         return $this->morphMany(Report::class, 'reportable');
-    }
-
-    public function scopeVisible($query, int $userId)
-    {
-
-        return $query->whereNotIn('user_id', function ($query) use ($userId) {
-            $query->select('friend_id')
-                ->from('friendships')
-                ->where('user_id', $userId)
-                ->where('blocked', true)
-                ->union(function ($query) use ($userId) {
-                    $query->select('user_id')
-                        ->from('friendships')
-                        ->where('friend_id', $userId)
-                        ->where('blocked', true);
-                });
-        });
     }
 
     public function experiences(): HasMany

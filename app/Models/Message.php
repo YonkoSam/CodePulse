@@ -36,19 +36,23 @@ class Message extends Model
         return null;
     }
 
-
     public function scopeVisibleToUser($query, $userId)
     {
-        return $query->whereNotIn('sender_id', function ($query) use ($userId) {
-            $query->select('friend_id')
-                ->from('friendships')
-                ->where('user_id', $userId)
-                ->where('blocked', true)
-                ->union(function ($query) use ($userId) {
-                    $query->select('user_id')
+        return $query->whereHas('sender', function ($userQuery) {
+            $userQuery->where('is_suspended', false);
+        })->where(function ($query) use ($userId) {
+            $query->where('user_id', $userId)
+                ->orWhereNotIn('sender_id', function ($query) use ($userId) {
+                    $query->select('friend_id')
                         ->from('friendships')
-                        ->where('friend_id', $userId)
-                        ->where('blocked', true);
+                        ->where('user_id', $userId)
+                        ->where('blocked', true)
+                        ->union(function ($query) use ($userId) {
+                            $query->select('user_id')
+                                ->from('friendships')
+                                ->where('friend_id', $userId)
+                                ->where('blocked', true);
+                        });
                 });
         });
     }
@@ -63,13 +67,12 @@ class Message extends Model
         return $this->morphMany(Report::class, 'reportable');
     }
 
-    public function markAsSeen(int $userID=null): void
+    public function markAsSeen(?int $userID = null): void
     {
-        if($this->receiver_id) {
+        if ($this->receiver_id) {
             $this->seen_at = now();
             $this->save();
-        }
-        else {
+        } else {
             $this->usersSeen()->attach($userID, ['seen_at' => now()]);
         }
     }
@@ -79,7 +82,6 @@ class Message extends Model
         return $this->belongsToMany(User::class, 'team_user_message_reads')
             ->withPivot('seen_at');
     }
-
 
     public function team(): BelongsTo
     {

@@ -204,6 +204,7 @@ class ChatController extends Controller
     {
 
         $user = Auth::user();
+        $this->validateReceiver($receiver->id);
 
         $messages = $user->allMessagesWithFriend($receiver->id)->with(['sender', 'receiver'])
             ->orderBy('created_at', 'desc')
@@ -229,6 +230,18 @@ class ChatController extends Controller
 
         return response()->json($messages);
 
+    }
+
+    private function validateReceiver($receiverId)
+    {
+        $user = auth()->user();
+        $receiver = User::findOrFail($receiverId);
+
+        if ($receiver->isBlocked($user->id) || ! $user->isFriend($receiver) || $receiver->is_suspended) {
+            throw ValidationException::withMessages([
+                'receiver_id' => ['you can not contact this user.'],
+            ]);
+        }
     }
 
     public function store(MessageRequest $request, ProfanityFilterService $profanityFilterService)
@@ -258,18 +271,6 @@ class ChatController extends Controller
         $message->load('sender', 'receiver');
 
         return response()->json($message);
-    }
-
-    private function validateReceiver($receiverId)
-    {
-        $user = auth()->user();
-        $receiver = User::findOrFail($receiverId);
-
-        if ($receiver->isBlocked($user->id) || ! $user->isFriend($receiver)) {
-            throw ValidationException::withMessages([
-                'receiver_id' => ['Sorry, you are smart but not smart enough.'],
-            ]);
-        }
     }
 
     private function validateTeam($teamId)
