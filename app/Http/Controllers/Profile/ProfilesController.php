@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Profile;
 
 use App\Enums\XpAction;
+use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use App\Models\Pulse;
 use App\Models\Social;

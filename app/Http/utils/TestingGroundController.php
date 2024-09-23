@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\utils;
 
+use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 
 class TestingGroundController extends Controller

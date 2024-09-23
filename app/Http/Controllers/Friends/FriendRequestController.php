@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Friends;
 
+use App\Http\Controllers\Controller;
 use App\Models\FriendRequest;
 use App\Models\Friendship;
 use App\Models\User;

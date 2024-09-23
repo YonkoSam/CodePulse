@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Friends;
 
+use App\Http\Controllers\Controller;
 use App\Models\Friendship;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,7 @@ class FriendController extends Controller
             $user->friends()->detach($friend->id);
             $user->friendOf()->detach($friend->id);
             $user->allMessagesWithFriend($friend->id)->delete();
+
             return back();
 
         } else {

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\utils;
 
+use App\Http\Controllers\Controller;
 use App\Mail\ContactAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;

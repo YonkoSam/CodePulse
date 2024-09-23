@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Chat;
 
 use App\Events\isTypingEvent;
 use App\Events\isTypingGroupChat;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class isTypingController extends Controller

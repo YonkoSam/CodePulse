@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Chat;
 
 use App\Enums\MessageType;
 use App\Events\MessageSeen;
 use App\Events\MessageSeenGroupChat;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\MessageRequest;
 use App\Models\Friendship;
 use App\Models\Message;

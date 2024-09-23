@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Teamwork;
+namespace App\Http\Controllers\Team;
 
 use Illuminate\Routing\Controller;
 use Mpociot\Teamwork\Facades\Teamwork;

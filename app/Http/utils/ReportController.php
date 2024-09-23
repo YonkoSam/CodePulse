@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\utils;
 
 use App\Enums\ReportReason;
+use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Illuminate\Validation\Rule;
 

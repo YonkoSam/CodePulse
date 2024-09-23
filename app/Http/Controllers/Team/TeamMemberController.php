@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Teamwork;
+namespace App\Http\Controllers\Team;
 
 use App\Models\Team;
 use App\Models\User;

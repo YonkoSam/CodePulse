@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Pulse;
 
 use App\Enums\XpAction;
+use App\Http\Controllers\Controller;
 use App\Models\Like;
 use App\Notifications\LikeNotification;
 use App\Services\XpService;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class LikeController extends Controller
 {
-    public function store(Request $request,XpService  $xpService)
+    public function store(Request $request, XpService $xpService)
     {
 
         $data = $request->validate([
@@ -30,6 +31,7 @@ class LikeController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
+
             return response()->json(['like' => false]);
         }
 
@@ -44,8 +46,7 @@ class LikeController extends Controller
             ->where('data->user_id', $userId)
             ->exists();
 
-
-        if (!$notificationExists && $like->user_id) {
+        if (! $notificationExists && $like->user_id) {
             if ($likeableType === 'comment_id' && $like->user_id != $like->comment->user_id) {
                 $like->comment->user->notify(new LikeNotification($like));
                 $xpService->assignPoints($like->comment->user->profile, XpAction::RECEIVE_LIKE_ON_COMMENT);
@@ -55,9 +56,7 @@ class LikeController extends Controller
             }
         }
 
-
-            return response()->json(['like'=> true]);
-
+        return response()->json(['like' => true]);
 
     }
 }

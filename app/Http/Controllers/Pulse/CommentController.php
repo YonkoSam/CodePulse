@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Pulse;
 
 use App\Enums\XpAction;
+use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Pulse;
 use App\Notifications\CommentNotification;

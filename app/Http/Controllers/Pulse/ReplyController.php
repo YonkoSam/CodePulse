@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Pulse;
 
+use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Notifications\ReplyNotification;
 

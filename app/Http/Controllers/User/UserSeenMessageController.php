@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use App\Events\MessageSeen;
 use App\Events\MessageSeenGroupChat;
+use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Team;
 

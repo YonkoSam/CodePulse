@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Pulse;
 
 use App\Enums\XpAction;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\PulseRequest;
 use App\Jobs\AiAnswerPulseJob;
 use App\Models\Pulse;

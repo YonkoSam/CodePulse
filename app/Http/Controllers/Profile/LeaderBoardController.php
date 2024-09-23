@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Profile;
 
+use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use Inertia\Inertia;
 
-class LeaderBoardController extends Controller{
+class LeaderBoardController extends Controller
+{
     public function __invoke()
     {
         $authUserId = auth()->id();
@@ -14,7 +16,7 @@ class LeaderBoardController extends Controller{
             ->with(['user' => function ($query) {
                 $query->select('id', 'name', 'profile_image');
             }])
-            ->visible($authUserId)
+            ->visibleToUser($authUserId)
             ->orderBy('xp', 'desc')
             ->paginate(10);
 
